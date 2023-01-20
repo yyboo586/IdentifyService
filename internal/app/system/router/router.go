@@ -25,10 +25,15 @@ func (router *Router) BindController(ctx context.Context, group *ghttp.RouterGro
 			//登录
 			controller.Login,
 		)
+		//context拦截器
+		group.Middleware(service.Middleware().Ctx)
+		//自动绑定定义的控制器
+		if err := libRouter.RouterAutoBindBefore(ctx, router, group); err != nil {
+			panic(err)
+		}
 		//登录验证拦截
 		service.GfToken().Middleware(group)
-		//context拦截器
-		group.Middleware(service.Middleware().Ctx, service.Middleware().Auth)
+		group.Middleware(service.Middleware().Auth)
 		//后台操作日志记录
 		group.Hook("/*", ghttp.HookAfterOutput, service.OperateLog().OperationLog)
 		group.Bind(
@@ -43,16 +48,15 @@ func (router *Router) BindController(ctx context.Context, group *ghttp.RouterGro
 			controller.Monitor,
 			controller.LoginLog,
 			controller.OperLog,
-			controller.BigFile,
 			controller.ToolsGenTable,
 			controller.Personal,
 			controller.UserOnline,
-			controller.Upload,    // 普通文件上传
-			controller.BigUpload, // 大文件上传
-			controller.UEditor,   //编辑器
+			controller.Cache,   // 缓存处理
+			controller.Upload,  // 普通文件上传
+			controller.UEditor, //编辑器
 		)
 		//自动绑定定义的控制器
-		if err := libRouter.RouterAutoBind(router, ctx, group); err != nil {
+		if err := libRouter.RouterAutoBind(ctx, router, group); err != nil {
 			panic(err)
 		}
 	})

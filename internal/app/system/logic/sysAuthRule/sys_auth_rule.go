@@ -29,7 +29,7 @@ func init() {
 	service.RegisterSysAuthRule(New())
 }
 
-func New() *sSysAuthRule {
+func New() service.ISysAuthRule {
 	return &sSysAuthRule{}
 }
 
@@ -71,7 +71,7 @@ func (s *sSysAuthRule) GetMenuList(ctx context.Context) (list []*model.SysAuthRu
 	cache := commonService.Cache()
 	//从缓存获取
 	iList := cache.GetOrSetFuncLock(ctx, consts.CacheSysAuthMenu, s.getMenuListFromDb, 0, consts.CacheSysAuthTag)
-	if iList != nil {
+	if !iList.IsEmpty() {
 		err = gconv.Struct(iList, &list)
 		liberr.ErrIsNil(ctx, err)
 	}
@@ -313,4 +313,18 @@ func (s *sSysAuthRule) FindSonByParentId(list []*model.SysAuthRuleInfoRes, pid u
 		}
 	}
 	return children
+}
+
+func (s *sSysAuthRule) GetIdByName(ctx context.Context, name string) (id uint, err error) {
+	var menuList []*model.SysAuthRuleInfoRes
+	menuList, err = s.GetMenuList(ctx)
+	if err != nil {
+		return
+	}
+	for _, menu := range menuList {
+		if menu.Name == name {
+			id = menu.Id
+		}
+	}
+	return
 }

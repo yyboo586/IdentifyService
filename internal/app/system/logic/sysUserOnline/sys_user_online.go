@@ -15,6 +15,7 @@ import (
 	"github.com/mssola/user_agent"
 	"github.com/tiger1103/gfast/v3/api/v1/common"
 	"github.com/tiger1103/gfast/v3/api/v1/system"
+	comModel "github.com/tiger1103/gfast/v3/internal/app/common/model"
 	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
 	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
 	"github.com/tiger1103/gfast/v3/internal/app/system/model"
@@ -28,7 +29,7 @@ func init() {
 	service.RegisterSysUserOnline(New())
 }
 
-func New() *sSysUserOnline {
+func New() service.ISysUserOnline {
 	return &sSysUserOnline{
 		Pool: grpool.New(100),
 	}
@@ -90,11 +91,13 @@ func (s *sSysUserOnline) SaveOnline(ctx context.Context, params *model.SysUserOn
 func (s *sSysUserOnline) CheckUserOnline(ctx context.Context) {
 	param := &system.SysUserOnlineSearchReq{
 		PageReq: common.PageReq{
-			PageNum:  1,
-			PageSize: 50,
+			PageReq: comModel.PageReq{
+				PageNum:  1,
+				PageSize: 50,
+			},
 		},
 	}
-	var total int
+
 	for {
 		var (
 			res *system.SysUserOnlineSearchRes
@@ -110,11 +113,11 @@ func (s *sSysUserOnline) CheckUserOnline(ctx context.Context) {
 		}
 		for _, v := range res.List {
 			if b := s.UserIsOnline(ctx, v.Token); !b {
-				s.DeleteOnlineByToken(ctx, v.Token)
+				err = s.DeleteOnlineByToken(ctx, v.Token)
+				if err != nil {
+					g.Log().Error(ctx, err)
+				}
 			}
-		}
-		if param.PageNum*param.PageSize >= total {
-			break
 		}
 		param.PageNum++
 	}

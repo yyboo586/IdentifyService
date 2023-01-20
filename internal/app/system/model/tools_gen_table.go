@@ -32,9 +32,14 @@ type ToolsGenTableEx struct {
 	UpdateTime     *gtime.Time              // 更新时间
 	Remark         string                   // 备注
 	Overwrite      bool                     // 是否覆盖原有文件
+	OverwriteInfo  []*entity.OverwriteInfo  //覆盖文件信息
 	SortColumn     string                   // 缺省排序字段
 	SortType       string                   // 缺省排序方式 (asc顺序 desc倒序)
 	ShowDetail     bool                     // 是否有查看详情功能
+	ExcelPort      bool                     // 是否有导出excel功能
+	ExcelImp       bool                     // 是否有导入excel功能
+	UseSnowId      bool                     // 主键是否使用雪花ID
+	UseVirtual     bool                     // 树表是否使用虚拟表
 	TreeCode       string                   // 树编码字段
 	TreeParentCode string                   // 树父编码字段
 	TreeName       string                   // 树名称字段
@@ -42,27 +47,40 @@ type ToolsGenTableEx struct {
 	IsPkListable   bool                     // 主键是否出现在列表中
 	HasTimeColumn  bool                     // 是否有时间类型
 	HasCreatedBy   bool                     // 是否有created_by字段
+	HasDeptId      bool                     // 是否右dept_id字段
 	HasUpdatedBy   bool                     // 是否有updated_by字段
 	HasConversion  bool                     // service中是否有转换函数
 	Columns        []*ToolsGenTableColumnEx // 表列信息
-	EditColumns    []*ToolsGenTableColumnEx // 新增、编辑界面列信息，主键单独判断不在此列
+	EditColumns    []*ToolsGenTableColumnEx // 编辑界面列信息，主键单独判断不在此列
 	ListColumns    []*ToolsGenTableColumnEx // 列表界面列信息
 	DetailColumns  []*ToolsGenTableColumnEx // 详情界面列信息
 	QueryColumns   []*ToolsGenTableColumnEx // 查询表单列信息
 	PkColumn       *ToolsGenTableColumnEx   // 主键列信息
 	LinkedTables   []*ToolsGenTableLinked   // 关联表信息
+	MenuPid        uint                     // 父级菜单ID
 }
 
 // ToolsGenTableLinked 关联表
 type ToolsGenTableLinked struct {
-	TableName    string                 // 表名称
-	TableComment string                 // 表描述
-	ClassName    string                 // 实体类名称
-	PackageName  string                 // 生成包路径
-	ModuleName   string                 // 生成模块名
-	BusinessName string                 // 生成业务名
-	RefColumns   *gmap.ListMap          // 要被查询的所有数据列信息
-	LinkedTables []*ToolsGenTableLinked // 嵌套关联表信息
+	TableName     string                 // 表名称
+	TableComment  string                 // 表描述
+	ClassName     string                 // 实体类名称
+	PackageName   string                 // 生成包路径
+	ModuleName    string                 // 生成模块名
+	BusinessName  string                 // 生成业务名
+	TplCategory   string                 // 表类型列表或树表
+	Options       string                 // 表相关选项配置
+	OptionsStruct ToolsGenTableOptions   // 表相关选项配置结构
+	RefColumns    *gmap.ListMap          // 要被查询的所有数据列信息
+	LinkedTables  []*ToolsGenTableLinked // 嵌套关联表信息
+}
+
+// ToolsGenTableOptions 表相关选项配置
+type ToolsGenTableOptions struct {
+	TreeCode       string `json:"treeCode"`
+	TreeName       string `json:"treeName"`
+	TreeParentCode string `json:"treeParentCode"`
+	ColumnAttr     *ToolsGenTableColumnEx
 }
 
 // ToolsGenTableEditData 编辑页面表数据详情

@@ -22,6 +22,8 @@ type ISysDept interface {
 	FindSonByParentId(deptList []*entity.SysDept, deptId uint64) []*entity.SysDept
 	GetListTree(pid uint64, list []*entity.SysDept) (deptTree []*model.SysDeptTreeRes)
 	GetByDeptId(ctx context.Context, deptId uint64) (dept *entity.SysDept, err error)
+	GetByDept(ctx context.Context, deptId interface{}) (dept *model.LinkDeptRes)
+	GetTopIds(list []*entity.SysDept) (ids []uint64)
 }
 
 var localSysDept ISysDept

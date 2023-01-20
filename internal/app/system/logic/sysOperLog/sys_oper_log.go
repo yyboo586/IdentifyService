@@ -11,9 +11,11 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/grpool"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
+	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/tiger1103/gfast/v3/api/v1/system"
 	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
 	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
@@ -33,7 +35,7 @@ func init() {
 	service.RegisterOperateLog(New())
 }
 
-func New() *sOperateLog {
+func New() service.IOperateLog {
 	return &sOperateLog{
 		Pool: grpool.New(100),
 	}
@@ -70,7 +72,7 @@ func (s *sOperateLog) OperationLog(r *ghttp.Request) {
 		ClientIp:     libUtils.GetClientIp(r.GetCtx()),
 		OperatorType: 1,
 	}
-	s.Invoke(r.GetCtx(), data)
+	s.Invoke(gctx.New(), data)
 }
 
 func (s *sOperateLog) Invoke(ctx context.Context, data *model.SysOperLogAdd) {
@@ -104,7 +106,7 @@ func (s *sOperateLog) operationLogAdd(ctx context.Context, data *model.SysOperLo
 		OperIp:        data.ClientIp,
 		OperLocation:  libUtils.GetCityByIp(data.ClientIp),
 		OperTime:      gtime.Now(),
-		OperParam:     data.Params,
+		OperParam:     gstr.SubStrRune(gconv.String(data.Params), 0, 60000),
 	}
 	rawQuery := data.Url.RawQuery
 	if rawQuery != "" {

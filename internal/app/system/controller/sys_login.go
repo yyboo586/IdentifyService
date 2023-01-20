@@ -12,8 +12,9 @@ import (
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/gogf/gf/v2/util/gmode"
 	"github.com/tiger1103/gfast/v3/api/v1/system"
 	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
 	"github.com/tiger1103/gfast/v3/internal/app/system/model"
@@ -37,19 +38,35 @@ func (c *loginController) Login(ctx context.Context, req *system.UserLoginReq) (
 		menuList    []*model.UserMenus
 	)
 	//判断验证码是否正确
-	debug := gmode.IsDevelop()
-	if !debug {
+	verifyStatus := g.Cfg().MustGet(ctx, "system.verifyStatus").Int()
+	if verifyStatus == 1 {
+		// 验证码v1版
+		if gstr.Trim(req.VerifyCode) == "" {
+			err = gerror.New("验证码输入错误")
+			return
+		}
 		if !commonService.Captcha().VerifyString(req.VerifyKey, req.VerifyCode) {
 			err = gerror.New("验证码输入错误")
 			return
 		}
+	} else if verifyStatus == 2 {
+		// 验证码v2版
+		if gstr.Trim(req.VerifyCode) == "" {
+			err = gerror.New("人机交互验证失败")
+			return
+		}
+		err = commonService.Captcha().CheckCaptchaV2(ctx, req.VerifyKey, req.VerifyCode, true)
+		if err != nil {
+			return
+		}
 	}
+
 	ip := libUtils.GetClientIp(ctx)
 	userAgent := libUtils.GetUserAgent(ctx)
 	user, err = service.SysUser().GetAdminUserByUsernamePassword(ctx, req)
 	if err != nil {
 		// 保存登录失败的日志信息
-		service.SysLoginLog().Invoke(ctx, &model.LoginLogParams{
+		service.SysLoginLog().Invoke(gctx.New(), &model.LoginLogParams{
 			Status:    0,
 			Username:  req.Username,
 			Ip:        ip,
@@ -64,7 +81,7 @@ func (c *loginController) Login(ctx context.Context, req *system.UserLoginReq) (
 		return
 	}
 	// 报存登录成功的日志信息
-	service.SysLoginLog().Invoke(ctx, &model.LoginLogParams{
+	service.SysLoginLog().Invoke(gctx.New(), &model.LoginLogParams{
 		Status:    1,
 		Username:  req.Username,
 		Ip:        ip,
@@ -76,7 +93,6 @@ func (c *loginController) Login(ctx context.Context, req *system.UserLoginReq) (
 	if g.Cfg().MustGet(ctx, "gfToken.multiLogin").Bool() {
 		key = gconv.String(user.Id) + "-" + gmd5.MustEncryptString(user.UserName) + gmd5.MustEncryptString(user.UserPassword+ip+userAgent)
 	}
-	user.UserPassword = ""
 	token, err = service.GfToken().GenerateToken(ctx, key, user)
 	if err != nil {
 		g.Log().Error(ctx, err)
@@ -95,7 +111,7 @@ func (c *loginController) Login(ctx context.Context, req *system.UserLoginReq) (
 		Permissions: permissions,
 	}
 	//用户在线状态保存
-	service.SysUserOnline().Invoke(ctx, &model.SysUserOnlineParams{
+	service.SysUserOnline().Invoke(gctx.New(), &model.SysUserOnlineParams{
 		UserAgent: userAgent,
 		Uuid:      gmd5.MustEncrypt(token),
 		Token:     token,
@@ -107,6 +123,6 @@ func (c *loginController) Login(ctx context.Context, req *system.UserLoginReq) (
 
 // LoginOut 退出登录
 func (c *loginController) LoginOut(ctx context.Context, req *system.UserLoginOutReq) (res *system.UserLoginOutRes, err error) {
-	err = service.GfToken().RemoveToken(ctx, service.GfToken().GetRequestToken(g.RequestFromCtx(ctx)))
+	_ = service.GfToken().RemoveToken(ctx, service.GfToken().GetRequestToken(g.RequestFromCtx(ctx)))
 	return
 }

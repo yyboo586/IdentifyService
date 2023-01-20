@@ -32,14 +32,31 @@ func EncryptPassword(password, salt string) string {
 }
 
 // GetDomain 获取当前请求接口域名
-func GetDomain(ctx context.Context) string {
+func GetDomain(ctx context.Context, hasUri ...bool) string {
 	r := g.RequestFromCtx(ctx)
-	pathInfo, err := gurl.ParseURL(r.GetUrl(), -1)
-	if err != nil {
-		g.Log().Error(ctx, err)
-		return ""
+	host := r.Header.Get("X-Forwarded-Host")
+	if host == "" {
+		host = r.Header.Get("X-Host")
 	}
-	return fmt.Sprintf("%s://%s:%s/", pathInfo["scheme"], pathInfo["host"], pathInfo["port"])
+	if host == "" {
+		host = r.Host
+	}
+	host = gstr.ReplaceByArray(host, []string{":80", "", ":443", ""})
+	scheme := r.Header.Get("X-Scheme")
+	if scheme == "" {
+		scheme = r.GetSchema()
+	}
+	if len(hasUri) > 0 && hasUri[0] {
+		uri := r.Header.Get("X-Original-URI")
+		if uri != "" {
+			pos := gstr.PosI(uri, "/api/v1")
+			if pos >= 0 {
+				uri = gstr.SubStr(uri, 1, pos)
+			}
+		}
+		return fmt.Sprintf("%s://%s%s", scheme, host, uri)
+	}
+	return fmt.Sprintf("%s://%s", scheme, host)
 }
 
 // GetClientIp 获取客户端IP
@@ -163,6 +180,7 @@ func GetType(p string) (result string, err error) {
 		g.Log().Error(context.TODO(), err)
 		return
 	}
+	defer file.Close()
 	buff := make([]byte, 512)
 
 	_, err = file.Read(buff)
@@ -178,7 +196,7 @@ func GetType(p string) (result string, err error) {
 // GetFilesPath 获取附件相对路径
 func GetFilesPath(ctx context.Context, fileUrl string) (path string, err error) {
 	upType := g.Cfg().MustGet(ctx, "upload.default").Int()
-	if upType != 0 || (upType == 0 && !gstr.ContainsI(fileUrl, consts.UploadPath)) {
+	if upType != 0 || (!gstr.ContainsI(fileUrl, consts.UploadPath)) {
 		path = fileUrl
 		return
 	}
@@ -193,4 +211,37 @@ func GetFilesPath(ctx context.Context, fileUrl string) (path string, err error) 
 		path = gstr.SubStr(pathInfo["path"], pos)
 	}
 	return
+}
+
+// SliceUnique 数字元素去重
+func SliceUnique[T comparable](slice []T) []T {
+	encountered := map[T]bool{}
+	result := []T{}
+
+	for _, v := range slice {
+		if !encountered[v] {
+			encountered[v] = true
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+// DiffSlice 比较两个切片，返回他们的差集
+// slice1 := []int{1, 2, 3, 4, 5}
+// slice2 := []int{4, 5, 6, 7, 8}
+// fmt.Println(Difference(slice1, slice2)) // Output: [1 2 3]
+func DiffSlice[T comparable](s1, s2 []T) []T {
+	m := make(map[T]bool)
+	for _, item := range s1 {
+		m[item] = true
+	}
+
+	var diff []T
+	for _, item := range s2 {
+		if _, ok := m[item]; !ok {
+			diff = append(diff, item)
+		}
+	}
+	return diff
 }

@@ -10,11 +10,12 @@ package system
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	commonApi "github.com/tiger1103/gfast/v3/api/v1/common"
+	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
 )
 
 type PersonalInfoReq struct {
-	g.Meta `path:"/personal/getPersonalInfo" tags:"用户管理" method:"get" summary:"登录用户信息"`
+	g.Meta `path:"/personal/getPersonalInfo" tags:"系统后台/用户管理" method:"get" summary:"登录用户信息"`
 	commonApi.Author
 }
 
@@ -39,19 +40,33 @@ type SetPersonalReq struct {
 
 // PersonalEditReq 修改个人
 type PersonalEditReq struct {
-	g.Meta `path:"/personal/edit" tags:"用户管理" method:"put" summary:"修改个人资料"`
+	g.Meta `path:"/personal/edit" tags:"系统后台/用户管理" method:"put" summary:"修改个人资料"`
 	*SetPersonalReq
 	commonApi.Author
 }
 
 type PersonalEditRes struct {
+	commonApi.EmptyRes
+	UserInfo *model.LoginUserRes `json:"userInfo"`
+	Token    string              `json:"token"`
 }
 
 type PersonalResetPwdReq struct {
-	g.Meta   `path:"/personal/resetPwd" tags:"用户管理" method:"put" summary:"重置个人密码"`
-	Password string `p:"password" v:"required|password#密码不能为空|密码以字母开头，只能包含字母、数字和下划线，长度在6~18之间"`
+	g.Meta   `path:"/personal/resetPwd" tags:"系统后台/用户管理" method:"put" summary:"重置个人密码"`
+	Password string `p:"password" v:"required|password2#密码不能为空|密码必须包含大小写字母和数字，长度在6~18之间"`
 	commonApi.Author
 }
 
 type PersonalResetPwdRes struct {
+}
+
+type RefreshTokenReq struct {
+	g.Meta `path:"/personal/refreshToken" tags:"系统后台/用户管理" method:"get" summary:"刷新token"`
+	commonApi.Author
+}
+
+type RefreshTokenRes struct {
+	commonApi.EmptyRes
+	Token    string              `json:"token"`
+	UserInfo *model.LoginUserRes `json:"userInfo"`
 }

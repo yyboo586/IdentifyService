@@ -9,6 +9,8 @@ package sysDept
 
 import (
 	"context"
+	"errors"
+	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -27,7 +29,7 @@ func init() {
 	service.RegisterSysDept(New())
 }
 
-func New() *sSysDept {
+func New() service.ISysDept {
 	return &sSysDept{}
 }
 
@@ -38,6 +40,22 @@ func (s *sSysDept) GetList(ctx context.Context, req *system.DeptSearchReq) (list
 	list, err = s.GetFromCache(ctx)
 	if err != nil {
 		return
+	}
+	//判断是否有管理所有部门权限
+	if !req.ShowAll && !service.SysUser().AccessRule(ctx, req.UserId, "api/v1/system/dept/all") {
+		var userDept *entity.SysDept
+		userDept, err = s.GetByDeptId(ctx, req.UserDeptId)
+		if err != nil {
+			return
+		}
+		if userDept == nil {
+			err = errors.New("您没有被设置部门，无法获取信息")
+			return
+		}
+		newList := make([]*entity.SysDept, 0, 100)
+		newList = append(newList, userDept)
+		newList = append(newList, s.FindSonByParentId(list, req.UserDeptId)...)
+		list = newList
 	}
 	rList := make([]*entity.SysDept, 0, len(list))
 	if req.DeptName != "" || req.Status != "" {
@@ -65,7 +83,7 @@ func (s *sSysDept) GetFromCache(ctx context.Context) (list []*entity.SysDept, er
 			value = list
 			return
 		}, 0, consts.CacheSysAuthTag)
-		if iList != nil {
+		if !iList.IsEmpty() {
 			err = gconv.Struct(iList, &list)
 			liberr.ErrIsNil(ctx, err)
 		}
@@ -96,6 +114,9 @@ func (s *sSysDept) Add(ctx context.Context, req *system.DeptAddReq) (err error) 
 // Edit 部门修改
 func (s *sSysDept) Edit(ctx context.Context, req *system.DeptEditReq) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
+		if req.DeptId == req.ParentID {
+			liberr.ErrIsNil(ctx, errors.New("上级部门不能是自己"))
+		}
 		_, err = dao.SysDept.Ctx(ctx).WherePri(req.DeptId).Update(do.SysDept{
 			ParentId:  req.ParentID,
 			DeptName:  req.DeptName,
@@ -162,6 +183,24 @@ func (s *sSysDept) GetListTree(pid uint64, list []*entity.SysDept) (deptTree []*
 	return
 }
 
+func (s *sSysDept) GetTopIds(list []*entity.SysDept) (ids []uint64) {
+	arr := garray.NewArray()
+	for _, v1 := range list {
+		tag := true
+		for _, v2 := range list {
+			if v1.ParentId == v2.DeptId {
+				tag = false
+				break
+			}
+		}
+		if tag {
+			arr.PushRight(v1.ParentId)
+		}
+	}
+	ids = gconv.Uint64s(arr.Unique().Slice())
+	return
+}
+
 // GetByDeptId 通过部门id获取部门信息
 func (s *sSysDept) GetByDeptId(ctx context.Context, deptId uint64) (dept *entity.SysDept, err error) {
 	var depts []*entity.SysDept
@@ -173,6 +212,18 @@ func (s *sSysDept) GetByDeptId(ctx context.Context, deptId uint64) (dept *entity
 		if v.DeptId == deptId {
 			dept = v
 			break
+		}
+	}
+	return
+}
+
+// GetByDept 获取部门信息
+func (s *sSysDept) GetByDept(ctx context.Context, deptId interface{}) (dept *model.LinkDeptRes) {
+	deptEnt, _ := s.GetByDeptId(ctx, gconv.Uint64(deptId))
+	if deptEnt != nil {
+		dept = &model.LinkDeptRes{
+			DeptId:   deptEnt.DeptId,
+			DeptName: deptEnt.DeptName,
 		}
 	}
 	return

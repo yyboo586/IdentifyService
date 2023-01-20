@@ -38,6 +38,12 @@ type ToolsGenTableColumns struct {
 	SortColumn     string // 排序字段名
 	SortType       string // 排序方式 (asc顺序 desc倒序)
 	ShowDetail     string // 是否有查看详情功能
+	ExcelPort      string // 是否有导出excel功能
+	ExcelImp       string // 是否有导入excel功能
+	UseSnowId      string //主键是否使用雪花ID
+	UseVirtual     string // 树表是否使用虚拟表
+	OverwriteInfo  string // 覆盖文件信息
+	MenuPid        string // 父级菜单ID
 }
 
 // toolsGenTableColumns holds the columns for table tools_gen_table.
@@ -60,6 +66,12 @@ var toolsGenTableColumns = ToolsGenTableColumns{
 	SortColumn:     "sort_column",
 	SortType:       "sort_type",
 	ShowDetail:     "show_detail",
+	ExcelPort:      "excel_port",
+	ExcelImp:       "excel_imp",
+	UseSnowId:      "use_snow_id",
+	UseVirtual:     "use_virtual",
+	OverwriteInfo:  "overwrite_info",
+	MenuPid:        "menu_pid",
 }
 
 // NewToolsGenTableDao creates and returns a new DAO object for table data access.

@@ -7,6 +7,7 @@ package service
 
 import (
 	"context"
+	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 
 	"github.com/tiger1103/gfast/v3/api/v1/system"
 	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
@@ -19,13 +20,16 @@ type (
 		AddRoleRule(ctx context.Context, ruleIds []uint, roleId int64) (err error)
 		DelRoleRule(ctx context.Context, roleId int64) (err error)
 		AddRole(ctx context.Context, req *system.RoleAddReq) (err error)
-		Get(ctx context.Context, id uint) (res *entity.SysRole, err error)
+		Get(ctx context.Context, id uint) (res *model.RoleInfoRes, err error)
 		GetFilteredNamedPolicy(ctx context.Context, id uint) (gpSlice []int, err error)
 		EditRole(ctx context.Context, req *system.RoleEditReq) (err error)
 		DeleteByIds(ctx context.Context, ids []int64) (err error)
-		RoleDeptTreeSelect(ctx context.Context, roleId int64) (res *system.RoleDeptTreeSelectRes, err error)
-		GetRoleDepts(ctx context.Context, roleId int64) ([]int64, error)
+		RoleDeptTreeSelect(ctx context.Context) (res *system.RoleDeptTreeSelectRes, err error)
 		RoleDataScope(ctx context.Context, req *system.DataScopeReq) error
+		FindSonByParentId(roleList []*entity.SysRole, id uint) []*entity.SysRole
+		FindSonIdsByParentId(roleList []*entity.SysRole, id uint) []uint
+		GetRoleDataScope(ctx context.Context, roleId uint) (data []*model.ScopeAuthData, err error)
+		GetRoleMenuScope(ctx context.Context, roleIds []uint, menuId uint) (data []*model.ScopeAuthData, err error)
 	}
 )
 

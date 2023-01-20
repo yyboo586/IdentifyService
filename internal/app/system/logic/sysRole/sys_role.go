@@ -9,16 +9,21 @@ package sysRole
 
 import (
 	"context"
+	"errors"
+	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/tiger1103/gfast/v3/api/v1/system"
 	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
 	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
 	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
+	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 	"github.com/tiger1103/gfast/v3/internal/app/system/model/do"
 	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
 	"github.com/tiger1103/gfast/v3/internal/app/system/service"
+	"github.com/tiger1103/gfast/v3/library/libWebsocket"
 	"github.com/tiger1103/gfast/v3/library/liberr"
 )
 
@@ -26,7 +31,7 @@ func init() {
 	service.RegisterSysRole(New())
 }
 
-func New() *sSysRole {
+func New() service.ISysRole {
 	return &sSysRole{}
 }
 
@@ -35,24 +40,40 @@ type sSysRole struct {
 
 func (s *sSysRole) GetRoleListSearch(ctx context.Context, req *system.RoleListReq) (res *system.RoleListRes, err error) {
 	res = new(system.RoleListRes)
-	g.Try(ctx, func(ctx context.Context) {
+	err = g.Try(ctx, func(ctx context.Context) {
 		model := dao.SysRole.Ctx(ctx)
 		if req.RoleName != "" {
-			model = model.Where("name like ?", "%"+req.RoleName+"%")
+			model = model.Where("a.name like ?", "%"+req.RoleName+"%")
 		}
 		if req.Status != "" {
-			model = model.Where("status", gconv.Int(req.Status))
+			model = model.Where("a.status", gconv.Int(req.Status))
 		}
-		res.Total, err = model.Count()
-		liberr.ErrIsNil(ctx, err, "获取角色数据失败")
-		if req.PageNum == 0 {
-			req.PageNum = 1
+		userId := service.Context().GetUserId(ctx)
+		//获取当前用户所属角色ids
+		if !service.SysUser().IsSupperAdmin(ctx, userId) {
+			var roleIds []uint
+			roleIds, err = service.SysUser().GetAdminRoleIds(ctx, userId, true)
+			liberr.ErrIsNil(ctx, err)
+			if len(roleIds) == 0 {
+				return
+			}
+			model = model.Where("a."+dao.SysRole.Columns().Id+" in(?) OR a.created_by = ?", roleIds, userId)
 		}
-		res.CurrentPage = req.PageNum
-		if req.PageSize == 0 {
-			req.PageSize = consts.PageSize
+		model = model.As("a")
+		fields := "a.*, count(u.id) user_cnt"
+		if service.ToolsGenTable().IsMysql() {
+			model = model.LeftJoin("casbin_rule", "b", "b.v1  = a.id ")
+			model = model.LeftJoin("sys_user", "u", "CONCAT('u_',u.id) = b.v0 ")
+		} else if service.ToolsGenTable().IsDM() {
+			fields = "a.id,a.pid,a.status,a.list_order,a.name,a.remark, a.created_at,COUNT(u.id) AS user_cnt"
+			model = model.LeftJoin("casbin_rule", "b", "b.v1  = a.id ")
+			model = model.LeftJoin("sys_user", "u", "('u_' || u.id) = b.v0 ")
+		} else {
+			model = model.LeftJoin("casbin_rule", "b", "b.v1  = cast(a.id AS VARCHAR) ")
+			model = model.LeftJoin("sys_user", "u", "CONCAT('u_',u.id)  =  b.v0")
 		}
-		err = model.Page(res.CurrentPage, req.PageSize).Order("id asc").Scan(&res.List)
+		model = model.Group("a.id")
+		err = model.Order("list_order asc,id asc").Fields(fields).Scan(&res.List)
 		liberr.ErrIsNil(ctx, err, "获取数据失败")
 	})
 	return
@@ -63,7 +84,7 @@ func (s *sSysRole) GetRoleList(ctx context.Context) (list []*entity.SysRole, err
 	cache := commonService.Cache()
 	//从缓存获取
 	iList := cache.GetOrSetFuncLock(ctx, consts.CacheSysRole, s.getRoleListFromDb, 0, consts.CacheSysAuthTag)
-	if iList != nil {
+	if !iList.IsEmpty() {
 		err = gconv.Struct(iList, &list)
 	}
 	return
@@ -89,8 +110,12 @@ func (s *sSysRole) AddRoleRule(ctx context.Context, ruleIds []uint, roleId int64
 		enforcer, e := commonService.CasbinEnforcer(ctx)
 		liberr.ErrIsNil(ctx, e)
 		ruleIdsStr := gconv.Strings(ruleIds)
-		for _, v := range ruleIdsStr {
-			_, err = enforcer.AddPolicy(gconv.String(roleId), v, "All")
+		rules := make([][]string, len(ruleIdsStr))
+		for k, v := range ruleIdsStr {
+			rules[k] = []string{gconv.String(roleId), v, "All"}
+		}
+		if len(rules) > 0 {
+			_, err = enforcer.AddPolicies(rules)
 			liberr.ErrIsNil(ctx, err)
 		}
 	})
@@ -111,8 +136,20 @@ func (s *sSysRole) DelRoleRule(ctx context.Context, roleId int64) (err error) {
 func (s *sSysRole) AddRole(ctx context.Context, req *system.RoleAddReq) (err error) {
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		err = g.Try(ctx, func(ctx context.Context) {
-			roleId, e := dao.SysRole.Ctx(ctx).TX(tx).InsertAndGetId(req)
+			req.CreatedBy = service.Context().GetUserId(ctx)
+			roleId, e := dao.SysRole.Ctx(ctx).TX(tx).InsertAndGetId(do.SysRole{
+				Pid:           req.Pid,
+				Status:        req.Status,
+				ListOrder:     req.ListOrder,
+				Name:          req.Name,
+				Remark:        req.Remark,
+				CreatedBy:     req.CreatedBy,
+				EffectiveTime: req.EffectiveTimeInfo,
+			})
 			liberr.ErrIsNil(ctx, e, "添加角色失败")
+			//过滤ruleIds 把没有权限的过滤掉
+			req.MenuIds, err = s.filterAccessRuleIds(ctx, req.MenuIds)
+			liberr.ErrIsNil(ctx, err)
 			//添加角色权限
 			e = s.AddRoleRule(ctx, req.MenuIds, roleId)
 			liberr.ErrIsNil(ctx, e)
@@ -124,10 +161,19 @@ func (s *sSysRole) AddRole(ctx context.Context, req *system.RoleAddReq) (err err
 	return
 }
 
-func (s *sSysRole) Get(ctx context.Context, id uint) (res *entity.SysRole, err error) {
+func (s *sSysRole) Get(ctx context.Context, id uint) (res *model.RoleInfoRes, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
-		err = dao.SysRole.Ctx(ctx).WherePri(id).Scan(&res)
+		//判断是否具有此角色的权限
+		if !s.hasManageAccess(ctx, id, true) {
+			liberr.ErrIsNil(ctx, errors.New("没有查看这个角色的权限"))
+		}
+		res = new(model.RoleInfoRes)
+		err = dao.SysRole.Ctx(ctx).WherePri(id).Scan(&res.SysRole)
 		liberr.ErrIsNil(ctx, err, "获取角色信息失败")
+		err = gconv.Struct(res.SysRole.EffectiveTime, &res.EffectiveTimeInfo)
+		if err != nil {
+			res.EffectiveTimeInfo = new(model.EffectiveTimeInfo)
+		}
 	})
 	return
 }
@@ -146,17 +192,64 @@ func (s *sSysRole) GetFilteredNamedPolicy(ctx context.Context, id uint) (gpSlice
 	return
 }
 
+func (s *sSysRole) hasManageAccess(ctx context.Context, roleId uint, includeChildren ...bool) bool {
+	currentUserId := service.Context().GetUserId(ctx)
+	if !service.SysUser().IsSupperAdmin(ctx, currentUserId) {
+		var (
+			roleIds   []uint
+			hasAccess bool
+			err       error
+			list      []*entity.SysRole
+		)
+		list, err = s.GetRoleList(ctx)
+		if err != nil {
+			g.Log().Error(ctx, err)
+			return false
+		}
+		for _, v := range list {
+			//判断是否当前用户所建角色
+			if roleId == v.Id && v.CreatedBy == currentUserId {
+				return true
+			}
+		}
+		roleIds, err = service.SysUser().GetAdminRoleIds(ctx, service.Context().GetUserId(ctx), includeChildren...)
+		if err != nil {
+			g.Log().Error(ctx, err)
+			return false
+		}
+		if len(roleIds) > 0 {
+			for _, v := range roleIds {
+				if v == roleId {
+					hasAccess = true
+					break
+				}
+			}
+		}
+		return hasAccess
+	}
+	return true
+}
+
 // EditRole 修改角色
 func (s *sSysRole) EditRole(ctx context.Context, req *system.RoleEditReq) (err error) {
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		err = g.Try(ctx, func(ctx context.Context) {
+			//判断是否具有修改此角色的权限
+			if !s.hasManageAccess(ctx, gconv.Uint(req.Id), true) {
+				liberr.ErrIsNil(ctx, errors.New("没有修改这个角色的权限"))
+			}
 			_, e := dao.SysRole.Ctx(ctx).TX(tx).WherePri(req.Id).Data(&do.SysRole{
-				Status:    req.Status,
-				ListOrder: req.ListOrder,
-				Name:      req.Name,
-				Remark:    req.Remark,
+				Pid:           req.Pid,
+				Status:        req.Status,
+				ListOrder:     req.ListOrder,
+				Name:          req.Name,
+				Remark:        req.Remark,
+				EffectiveTime: gconv.String(req.EffectiveTimeInfo),
 			}).Update()
 			liberr.ErrIsNil(ctx, e, "修改角色失败")
+			//过滤ruleIds 把没有权限的过滤掉
+			req.MenuIds, err = s.filterAccessRuleIds(ctx, req.MenuIds)
+			liberr.ErrIsNil(ctx, err)
 			//删除角色权限
 			e = s.DelRoleRule(ctx, req.Id)
 			liberr.ErrIsNil(ctx, e)
@@ -165,8 +258,34 @@ func (s *sSysRole) EditRole(ctx context.Context, req *system.RoleEditReq) (err e
 			liberr.ErrIsNil(ctx, e)
 			//清除缓存
 			commonService.Cache().Remove(ctx, consts.CacheSysRole)
+			//通知刷新token
+			s.refreshToken(ctx, req.Id)
 		})
 		return err
+	})
+	return
+}
+
+// 从给定的menuIds中过滤掉用户没有操作权限的菜单id
+func (s *sSysRole) filterAccessRuleIds(ctx context.Context, menuIds []uint) (newRuleIds []uint, err error) {
+	err = g.Try(ctx, func(ctx context.Context) {
+		//若不是超管，过滤ruleIds 把没有权限的过滤掉
+		if !service.SysUser().IsSupperAdmin(ctx, service.Context().GetUserId(ctx)) {
+			var (
+				userRoleIds []uint
+				accessMenus *garray.Array
+			)
+			userRoleIds, err = service.SysUser().GetAdminRoleIds(ctx, service.Context().GetUserId(ctx))
+			liberr.ErrIsNil(ctx, err)
+			accessMenus, err = service.SysUser().GetAdminMenusIdsByRoleIds(ctx, userRoleIds)
+			for _, v := range menuIds {
+				if accessMenus.Contains(v) {
+					newRuleIds = append(newRuleIds, v)
+				}
+			}
+		} else {
+			newRuleIds = menuIds
+		}
 	})
 	return
 }
@@ -175,6 +294,12 @@ func (s *sSysRole) EditRole(ctx context.Context, req *system.RoleEditReq) (err e
 func (s *sSysRole) DeleteByIds(ctx context.Context, ids []int64) (err error) {
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		err = g.Try(ctx, func(ctx context.Context) {
+			for _, id := range ids {
+				//判断是否有删除该角色的权限
+				if !s.hasManageAccess(ctx, gconv.Uint(id)) {
+					liberr.ErrIsNil(ctx, errors.New("没有删除这个角色的权限"))
+				}
+			}
 			_, err = dao.SysRole.Ctx(ctx).TX(tx).Where(dao.SysRole.Columns().Id+" in(?)", ids).Delete()
 			liberr.ErrIsNil(ctx, err, "删除角色失败")
 			//删除角色权限
@@ -190,55 +315,106 @@ func (s *sSysRole) DeleteByIds(ctx context.Context, ids []int64) (err error) {
 	return
 }
 
-func (s *sSysRole) RoleDeptTreeSelect(ctx context.Context, roleId int64) (res *system.RoleDeptTreeSelectRes, err error) {
+func (s *sSysRole) RoleDeptTreeSelect(ctx context.Context) (res *system.RoleDeptTreeSelectRes, err error) {
 	res = new(system.RoleDeptTreeSelectRes)
 	err = g.Try(ctx, func(ctx context.Context) {
 		list, err := service.SysDept().GetList(ctx, &system.DeptSearchReq{
-			Status: "1",
+			Status:  "1",
+			ShowAll: true,
 		})
 		liberr.ErrIsNil(ctx, err)
-		//获取关联的角色数据权限
-		checkedKeys, err := s.GetRoleDepts(ctx, roleId)
-		liberr.ErrIsNil(ctx, err)
-
 		dList := service.SysDept().GetListTree(0, list)
 		res.Depts = dList
-		res.CheckedKeys = checkedKeys
 	})
 	return
 }
 
-func (s *sSysRole) GetRoleDepts(ctx context.Context, roleId int64) ([]int64, error) {
-	var entities []*entity.SysRoleDept
-	err := dao.SysRoleDept.Ctx(ctx).Where("role_id", roleId).Scan(&entities)
-	if err != nil {
-		return nil, err
-	}
-	result := make([]int64, 0)
-	for _, v := range entities {
-		result = append(result, v.DeptId)
-	}
-	return result, nil
+func (s *sSysRole) GetRoleDataScope(ctx context.Context, roleId uint) (data []*model.ScopeAuthData, err error) {
+	err = g.Try(ctx, func(ctx context.Context) {
+		err = dao.SysRoleScope.Ctx(ctx).Where("role_id", roleId).Scan(&data)
+		liberr.ErrIsNil(ctx, err, "获取角色数据权限失败")
+	})
+	return
+}
+
+func (s *sSysRole) GetRoleMenuScope(ctx context.Context, roleIds []uint, menuId uint) (data []*model.ScopeAuthData, err error) {
+	err = g.Try(ctx, func(ctx context.Context) {
+		err = dao.SysRoleScope.Ctx(ctx).WhereIn("role_id", roleIds).
+			Where("menu_id", menuId).
+			Scan(&data)
+		liberr.ErrIsNil(ctx, err, "获取角色数据权限失败")
+	})
+	return
 }
 
 // RoleDataScope 设置角色数据权限
 func (s *sSysRole) RoleDataScope(ctx context.Context, req *system.DataScopeReq) error {
 	err := g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		err := g.Try(ctx, func(ctx context.Context) {
-			_, err := tx.Model(dao.SysRole.Table()).Where("id", req.RoleId).Data(g.Map{"data_scope": req.DataScope}).Update()
-			liberr.ErrIsNil(ctx, err, "设置失败")
-			if req.DataScope == 2 {
-				_, err = tx.Model(dao.SysRoleDept.Table()).Where("role_id", req.RoleId).Delete()
-				liberr.ErrIsNil(ctx, err, "设置失败")
-				data := g.List{}
-				for _, deptId := range req.DeptIds {
-					data = append(data, g.Map{"role_id": req.RoleId, "dept_id": deptId})
+			data := make([]do.SysRoleScope, 0, len(req.AuthData))
+			for _, v := range req.AuthData {
+				if v.MenuId != 0 && v.Scope != 0 {
+					data = append(data, do.SysRoleScope{
+						RoleId:    req.RoleId,
+						MenuId:    v.MenuId,
+						DataScope: v.Scope,
+						DeptIds:   gconv.String(v.DeptIds),
+					})
 				}
-				_, err = tx.Model(dao.SysRoleDept.Table()).Data(data).Insert()
-				liberr.ErrIsNil(ctx, err, "设置失败")
 			}
+			//清除旧权限
+			_, err := dao.SysRoleScope.Ctx(ctx).Where(dao.SysRoleScope.Columns().RoleId, req.RoleId).
+				Delete()
+			liberr.ErrIsNil(ctx, err, "清除旧权限信息失败")
+			if len(data) > 0 {
+				_, err = dao.SysRoleScope.Ctx(ctx).Data(data).Insert()
+				liberr.ErrIsNil(ctx, err, "设置权限信息失败")
+			}
+			//通知刷新token
+			s.refreshToken(ctx, gconv.Int64(req.RoleId))
 		})
 		return err
 	})
 	return err
+}
+
+func (s *sSysRole) FindSonByParentId(roleList []*entity.SysRole, id uint) []*entity.SysRole {
+	children := make([]*entity.SysRole, 0, len(roleList))
+	for _, v := range roleList {
+		if v.Pid == id {
+			children = append(children, v)
+			fChildren := s.FindSonByParentId(roleList, v.Id)
+			children = append(children, fChildren...)
+		}
+	}
+	return children
+}
+
+func (s *sSysRole) FindSonIdsByParentId(roleList []*entity.SysRole, id uint) []uint {
+	children := make([]uint, 0, len(roleList))
+	for _, v := range roleList {
+		if v.Pid == id {
+			children = append(children, v.Id)
+			fChildren := s.FindSonIdsByParentId(roleList, v.Id)
+			children = append(children, fChildren...)
+		}
+	}
+	return children
+}
+
+// 刷新角色下用户token
+func (s *sSysRole) refreshToken(ctx context.Context, roleId int64) {
+	_ = g.Try(ctx, func(ctx context.Context) {
+		enforcer, e := commonService.CasbinEnforcer(ctx)
+		liberr.ErrIsNil(ctx, e)
+		userRoleIds := enforcer.GetFilteredGroupingPolicy(1, gconv.String(roleId))
+		for _, v := range userRoleIds {
+			userId := gstr.Split(v[0], "_")[1]
+			//通知用户更新token
+			libWebsocket.SendToUser(gconv.Uint64(userId), &libWebsocket.WResponse{
+				Event: consts.WebsocketTypeTokenUpdated,
+				Data:  nil,
+			})
+		}
+	})
 }

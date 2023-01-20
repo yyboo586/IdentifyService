@@ -8,13 +8,22 @@
 package task
 
 import (
+	"context"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 	"github.com/tiger1103/gfast/v3/internal/app/system/service"
+	"github.com/tiger1103/gfast/v3/internal/mounter"
 )
 
 func init() {
+	mounter.Mount(func(ctx context.Context, s *ghttp.Server) {
+		Run()
+	})
+}
+
+func Run() {
 	task1 := &model.TimeTask{
 		FuncName: "test1",
 		Run:      Test1,

@@ -9,6 +9,7 @@ package toolsGenTableColumn
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gregex"
@@ -26,12 +27,12 @@ func init() {
 	service.RegisterToolsGenTableColumn(New())
 }
 
-func New() *sToolsGenTableColumn {
+func New() service.IToolsGenTableColumn {
 	return &sToolsGenTableColumn{
 		ColumnTypeStr:       []string{"char", "varchar", "narchar", "varchar2", "tinytext", "text", "mediumtext", "longtext"},
 		ColumnTypeTime:      []string{"datetime", "time", "date", "timestamp"},
 		ColumnTypeNumber:    []string{"tinyint", "smallint", "mediumint", "int", "number", "integer", "bigint", "float", "float", "double", "decimal"},
-		ColumnNameNotEdit:   []string{"created_by", "created_at", "updated_by", "updated_at", "deleted_at"},
+		ColumnNameNotEdit:   []string{"created_by", "created_at", "updated_by", "updated_at", "deleted_at", "dept_id"},
 		ColumnNameNotList:   []string{"updated_by", "updated_at", "deleted_at"},
 		ColumnNameNotDetail: []string{"updated_at", "deleted_at"},
 		ColumnNameNotQuery:  []string{"updated_by", "updated_at", "deleted_at", "remark"},
@@ -48,16 +49,98 @@ type sToolsGenTableColumn struct {
 	ColumnNameNotQuery  []string //页面不需要查询字段
 }
 
+// 自定义错误类型
+type MyError struct {
+	Code    int
+	Message string
+}
+
+// 实现 error 接口的 Error() 方法
+func (e MyError) Error() string {
+	return fmt.Sprintf("错误代码：%d，错误信息：%s", e.Code, e.Message)
+}
+
 // SelectDbTableColumnsByName 根据表名称查询列信息
 func (s *sToolsGenTableColumn) SelectDbTableColumnsByName(ctx context.Context, tableName string) ([]*entity.ToolsGenTableColumn, error) {
 	var res []*entity.ToolsGenTableColumn
 	err := g.Try(ctx, func(ctx context.Context) {
 		db := g.DB()
-		sql := " select column_name, (case when (is_nullable = 'YES' || is_nullable = 'NO' && column_default is not null) then '0' else '1' end) as is_required, " +
-			"(case when column_key = 'PRI' then '1' else '0' end) as is_pk, ordinal_position as sort_order_edit, column_comment," +
-			" (case when extra = 'auto_increment' then '1' else '0' end) as is_increment, column_type from information_schema.columns" +
-			" where table_schema = (select database()) "
-		sql += " and " + gdb.FormatSqlWithArgs(" table_name=? ", []interface{}{tableName}) + " order by ordinal_position ASC "
+		var sql string
+		if service.ToolsGenTable().IsPg() {
+			//pg数据库
+			sql = "select c.column_name,(case when c.is_nullable='YES' || k.column_name is not null  then '1' else '0' end) as is_required," +
+				"(case when k.column_name is not null then '1' else '0' end) as is_pk,c.ordinal_position as sort_order_edit,d.description column_comment," +
+				"(case when c.column_default like 'nextval%' then '1' else '0' end) as is_increment,c.udt_name as column_type " +
+				"from information_schema.columns c " +
+				"left join pg_description d on d.objsubid=c.ordinal_position and d.objoid=c.table_name :: regclass " +
+				"left join information_schema.key_column_usage k on c.table_name=k.table_name and c.column_name=k.column_name and c.table_catalog=k.table_catalog and c.table_schema=k.table_schema "
+			sql += "where " + gdb.FormatSqlWithArgs(" c.table_name=? ", []interface{}{tableName}) + " order by c.ordinal_position"
+		} else if service.ToolsGenTable().IsDM() {
+			dbName := g.DB().GetSchema()
+			//达梦数据库
+			sql = "SELECT" +
+				"    A.COLUMN_NAME," +
+				"    (CASE WHEN A.NULLABLE = 'N' THEN '1' ELSE '0' END) AS IS_REQUIRED," +
+				"    (CASE WHEN B.CONSTRAINT_TYPE = 'P' THEN '1' ELSE '0' END) AS IS_PK," +
+				"    A.COLUMN_ID AS SORT_ORDER_EDIT," +
+				"    C.COMMENTS AS COLUMN_COMMENT," +
+				"    (CASE WHEN D.IS_INCREMENT = 1 THEN '1' ELSE '0' END) AS IS_INCREMENT," +
+				"    A.DATA_TYPE || '(' || A.DATA_LENGTH || ')' AS COLUMN_TYPE " +
+				"    FROM" +
+				"    ALL_TAB_COLUMNS A" +
+				"    LEFT JOIN (" +
+				"    SELECT" +
+				"        C.OWNER, " +
+				"        C.TABLE_NAME," +
+				"        CC.COLUMN_NAME," +
+				"        C.CONSTRAINT_TYPE" +
+				"    FROM" +
+				"        ALL_CONSTRAINTS C" +
+				"    JOIN ALL_CONS_COLUMNS CC" +
+				"        ON C.OWNER = CC.OWNER  " +
+				"        AND C.CONSTRAINT_NAME = CC.CONSTRAINT_NAME" +
+				"        AND C.TABLE_NAME = CC.TABLE_NAME" +
+				"    WHERE" +
+				"        C.CONSTRAINT_TYPE = 'P'" +
+				"        AND C.OWNER = ?  " +
+				") B " +
+				"    ON A.OWNER = B.OWNER " +
+				"    AND A.TABLE_NAME = B.TABLE_NAME" +
+				"    AND A.COLUMN_NAME = B.COLUMN_NAME" +
+				"    LEFT JOIN ALL_COL_COMMENTS C" +
+				"    ON A.OWNER = C.SCHEMA_NAME " +
+				"    AND A.TABLE_NAME = C.TABLE_NAME" +
+				"    AND A.COLUMN_NAME = C.COLUMN_NAME" +
+				"    LEFT JOIN (" +
+				"    SELECT" +
+				"        sf_get_schema_name_by_id(st.schid) AS TABLE_OWNER," +
+				"        st.name AS TABLE_NAME," +
+				"        sco.name AS COLUMN_NAME," +
+				"        CASE WHEN bitand(sco.info2, 0x0001) = 1 THEN 1 ELSE 0 END AS IS_INCREMENT" +
+				"    FROM" +
+				"        syscolumns sco" +
+				"    JOIN sysobjects st" +
+				"        ON sco.id = st.id" +
+				"        AND st.subtype$ = 'UTAB'" +
+				") D " +
+				"    ON A.OWNER = D.TABLE_OWNER " +
+				"    AND A.TABLE_NAME = D.TABLE_NAME" +
+				"    AND A.COLUMN_NAME = D.COLUMN_NAME" +
+				"    WHERE" +
+				"    A.OWNER = ? " +
+				"    AND A.TABLE_NAME = ?" +
+				"    ORDER BY" +
+				"    A.COLUMN_ID ASC"
+			sql = gdb.FormatSqlWithArgs(sql, []interface{}{dbName, dbName, tableName})
+		} else {
+			sql = "select column_name, (case when (is_nullable = 'YES' || is_nullable = 'NO' && column_default is not null) then '0' else '1' end) as is_required, " +
+				"(case when column_key = 'PRI' then '1' else '0' end) as is_pk, ordinal_position as sort_order_edit, column_comment," +
+				" (case when extra = 'auto_increment' then '1' else '0' end) as is_increment, column_type from information_schema.columns" +
+				" where table_schema = (select database()) "
+			sql += " and " + gdb.FormatSqlWithArgs(" table_name=? ", []interface{}{tableName}) + " order by ordinal_position ASC "
+
+		}
+
 		err := db.GetScan(ctx, &res, sql)
 		liberr.ErrIsNil(ctx, err, "查询列信息失败")
 	})
@@ -117,15 +200,6 @@ func (s *sToolsGenTableColumn) InitColumnField(column *entity.ToolsGenTableColum
 		column.TsType = "boolean"
 	}
 
-	//新增字段
-	if s.IsNotEdit(columnName) {
-		column.IsInsert = false
-	} else if column.IsIncrement {
-		column.IsInsert = false
-	} else {
-		column.IsInsert = true
-	}
-
 	// 编辑字段
 	if s.IsNotEdit(columnName) {
 		column.IsEdit = false
@@ -176,10 +250,10 @@ func (s *sToolsGenTableColumn) InitColumnField(column *entity.ToolsGenTableColum
 	column.SortOrderList = column.SortOrderEdit
 	column.SortOrderDetail = column.SortOrderEdit
 	column.SortOrderQuery = column.SortOrderEdit
-	column.ColSpan = 12
+	column.ColSpan = 1
 	column.RowSpan = 1
 	column.IsRowStart = false
-	column.MinWidth = 100
+	column.MinWidth = 150
 	column.IsFixed = false
 	column.IsOverflowTooltip = false
 	column.IsCascade = false

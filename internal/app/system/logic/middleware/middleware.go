@@ -8,22 +8,30 @@
 package middleware
 
 import (
-	"fmt"
+	"context"
+	"errors"
+	"github.com/casbin/casbin/v2"
+	"github.com/gogf/gf/v2/container/garray"
+	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
 	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
+	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
 	"github.com/tiger1103/gfast/v3/internal/app/system/model"
+	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
 	"github.com/tiger1103/gfast/v3/internal/app/system/service"
 	"github.com/tiger1103/gfast/v3/library/libResponse"
+	"github.com/tiger1103/gfast/v3/library/liberr"
 )
 
 func init() {
 	service.RegisterMiddleware(New())
 }
 
-func New() *sMiddleware {
+func New() service.IMiddleware {
 	return &sMiddleware{}
 }
 
@@ -37,6 +45,7 @@ func (s *sMiddleware) Ctx(r *ghttp.Request) {
 	if err != nil {
 		// 执行下一步请求逻辑
 		r.Middleware.Next()
+		return
 	}
 	if data != nil {
 		context := new(model.Context)
@@ -45,6 +54,7 @@ func (s *sMiddleware) Ctx(r *ghttp.Request) {
 			g.Log().Error(ctx, err)
 			// 执行下一步请求逻辑
 			r.Middleware.Next()
+			return
 		}
 		service.Context().Init(r, context)
 	}
@@ -57,24 +67,12 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 	ctx := r.GetCtx()
 	//获取登陆用户id
 	adminId := service.Context().GetUserId(ctx)
-	accessParams := r.Get("accessParams").Strings()
-	accessParamsStr := ""
-	if len(accessParams) > 0 && accessParams[0] != "undefined" {
-		accessParamsStr = "?" + gstr.Join(accessParams, "&")
-	}
-	url := gstr.TrimLeft(r.Request.URL.Path, "/") + accessParamsStr
-	/*if r.Method != "GET" && adminId != 1 && url!="api/v1/system/login" {
+	url := gstr.TrimLeft(r.Request.URL.Path, "/")
+	/*if r.Method != "GET" && adminId != 1 && url != "api/v1/system/login" {
 		libResponse.FailJson(true, r, "对不起！演示系统，不能删改数据！")
 	}*/
 	//获取无需验证权限的用户id
-	tagSuperAdmin := false
-	service.SysUser().NotCheckAuthAdminIds(ctx).Iterator(func(v interface{}) bool {
-		if gconv.Uint64(v) == adminId {
-			tagSuperAdmin = true
-			return false
-		}
-		return true
-	})
+	tagSuperAdmin := service.SysUser().IsSupperAdmin(ctx, service.Context().GetUserId(ctx))
 	if tagSuperAdmin {
 		r.Middleware.Next()
 		//不要再往后面执行
@@ -96,6 +94,14 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 	}
 	//只验证存在数据库中的规则
 	if menu != nil {
+		//若是不登录能访问的接口则不判断权限
+		excludePaths := g.Cfg().MustGet(ctx, "gfToken.excludePaths").Strings()
+		for _, p := range excludePaths {
+			if gstr.Equal(menu.Name, gstr.TrimLeft(p, "/")) {
+				r.Middleware.Next()
+				return
+			}
+		}
 		//若存在不需要验证的条件则跳过
 		if gstr.Equal(menu.Condition, "nocheck") {
 			r.Middleware.Next()
@@ -105,23 +111,74 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 		//菜单没存数据库不验证权限
 		if menuId != 0 {
 			//判断权限操作
-			enforcer, err := commonService.CasbinEnforcer(ctx)
+			err = s.checkAuth(ctx, adminId, menuId)
 			if err != nil {
-				g.Log().Error(ctx, err)
-				libResponse.FailJson(true, r, "获取权限失败")
-			}
-			hasAccess := false
-			hasAccess, err = enforcer.Enforce(fmt.Sprintf("%s%d", service.SysUser().GetCasBinUserPrefix(), adminId), gconv.String(menuId), "All")
-			if err != nil {
-				g.Log().Error(ctx, err)
-				libResponse.FailJson(true, r, "判断权限失败")
-			}
-			if !hasAccess {
-				libResponse.FailJson(true, r, "没有访问权限")
+				libResponse.FailJson(true, r, err.Error())
 			}
 		}
-	} else if menu == nil && accessParamsStr != "" {
-		libResponse.FailJson(true, r, "没有访问权限")
 	}
 	r.Middleware.Next()
+}
+
+func (s *sMiddleware) checkAuth(ctx context.Context, adminId uint64, menuId uint) (err error) {
+	var (
+		roleIds    []uint
+		roleList   []*entity.SysRole
+		roleIdsMap = gmap.New()
+		enforcer   *casbin.SyncedEnforcer
+		b          bool
+	)
+	err = g.Try(ctx, func(ctx context.Context) {
+		roleIds, err = service.SysUser().GetAdminRoleIds(ctx, adminId)
+		liberr.ErrIsNil(ctx, err)
+		for _, v := range roleIds {
+			roleIdsMap.Set(v, v)
+		}
+		//获取对应角色
+		roleList, err = service.SysRole().GetRoleList(ctx)
+		liberr.ErrIsNil(ctx, err)
+		for _, v := range roleList {
+			if roleIdsMap.Contains(v.Id) {
+				//判断是否在角色有效时间段内
+				if v.EffectiveTime != "" {
+					var effective *model.EffectiveTimeInfo
+					err = gconv.Struct(v.EffectiveTime, &effective)
+					liberr.ErrIsNil(ctx, err, "获取角色有效时间段失败")
+					if effective != nil && effective.EffectiveType == consts.EffectiveTypeStartEnd {
+						//按起止日期
+						now := gtime.Now()
+						if now.Before(effective.DateRange[0]) || now.After(effective.DateRange[1]) {
+							roleIdsMap.Remove(v.Id)
+						}
+					} else if effective != nil && effective.EffectiveType == consts.EffectiveTypeDate {
+						//按时间段
+						now := gtime.Now()
+						arr := garray.NewIntArrayFrom(effective.WeekDay)
+						if arr.Contains(gconv.Int(now.Format("w"))) {
+							sHis := effective.DayRange[0].Format("H:i:s")
+							eHis := effective.DayRange[1].Format("H:i:s")
+							start := gtime.NewFromStr(now.Format("Y-m-d " + sHis))
+							end := gtime.NewFromStr(now.Format("Y-m-d " + eHis))
+							if now.Before(start) || now.After(end) {
+								roleIdsMap.Remove(v.Id)
+							}
+						} else {
+							roleIdsMap.Remove(v.Id)
+						}
+					}
+				}
+			}
+		}
+		enforcer, err = commonService.CasbinEnforcer(ctx)
+		liberr.ErrIsNil(ctx, err)
+		roleIdsMap.Iterator(func(k interface{}, v interface{}) bool {
+			b, err = enforcer.Enforce(gconv.String(v), gconv.String(menuId), "All")
+			liberr.ErrIsNil(ctx, err)
+			return !b
+		})
+		if !b {
+			liberr.ErrIsNil(ctx, errors.New("没有权限"))
+		}
+	})
+	return
 }

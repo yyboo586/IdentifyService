@@ -10,6 +10,7 @@ package token
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/tiger1103/gfast-token/adapter"
 	"github.com/tiger1103/gfast-token/gftoken"
 	"github.com/tiger1103/gfast/v3/internal/app/common/consts"
 	commonModel "github.com/tiger1103/gfast/v3/internal/app/common/model"
@@ -21,7 +22,7 @@ type sToken struct {
 	*gftoken.GfToken
 }
 
-func New() *sToken {
+func New() service.IGfToken {
 	var (
 		ctx = gctx.New()
 		opt *commonModel.TokenOptions
@@ -30,9 +31,14 @@ func New() *sToken {
 	)
 	liberr.ErrIsNil(ctx, err)
 	if opt.CacheModel == consts.CacheModelRedis {
-		fun = gftoken.WithGRedis()
+		fun = gftoken.WithGRedis() //redis缓存
+	} else if opt.CacheModel == consts.CacheModelDist {
+		//磁盘缓存
+		fun = gftoken.WithDistConfig(&adapter.Config{
+			Dir: opt.DistPath,
+		})
 	} else {
-		fun = gftoken.WithGCache()
+		fun = gftoken.WithGCache() // 内存缓存
 	}
 	return &sToken{
 		GfToken: gftoken.NewGfToken(
