@@ -1,7 +1,6 @@
 package system
 
 import (
-	v1 "IdentifyService/api/v1"
 	"IdentifyService/internal/app/system/model"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -10,7 +9,7 @@ import (
 // SysNoticeReadSearchReq 分页请求参数
 type SysNoticeReadSearchReq struct {
 	g.Meta `path:"/list" tags:"系统后台/已读记录" method:"get" summary:"已读记录列表"`
-	v1.Author
+	model.Author
 	model.SysNoticeReadSearchReq
 }
 
@@ -23,44 +22,44 @@ type SysNoticeReadSearchRes struct {
 // SysNoticeReadAddReq 添加操作请求参数
 type SysNoticeReadAddReq struct {
 	g.Meta `path:"/add" tags:"系统后台/已读记录" method:"post" summary:"已读记录添加"`
-	v1.Author
+	model.Author
 	*model.SysNoticeReadAddReq
 }
 
 // SysNoticeReadAddRes 添加操作返回结果
 type SysNoticeReadAddRes struct {
-	v1.EmptyRes
+	model.EmptyRes
 }
 
 // SysNoticeReadAddReq 添加操作请求参数
 type SysNoticeReadNoticeAddReq struct {
 	g.Meta `path:"/readNotice" tags:"系统后台/已读记录" method:"post" summary:"已读记录"`
-	v1.Author
+	model.Author
 	*model.SysNoticeReadNoticeReq
 }
 
 // SysNoticeReadAddRes 添加操作返回结果
 type SysNoticeReadNoticeAddRes struct {
-	v1.EmptyRes
+	model.EmptyRes
 }
 
 // SysNoticeReadEditReq 修改操作请求参数
 type SysNoticeReadEditReq struct {
 	g.Meta `path:"/edit" tags:"系统后台/已读记录" method:"put" summary:"已读记录修改"`
-	v1.Author
+	model.Author
 	*model.SysNoticeReadEditReq
 }
 
 // SysNoticeReadEditRes 修改操作返回结果
 type SysNoticeReadEditRes struct {
-	v1.EmptyRes
+	model.EmptyRes
 }
 
 // SysNoticeReadGetReq 获取一条数据请求
 type SysNoticeReadGetReq struct {
 	g.Meta `path:"/get" tags:"系统后台/已读记录" method:"get" summary:"获取已读记录信息"`
-	v1.Author
-	Id int64 `p:"id" v:"required#主键必须"` //通过主键获取
+	model.Author
+	ID int64 `p:"id" v:"required#主键必须"` //通过主键获取
 }
 
 // SysNoticeReadGetRes 获取一条数据结果
@@ -72,11 +71,11 @@ type SysNoticeReadGetRes struct {
 // SysNoticeReadDeleteReq 删除数据请求
 type SysNoticeReadDeleteReq struct {
 	g.Meta `path:"/delete" tags:"系统后台/已读记录" method:"delete" summary:"删除已读记录"`
-	v1.Author
+	model.Author
 	Ids []int64 `p:"ids" v:"required#主键必须"` //通过主键删除
 }
 
 // SysNoticeReadDeleteRes 删除数据返回
 type SysNoticeReadDeleteRes struct {
-	v1.EmptyRes
+	model.EmptyRes
 }

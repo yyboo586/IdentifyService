@@ -1,8 +1,6 @@
 package model
 
 import (
-	comModel "IdentifyService/internal/app/common/model"
-
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gmeta"
 )
@@ -10,7 +8,7 @@ import (
 // SysNoticeInfoRes is the golang structure for table sys_notice.
 type SysNoticeInfoRes struct {
 	gmeta.Meta   `orm:"table:sys_notice"`
-	Id           int64          `orm:"id,primary" json:"id" dc:"ID"`         // ID
+	ID           int64          `orm:"id,primary" json:"id" dc:"ID"`         // ID
 	Title        string         `orm:"title" json:"title" dc:"标题"`           // 标题
 	Type         int64          `orm:"type" json:"type" dc:"类型"`             // 类型
 	Tag          int            `orm:"tag" json:"tag" dc:"标签"`               // 标签
@@ -30,7 +28,7 @@ type SysNoticeInfoRes struct {
 }
 
 type SysNoticeListRes struct {
-	Id          int64        `json:"id" dc:"ID"`
+	ID          int64        `json:"id" dc:"ID"`
 	Title       string       `json:"title" dc:"标题"`
 	Type        int64        `json:"type" dc:"类型"`
 	Tag         int          `json:"tag" dc:"标签"`
@@ -47,8 +45,8 @@ type SysNoticeListRes struct {
 
 // SysNoticeSearchReq 分页请求参数
 type SysNoticeSearchReq struct {
-	comModel.PageReq
-	Id        string `p:"id" dc:"ID"`                                                             //ID
+	PageReq
+	ID        string `p:"id" dc:"ID"`                                                             //ID
 	Title     string `p:"title" dc:"标题"`                                                          //标题
 	Type      string `p:"type" v:"type@integer#类型需为整数" dc:"类型"`                                   //类型
 	Tag       string `p:"tag" v:"tag@integer#标签需为整数" dc:"标签"`                                     //标签
@@ -59,12 +57,12 @@ type SysNoticeSearchReq struct {
 
 // SysNoticeSearchRes 列表返回结果
 type SysNoticeSearchRes struct {
-	comModel.ListRes
+	PageRes
 	List []*SysNoticeListRes `json:"list"`
 }
 
 type SysNoticeUserNickname struct {
-	Id           int64  `json:"id"`
+	ID           int64  `json:"id"`
 	UserNickName string `json:"userNickname"`
 }
 
@@ -77,13 +75,13 @@ type SysNoticeAddReq struct {
 	Remark    string   `p:"remark"  dc:"备注"`
 	Sort      int      `p:"sort"  dc:"排序"`
 	Status    int      `p:"status" v:"required#状态不能为空" dc:"状态"`
-	Receiver  []uint64 `p:"receiver"`
-	CreatedBy uint64
+	Receiver  []string `p:"receiver"`
+	CreatedBy string
 }
 
 // SysNoticeEditReq 修改操作请求参数
 type SysNoticeEditReq struct {
-	Id        int64    `p:"id" v:"required#主键ID不能为空" dc:"ID"`
+	ID        int64    `p:"id" v:"required#主键ID不能为空" dc:"ID"`
 	Title     string   `p:"title" v:"required#标题不能为空" dc:"标题"`
 	Type      int64    `p:"type" v:"required#类型不能为空" dc:"类型"`
 	Tag       int      `p:"tag"  dc:"标签"`
@@ -91,8 +89,8 @@ type SysNoticeEditReq struct {
 	Remark    string   `p:"remark"  dc:"备注"`
 	Sort      int      `p:"sort"  dc:"排序"`
 	Status    int      `p:"status" v:"required#状态不能为空" dc:"状态"`
-	Receiver  []uint64 `p:"receiver"`
-	UpdatedBy uint64
+	Receiver  []string `p:"receiver"`
+	UpdatedBy string
 }
 
 type SysNoticeIndexRes struct {

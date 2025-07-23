@@ -6,7 +6,7 @@ import (
 
 // SysJobLog is the golang structure for table sys_job_log.
 type SysJobLog struct {
-	Id         uint64      `json:"id"         description:"主键"`
+	ID         uint64      `json:"id"         description:"主键"`
 	TargetName string      `json:"targetName" description:"方法名"`
 	CreatedAt  *gtime.Time `json:"createdAt"  description:"执行日期"`
 	Result     string      `json:"result"     description:"执行结果"`

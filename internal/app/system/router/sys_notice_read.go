@@ -3,15 +3,13 @@ package router
 import (
 	"context"
 
-	"IdentifyService/internal/app/system/controller"
-
 	"github.com/gogf/gf/v2/net/ghttp"
 )
 
 func (router *Router) BindSysNoticeReadController(ctx context.Context, group *ghttp.RouterGroup) {
 	group.Group("/sysNoticeRead", func(group *ghttp.RouterGroup) {
 		group.Bind(
-			controller.SysNoticeRead,
+		//controller.SysNoticeRead,
 		)
 	})
 }

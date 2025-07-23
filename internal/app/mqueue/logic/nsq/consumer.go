@@ -25,7 +25,7 @@ type nsqConsumer struct {
 
 type nsqConsumerConnConfig struct {
 	Addr                 string // NsqLookupd 服务器地址
-	Port                 uint   // 服务器端口号
+	Port                 int64  // 服务器端口号
 	LocalAddr            string // 本地IP地址
 	AuthSecret           string // 认证秘钥
 	LookupdAuthorization bool   // 是否开启认证
@@ -54,7 +54,7 @@ func (c *nsqConsumer) HandleMessage(m *nsq.Message) error {
 // NewNsqConsumer 创建NSQConsumer实例
 func NewNsqConsumer(topic, channel string, handler model.MQConsumerHandlerCallback) (service.IConsumer, error) {
 	addr := g.Cfg().MustGet(context.TODO(), "mqueue.nsq.address").String()
-	port := g.Cfg().MustGet(context.TODO(), "mqueue.nsq.consumer_port").Uint()
+	port := g.Cfg().MustGet(context.TODO(), "mqueue.nsq.consumer_port").Int64()
 	if addr == "" || port < 1 {
 		return nil, errors.New("nsq 配置读取错误")
 	}

@@ -7,14 +7,14 @@ import (
 )
 
 var (
-	mctx          = gctx.GetInitCtx()             // 上下文
-	clientManager = NewClientManager()            // 客户端管理
-	routers       = make(map[string]EventHandler) // 消息路由
-	msgGo         = grpool.New(20)                // 消息处理协程池
+	mctx    = gctx.GetInitCtx()   // 上下文
+	routers = make(EventHandlers) // 消息路由
+	msgGo   = grpool.New(20)      // 消息处理协程池
 )
 
 // Start 启动
 func Start() {
+	clientManager = NewClientManager() // 客户端管理
 	go clientManager.start()
 	go clientManager.ping()
 	g.Log().Debug(mctx, "start websocket..")
