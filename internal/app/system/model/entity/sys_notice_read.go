@@ -8,7 +8,7 @@ import (
 // SysNoticeRead is the golang structure for table sys_notice_read.
 type SysNoticeRead struct {
 	gmeta.Meta `orm:"table:sys_notice_read"`
-	Id         int64       `orm:"id,primary" json:"id"`        // id
+	ID         int64       `orm:"id,primary" json:"id"`        // id
 	NoticeId   int64       `orm:"notice_id" json:"noticeId"`   // 信息id
 	UserId     int64       `orm:"user_id" json:"userId"`       // 用户id
 	UpdatedAt  *gtime.Time `orm:"updated_at" json:"updatedAt"` // 更新时间

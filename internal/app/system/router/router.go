@@ -2,12 +2,17 @@ package router
 
 import (
 	"context"
+	"errors"
+	"net/http"
 
 	"IdentifyService/internal/app/system/controller"
+	"IdentifyService/internal/app/system/model"
 	"IdentifyService/internal/app/system/service"
 	"IdentifyService/library/libRouter"
 
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/util/gconv"
 )
 
 var R = new(Router)
@@ -15,42 +20,56 @@ var R = new(Router)
 type Router struct{}
 
 func (router *Router) BindController(ctx context.Context, group *ghttp.RouterGroup) {
-	group.Group("/system", func(group *ghttp.RouterGroup) {
+	group.Group("/identify-service", func(group *ghttp.RouterGroup) {
 		group.Bind(
-			//登录
-			controller.Login,
+			controller.AuthController,
 		)
-		//context拦截器
-		group.Middleware(service.Middleware().Ctx)
-		//自动绑定定义的控制器
+		group.Middleware(InjectCtx)
 		if err := libRouter.RouterAutoBindBefore(ctx, router, group); err != nil {
 			panic(err)
 		}
-		//登录验证拦截
-		service.GfToken().Middleware(group)
-		group.Middleware(service.Middleware().Auth)
-		//后台操作日志记录
-		group.Hook("/*", ghttp.HookAfterOutput, service.OperateLog().OperationLog)
+		group.Hook("/*", ghttp.HookAfterOutput, service.Log().OperationLog)
 		group.Bind(
-			controller.User,
-			controller.Menu,
-			controller.Role,
-			controller.Dept,
-			controller.DictType,
-			controller.DictData,
-			controller.Config,
-			controller.Monitor,
-			controller.LoginLog,
-			controller.OperLog,
-			controller.Personal,
-			controller.UserOnline,
-			controller.Cache,   // 缓存处理
-			controller.Upload,  // 普通文件上传
-			controller.UEditor, //编辑器
+			controller.UserController,
+			controller.MenuController,
+			controller.RoleController,
+			controller.OrgController,
+			controller.LogController,
 		)
-		//自动绑定定义的控制器
 		if err := libRouter.RouterAutoBind(ctx, router, group); err != nil {
 			panic(err)
 		}
 	})
+}
+
+func InjectCtx(r *ghttp.Request) {
+	data, err := service.TokenService().Parse(r)
+	if err != nil {
+		if errors.Is(err, service.ErrTokenInvalid) || errors.Is(err, service.ErrTokenExpired) {
+			r.Response.Status = http.StatusOK
+			r.Response.WriteJson(g.Map{
+				"code":    http.StatusUnauthorized,
+				"message": "Unauthorized",
+			})
+		} else if errors.Is(err, service.ErrTokenNotActive) {
+			r.Response.Status = http.StatusOK
+			r.Response.WriteJson(g.Map{
+				"code":    http.StatusForbidden,
+				"message": "Forbidden",
+			})
+		}
+		g.Log().Error(r.GetCtx(), err)
+		r.ExitAll()
+	}
+	g.Log().Debug(r.Context(), "InjectCtx: ", data)
+	if data != nil {
+		customCtx := new(model.Context)
+		err = gconv.Struct(data, &customCtx.User)
+		if err != nil {
+			g.Log().Error(r.GetCtx(), err)
+			r.ExitAll()
+		}
+		service.ContextService().Init(r, customCtx)
+	}
+	r.Middleware.Next()
 }

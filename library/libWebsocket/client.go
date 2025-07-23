@@ -5,7 +5,6 @@ import (
 	"context"
 	"runtime/debug"
 
-	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -20,7 +19,7 @@ const (
 
 // 用户登录
 type login struct {
-	UserId uint64
+	UserId string
 	Client *Client
 }
 
@@ -31,19 +30,18 @@ func (l *login) GetKey() string {
 
 // Client 客户端连接
 type Client struct {
-	Addr          string                   // 客户端地址
-	ID            string                   // 连接唯一标识
-	Socket        *websocket.Conn          // 用户连接
-	Send          chan *WResponse          // 待发送的数据
-	SendClose     bool                     // 发送是否关闭
-	CloseSignal   chan struct{}            // 关闭信号
-	FirstTime     uint64                   // 首次连接时间
-	HeartbeatTime uint64                   // 用户上次心跳时间
-	Tags          garray.StrArray          // 标签
-	User          *systemModel.ContextUser // 用户信息
-	context       context.Context          // Custom context for internal usage purpose.
-	IP            string                   // 客户端IP
-	UserAgent     string                   // 用户代理
+	Addr              string                   // 客户端地址
+	ID                string                   // 连接唯一标识
+	Socket            *websocket.Conn          // 用户连接
+	Send              chan *WResponse          // 待发送的数据
+	SendClose         bool                     // 发送是否关闭
+	CloseSignal       chan struct{}            // 关闭信号
+	FirstConnectTime  int64                    // 首次连接时间
+	LastHeartbeatTime int64                    // 用户上次心跳时间
+	User              *systemModel.ContextUser // 用户信息
+	context           context.Context          // Custom context for internal usage purpose.
+	IP                string                   // 客户端IP
+	UserAgent         string                   // 用户代理
 }
 
 // 读取客户端数据
@@ -57,12 +55,12 @@ func (c *Client) Read() {
 	defer c.close()
 
 	for {
-		_, message, err := c.Socket.ReadMessage()
+		messageType, message, err := c.Socket.ReadMessage()
 		if err != nil {
 			return
 		}
 		// 处理消息
-		handlerMsg(c, message)
+		handleMessage(c, messageType, message)
 	}
 }
 
@@ -115,13 +113,13 @@ func (c *Client) Context() context.Context {
 }
 
 // Heartbeat 心跳更新
-func (c *Client) Heartbeat(currentTime uint64) {
-	c.HeartbeatTime = currentTime
+func (c *Client) SetHeartbeat(currentTime int64) {
+	c.LastHeartbeatTime = currentTime
 }
 
 // IsHeartbeatTimeout 心跳是否超时
-func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
-	if c.HeartbeatTime+heartbeatExpirationTime <= currentTime {
+func (c *Client) IsHeartbeatTimeout(currentTime int64) (timeout bool) {
+	if c.LastHeartbeatTime+heartbeatExpirationTime <= currentTime {
 		timeout = true
 	}
 	return
@@ -142,7 +140,7 @@ func Close(client *Client) {
 }
 
 // SendSuccess 发送成功消息
-func SendSuccess(client *Client, event string, data ...interface{}) {
+func SendSuccess(client *Client, event WebSocketEvent, data ...interface{}) {
 	d := interface{}(nil)
 	if len(data) > 0 {
 		d = data[0]
@@ -157,7 +155,7 @@ func SendSuccess(client *Client, event string, data ...interface{}) {
 }
 
 // SendError 发送错误消息
-func SendError(client *Client, event string, err error) {
+func SendError(client *Client, event WebSocketEvent, err error) {
 	client.SendMsg(&WResponse{
 		Event:     event,
 		Code:      gcode.CodeNil.Code(),
@@ -169,5 +167,5 @@ func SendError(client *Client, event string, err error) {
 
 // before
 func before(client *Client) {
-	client.Heartbeat(uint64(gtime.Now().Unix()))
+	client.SetHeartbeat(gtime.Now().Unix())
 }

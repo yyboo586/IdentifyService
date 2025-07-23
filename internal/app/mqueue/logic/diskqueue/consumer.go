@@ -18,7 +18,7 @@ import (
 type consumer struct {
 	Topic   string
 	Channel string
-	Id      string
+	ID      string
 	Handler model.MQConsumerHandlerCallback
 }
 
@@ -32,7 +32,7 @@ func NewDiskConsumer(topic, channel string, handler model.MQConsumerHandlerCallb
 	c := &consumer{
 		Topic:   topic,
 		Channel: channel,
-		Id:      id,
+		ID:      id,
 		Handler: handler,
 	}
 	dqs.RegisterConsumer(channel, c)
@@ -45,5 +45,5 @@ func (s *consumer) CloseMqConsumer() {
 		g.Log("diskQueue").Error(context.TODO(), "执行 CloseMqConsumer 失败："+err.Error())
 		return
 	}
-	dqs.RemoveConsumer(s.Channel, s.Id)
+	dqs.RemoveConsumer(s.Channel, s.ID)
 }

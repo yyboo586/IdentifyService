@@ -9,14 +9,14 @@ type ISysNotice interface {
 	List(ctx context.Context, req *model.SysNoticeSearchReq) (res *model.SysNoticeSearchRes, err error)
 	ListShow(ctx context.Context, req *model.SysNoticeSearchReq) (res *model.SysNoticeSearchRes, err error)
 
-	GetById(ctx context.Context, Id int64) (res *model.SysNoticeInfoRes, err error)
+	GetById(ctx context.Context, ID int64) (res *model.SysNoticeInfoRes, err error)
 	Add(ctx context.Context, req *model.SysNoticeAddReq) (err error)
 	Edit(ctx context.Context, req *model.SysNoticeEditReq) (err error)
-	Delete(ctx context.Context, Id []int64) (err error)
+	Delete(ctx context.Context, ID []int64) (err error)
 	//IndexData(ctx context.Context) (res *model.SysNoticeIndexRes, err error)
 	/*首页相关数据接口*/
 	UnReadList(ctx context.Context) (res *model.SysNoticeListRes, err error)
-	UnReadCount(ctx context.Context, currentUser uint64) (sysNoticeUnreadIds *model.SysNoticeUnreadCount, err error)
+	UnReadCount(ctx context.Context, currentUser string) (sysNoticeUnreadIds *model.SysNoticeUnreadCount, err error)
 	ReadAll(ctx context.Context, nType string) (err error)
 	GetUserNameList(ctx context.Context, search string) (res []*model.SysNoticeUserNickname, err error)
 	//NoticeReadLengthAdd(ctx context.Context, id int64) (err error)

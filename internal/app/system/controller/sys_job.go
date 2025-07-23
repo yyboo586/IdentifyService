@@ -7,7 +7,6 @@ import (
 )
 
 type sysJobController struct {
-	BaseController
 }
 
 var SysJob = new(sysJobController)

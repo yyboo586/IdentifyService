@@ -16,7 +16,7 @@ type SysNoticeReadDao struct {
 
 // SysNoticeReadColumns defines and stores column names for table sys_notice_read.
 type SysNoticeReadColumns struct {
-	Id        string // id
+	ID        string // id
 	NoticeId  string // 信息id
 	UserId    string // 用户id
 	UpdatedAt string // 更新时间
@@ -24,7 +24,7 @@ type SysNoticeReadColumns struct {
 }
 
 var sysNoticeReadColumns = SysNoticeReadColumns{
-	Id:        "id",
+	ID:        "id",
 	NoticeId:  "notice_id",
 	UserId:    "user_id",
 	UpdatedAt: "updated_at",

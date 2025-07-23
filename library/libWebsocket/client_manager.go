@@ -3,40 +3,49 @@ package libWebsocket
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
+	"sync"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gtime"
-	"runtime/debug"
-	"sync"
+)
+
+var (
+	clientManagerOnce sync.Once
+	clientManager     *ClientManager
 )
 
 // ClientManager 客户端管理
 type ClientManager struct {
-	Clients         map[*Client]bool      // 全部的连接
-	ClientsLock     sync.RWMutex          // 读写锁
-	Users           map[string][]*Client  // 登录的用户
-	UserLock        sync.RWMutex          // 读写锁
-	Register        chan *Client          // 连接连接处理
-	Login           chan *login           // 用户登录处理
-	Unregister      chan *Client          // 断开连接处理程序
+	Clients     map[*Client]bool     // 全部的连接
+	ClientsLock sync.RWMutex         // 读写锁
+	Users       map[string][]*Client // 登录的用户
+	UserLock    sync.RWMutex         // 读写锁
+
+	Register   chan *Client // 连接连接处理
+	Unregister chan *Client // 断开连接处理程序
+
 	Broadcast       chan *WResponse       // 广播 向全部成员发送数据
 	ClientBroadcast chan *ClientWResponse // 广播 向某个客户端发送数据
-	TagBroadcast    chan *TagWResponse    // 广播 向某个标签成员发送数据
 	UserBroadcast   chan *UserWResponse   // 广播 向某个用户的所有链接发送数据
+	OrgBroadcast    chan *OrgWResponse    // 广播 向某个组织的所有链接发送数据
 	closeSignal     chan struct{}         // 关闭信号
 }
 
 func NewClientManager() (clientManager *ClientManager) {
-	clientManager = &ClientManager{
-		Clients:       make(map[*Client]bool),
-		Users:         make(map[string][]*Client),
-		Register:      make(chan *Client, 1000),
-		Unregister:    make(chan *Client, 1000),
-		Broadcast:     make(chan *WResponse, 1000),
-		TagBroadcast:  make(chan *TagWResponse, 1000),
-		UserBroadcast: make(chan *UserWResponse, 1000),
-		closeSignal:   make(chan struct{}, 1),
-	}
+	clientManagerOnce.Do(func() {
+		clientManager = &ClientManager{
+			Clients:       make(map[*Client]bool),
+			Users:         make(map[string][]*Client),
+			Register:      make(chan *Client, 1000),
+			Unregister:    make(chan *Client, 1000),
+			Broadcast:     make(chan *WResponse, 1000),
+			UserBroadcast: make(chan *UserWResponse, 1000),
+			OrgBroadcast:  make(chan *OrgWResponse, 1000),
+			closeSignal:   make(chan struct{}, 1),
+		}
+	})
 	return
 }
 
@@ -45,8 +54,8 @@ func Manager() *ClientManager {
 }
 
 // GetUserKey 获取用户key
-func GetUserKey(userId uint64) (key string) {
-	key = fmt.Sprintf("%s_%d", "ws", userId)
+func GetUserKey(userId string) (key string) {
+	key = fmt.Sprintf("%s_%s", "ws", userId)
 	return
 }
 
@@ -110,7 +119,7 @@ func (manager *ClientManager) GetClient(id string) (client *Client) {
 }
 
 // GetUserClient 获取用户的连接
-func (manager *ClientManager) GetUserClient(userId uint64) (clients []*Client) {
+func (manager *ClientManager) GetUserClient(userId string) (clients []*Client) {
 	manager.UserLock.RLock()
 	defer manager.UserLock.RUnlock()
 	userKey := GetUserKey(userId)
@@ -131,7 +140,7 @@ func (manager *ClientManager) AddUsers(key string, client *Client) {
 func (manager *ClientManager) DelUsers(client *Client) (result bool) {
 	manager.UserLock.Lock()
 	defer manager.UserLock.Unlock()
-	key := GetUserKey(client.User.Id)
+	key := GetUserKey(client.User.ID)
 	if clients, ok := manager.Users[key]; ok {
 		for _, value := range clients {
 			// 判断是否为相同的用户
@@ -160,7 +169,7 @@ func (manager *ClientManager) EventRegister(client *Client) {
 	manager.AddClients(client)
 	// 用户登录
 	manager.EventLogin(&login{
-		UserId: client.User.Id,
+		UserId: client.User.ID,
 		Client: client,
 	})
 	// 发送当前客户端标识
@@ -191,7 +200,7 @@ func (manager *ClientManager) EventUnregister(client *Client) {
 
 // ClearTimeoutConnections 定时清理超时连接
 func (manager *ClientManager) clearTimeoutConnections() {
-	currentTime := uint64(gtime.Now().Unix())
+	currentTime := gtime.Now().Unix()
 	clients := clientManager.GetClients()
 	for client := range clients {
 		if client.IsHeartbeatTimeout(currentTime) {
@@ -237,9 +246,6 @@ func (manager *ClientManager) start() {
 		case conn := <-manager.Register:
 			// 建立连接事件
 			manager.EventRegister(conn)
-		case login := <-manager.Login:
-			// 用户登录
-			manager.EventLogin(login)
 
 		case conn := <-manager.Unregister:
 			// 断开连接事件
@@ -251,23 +257,12 @@ func (manager *ClientManager) start() {
 			for conn := range clients {
 				conn.SendMsg(message)
 			}
-		case message := <-manager.TagBroadcast:
-			// 标签广播事件
-			clients := manager.GetClients()
-			for conn := range clients {
-				if conn.Tags.Contains(message.Tag) {
-					if message.WResponse.Timestamp == 0 {
-						message.WResponse.Timestamp = gtime.Now().Timestamp()
-					}
-					conn.SendMsg(message.WResponse)
-				}
-			}
 		case message := <-manager.UserBroadcast:
 			// 用户广播事件
 			clients := manager.GetClients()
 
 			for conn := range clients {
-				if conn.User.Id == message.UserID {
+				if conn.User.ID == message.UserID {
 					if message.WResponse.Timestamp == 0 {
 						message.WResponse.Timestamp = gtime.Now().Timestamp()
 					}
@@ -282,6 +277,14 @@ func (manager *ClientManager) start() {
 					if message.WResponse.Timestamp == 0 {
 						message.WResponse.Timestamp = gtime.Now().Timestamp()
 					}
+					conn.SendMsg(message.WResponse)
+				}
+			}
+		case message := <-manager.OrgBroadcast:
+			// 组织广播事件
+			clients := manager.GetClients()
+			for conn := range clients {
+				if conn.User.OrgID == message.OrgID {
 					conn.SendMsg(message.WResponse)
 				}
 			}
@@ -307,7 +310,7 @@ func SendToClientID(id string, response *WResponse) {
 }
 
 // SendToUser 发送单个用户
-func SendToUser(userID uint64, response *WResponse) {
+func SendToUser(userID string, response *WResponse) {
 	userRes := &UserWResponse{
 		UserID:    userID,
 		WResponse: response,
@@ -315,11 +318,11 @@ func SendToUser(userID uint64, response *WResponse) {
 	clientManager.UserBroadcast <- userRes
 }
 
-// SendToTag 发送某个标签
-func SendToTag(tag string, response *WResponse) {
-	tagRes := &TagWResponse{
-		Tag:       tag,
+// SendToOrg 发送给指定组织
+func SendToOrg(orgID string, response *WResponse) {
+	orgRes := &OrgWResponse{
+		OrgID:     orgID,
 		WResponse: response,
 	}
-	clientManager.TagBroadcast <- tagRes
+	clientManager.OrgBroadcast <- orgRes
 }

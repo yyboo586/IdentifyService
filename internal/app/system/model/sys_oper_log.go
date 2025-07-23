@@ -11,7 +11,7 @@ import (
 // SysOperLogAdd 添加操作日志参数
 type SysOperLogAdd struct {
 	User         *ContextUser
-	Menu         *SysAuthRuleInfoRes
+	Menu         *AuthRule
 	Url          *url.URL
 	Params       g.Map
 	Method       string
@@ -40,7 +40,7 @@ type SysOperLogInfoRes struct {
 }
 
 type LinkedSysOperLogSysDept struct {
-	gmeta.Meta `orm:"table:sys_dept"`
+	gmeta.Meta `orm:"table:t_org"`
 	DeptId     int64  `orm:"dept_id" json:"deptId"`     // 部门id
 	DeptName   string `orm:"dept_name" json:"deptName"` // 部门名称
 }

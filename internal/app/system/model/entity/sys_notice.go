@@ -8,7 +8,7 @@ import (
 // SysNotice is the golang structure for table sys_notice.
 type SysNotice struct {
 	gmeta.Meta `orm:"table:sys_notice"`
-	Id         int64       `orm:"id,primary" json:"id"`        // ID
+	ID         int64       `orm:"id,primary" json:"id"`        // ID
 	Title      string      `orm:"title" json:"title"`          // 标题
 	Type       int64       `orm:"type" json:"type"`            // 类型
 	Tag        int         `orm:"tag" json:"tag"`              // 标签

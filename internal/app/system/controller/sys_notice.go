@@ -8,7 +8,6 @@ import (
 )
 
 type sysNoticeController struct {
-	BaseController
 }
 
 var SysNotice = new(sysNoticeController)
@@ -30,20 +29,20 @@ func (c *sysNoticeController) ShowList(ctx context.Context, req *system.SysNotic
 // Get 获取通知公告
 func (c *sysNoticeController) Get(ctx context.Context, req *system.SysNoticeGetReq) (res *system.SysNoticeGetRes, err error) {
 	res = new(system.SysNoticeGetRes)
-	res.SysNoticeInfoRes, err = service.SysNotice().GetById(ctx, req.Id)
+	res.SysNoticeInfoRes, err = service.SysNotice().GetById(ctx, req.ID)
 	return
 }
 
 // Add 添加通知公告
 func (c *sysNoticeController) Add(ctx context.Context, req *system.SysNoticeAddReq) (res *system.SysNoticeAddRes, err error) {
-	req.CreatedBy = service.Context().GetUserId(ctx)
+	req.CreatedBy = service.ContextService().Get(ctx).User.ID
 	err = service.SysNotice().Add(ctx, req.SysNoticeAddReq)
 	return
 }
 
 // Edit 修改通知公告
 func (c *sysNoticeController) Edit(ctx context.Context, req *system.SysNoticeEditReq) (res *system.SysNoticeEditRes, err error) {
-	req.UpdatedBy = service.Context().GetUserId(ctx)
+	req.UpdatedBy = service.ContextService().Get(ctx).User.ID
 	err = service.SysNotice().Edit(ctx, req.SysNoticeEditReq)
 	return
 }
@@ -63,7 +62,7 @@ func (c *sysNoticeController) IndexData(ctx context.Context, req *system.SysNoti
 // UnReadCount
 func (c *sysNoticeController) UnReadCount(ctx context.Context, req *system.SysNoticeUnReadCountReq) (res *system.SysNoticeUnReadCountRes, err error) {
 	res = new(system.SysNoticeUnReadCountRes)
-	currentUser := service.Context().Get(ctx).User.Id
+	currentUser := service.ContextService().Get(ctx).User.ID
 	//noticeids, err := service.SysNotice().CurrentUseWithIds(ctx, currentUser)
 	res.SysNoticeUnreadCount, err = service.SysNotice().UnReadCount(ctx, currentUser)
 	fmt.Println(res)
