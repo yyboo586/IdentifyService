@@ -1,7 +1,6 @@
 package libUtils
 
 import (
-	"IdentifyService/internal/app/common/consts"
 	"context"
 	"fmt"
 	"net"
@@ -13,8 +12,6 @@ import (
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/encoding/gcharset"
 	"github.com/gogf/gf/v2/encoding/gjson"
-	"github.com/gogf/gf/v2/encoding/gurl"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/text/gstr"
@@ -185,26 +182,6 @@ func GetType(p string) (result string, err error) {
 	}
 	filetype := http.DetectContentType(buff)
 	return filetype, nil
-}
-
-// GetFilesPath 获取附件相对路径
-func GetFilesPath(ctx context.Context, fileUrl string) (path string, err error) {
-	upType := g.Cfg().MustGet(ctx, "upload.default").Int()
-	if upType != 0 || (!gstr.ContainsI(fileUrl, consts.UploadPath)) {
-		path = fileUrl
-		return
-	}
-	pathInfo, err := gurl.ParseURL(fileUrl, 32)
-	if err != nil {
-		g.Log().Error(ctx, err)
-		err = gerror.New("解析附件路径失败")
-		return
-	}
-	pos := gstr.PosI(pathInfo["path"], consts.UploadPath)
-	if pos >= 0 {
-		path = gstr.SubStr(pathInfo["path"], pos)
-	}
-	return
 }
 
 // SliceUnique 数字元素去重

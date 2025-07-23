@@ -21,3 +21,10 @@ const (
 	// UploadAppId 上传应用ID
 	UploadAppId = "system"
 )
+
+const (
+	DefaultBackgroundOrgID = "00000000-0000-0000-0000-000000000000"
+	DefaultFrontOrgID      = "11111111-0000-0000-0000-000000000000"
+
+	DefaultSuperAdminID = "00000000-0000-0000-0000-000000000001"
+)

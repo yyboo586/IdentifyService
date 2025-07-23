@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"IdentifyService/internal/app/system/consts"
 	"IdentifyService/internal/app/system/model"
 
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -10,22 +11,44 @@ import (
 
 type IContext interface {
 	Init(r *ghttp.Request, customCtx *model.Context)
+	Set(ctx context.Context, customCtx *model.ContextUser)
 	Get(ctx context.Context) *model.Context
-	SetUser(ctx context.Context, ctxUser *model.ContextUser)
-	GetLoginUser(ctx context.Context) *model.ContextUser
-	GetUserId(ctx context.Context) uint64
-	GetDeptId(ctx context.Context) uint64
 }
 
 var localContext IContext
 
-func Context() IContext {
+func ContextService() IContext {
 	if localContext == nil {
 		panic("implement not found for interface IContext, forgot register?")
 	}
 	return localContext
 }
 
-func RegisterContext(i IContext) {
-	localContext = i
+func RegisterContextService() {
+	localContext = &sContext{}
+}
+
+type sContext struct {
+}
+
+// Init 初始化上下文对象指针到上下文对象中，以便后续的请求流程中可以修改。
+func (s *sContext) Init(r *ghttp.Request, customCtx *model.Context) {
+	r.SetCtxVar(consts.CtxKey, customCtx)
+}
+
+// SetUser 将上下文信息设置到上下文请求中，注意是完整覆盖
+func (s *sContext) Set(ctx context.Context, ctxUser *model.ContextUser) {
+	s.Get(ctx).User = ctxUser
+}
+
+// Get 获得上下文变量，如果没有设置，那么返回nil
+func (s *sContext) Get(ctx context.Context) *model.Context {
+	value := ctx.Value(consts.CtxKey)
+	if value == nil {
+		return nil
+	}
+	if localCtx, ok := value.(*model.Context); ok {
+		return localCtx
+	}
+	return nil
 }

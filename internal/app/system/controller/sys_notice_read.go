@@ -1,14 +1,12 @@
 package controller
 
 import (
-	"context"
-
 	"IdentifyService/api/v1/system"
 	"IdentifyService/internal/app/system/service"
+	"context"
 )
 
 type sysNoticeReadController struct {
-	BaseController
 }
 
 var SysNoticeRead = new(sysNoticeReadController)
@@ -23,7 +21,7 @@ func (c *sysNoticeReadController) List(ctx context.Context, req *system.SysNotic
 // Get 获取已读记录
 func (c *sysNoticeReadController) Get(ctx context.Context, req *system.SysNoticeReadGetReq) (res *system.SysNoticeReadGetRes, err error) {
 	res = new(system.SysNoticeReadGetRes)
-	res.SysNoticeReadInfoRes, err = service.SysNoticeRead().GetById(ctx, req.Id)
+	res.SysNoticeReadInfoRes, err = service.SysNoticeRead().GetById(ctx, req.ID)
 	return
 }
 

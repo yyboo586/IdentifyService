@@ -9,10 +9,10 @@ import (
 type ISysNoticeRead interface {
 	List(ctx context.Context, req *model.SysNoticeReadSearchReq) (res *model.SysNoticeReadSearchRes, err error)
 	ReadNotice(ctx context.Context, req *model.SysNoticeReadNoticeReq) (err error)
-	GetById(ctx context.Context, Id int64) (res *model.SysNoticeReadInfoRes, err error)
+	GetById(ctx context.Context, ID int64) (res *model.SysNoticeReadInfoRes, err error)
 	Add(ctx context.Context, req *model.SysNoticeReadAddReq) (err error)
 	Edit(ctx context.Context, req *model.SysNoticeReadEditReq) (err error)
-	Delete(ctx context.Context, Id []int64) (err error)
+	Delete(ctx context.Context, ID []int64) (err error)
 }
 
 var localSysNoticeRead ISysNoticeRead

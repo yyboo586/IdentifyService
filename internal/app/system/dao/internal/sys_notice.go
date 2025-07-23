@@ -16,7 +16,7 @@ type SysNoticeDao struct {
 
 // SysNoticeColumns defines and stores column names for table sys_notice.
 type SysNoticeColumns struct {
-	Id        string // ID
+	ID        string // ID
 	Title     string // 标题
 	Type      string // 类型
 	Tag       string // 标签
@@ -33,7 +33,7 @@ type SysNoticeColumns struct {
 }
 
 var sysNoticeColumns = SysNoticeColumns{
-	Id:        "id",
+	ID:        "id",
 	Title:     "title",
 	Type:      "type",
 	Tag:       "tag",

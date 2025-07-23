@@ -3,11 +3,12 @@ package libWebsocket
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
+	"sync"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gtime"
-	"runtime/debug"
-	"sync"
 )
 
 // ClientManager 客户端管理
@@ -45,8 +46,8 @@ func Manager() *ClientManager {
 }
 
 // GetUserKey 获取用户key
-func GetUserKey(userId uint64) (key string) {
-	key = fmt.Sprintf("%s_%d", "ws", userId)
+func GetUserKey(userId string) (key string) {
+	key = fmt.Sprintf("%s_%s", "ws", userId)
 	return
 }
 
@@ -110,7 +111,7 @@ func (manager *ClientManager) GetClient(id string) (client *Client) {
 }
 
 // GetUserClient 获取用户的连接
-func (manager *ClientManager) GetUserClient(userId uint64) (clients []*Client) {
+func (manager *ClientManager) GetUserClient(userId string) (clients []*Client) {
 	manager.UserLock.RLock()
 	defer manager.UserLock.RUnlock()
 	userKey := GetUserKey(userId)
@@ -131,7 +132,7 @@ func (manager *ClientManager) AddUsers(key string, client *Client) {
 func (manager *ClientManager) DelUsers(client *Client) (result bool) {
 	manager.UserLock.Lock()
 	defer manager.UserLock.Unlock()
-	key := GetUserKey(client.User.Id)
+	key := GetUserKey(client.User.ID)
 	if clients, ok := manager.Users[key]; ok {
 		for _, value := range clients {
 			// 判断是否为相同的用户
@@ -160,7 +161,7 @@ func (manager *ClientManager) EventRegister(client *Client) {
 	manager.AddClients(client)
 	// 用户登录
 	manager.EventLogin(&login{
-		UserId: client.User.Id,
+		UserId: client.User.ID,
 		Client: client,
 	})
 	// 发送当前客户端标识
@@ -267,7 +268,7 @@ func (manager *ClientManager) start() {
 			clients := manager.GetClients()
 
 			for conn := range clients {
-				if conn.User.Id == message.UserID {
+				if conn.User.ID == message.UserID {
 					if message.WResponse.Timestamp == 0 {
 						message.WResponse.Timestamp = gtime.Now().Timestamp()
 					}
@@ -307,7 +308,7 @@ func SendToClientID(id string, response *WResponse) {
 }
 
 // SendToUser 发送单个用户
-func SendToUser(userID uint64, response *WResponse) {
+func SendToUser(userID string, response *WResponse) {
 	userRes := &UserWResponse{
 		UserID:    userID,
 		WResponse: response,

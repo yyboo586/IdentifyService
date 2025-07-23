@@ -1,13 +1,11 @@
 package libValidate
 
 import (
-	"IdentifyService/internal/mounter"
 	"context"
 	"strconv"
 	"strings"
 
 	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -15,9 +13,6 @@ import (
 )
 
 func init() {
-	mounter.Mount(func(ctx context.Context, s *ghttp.Server) {
-		Register()
-	})
 }
 
 func Register() {

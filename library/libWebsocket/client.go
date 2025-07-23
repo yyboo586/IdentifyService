@@ -20,7 +20,7 @@ const (
 
 // 用户登录
 type login struct {
-	UserId uint64
+	UserId string
 	Client *Client
 }
 

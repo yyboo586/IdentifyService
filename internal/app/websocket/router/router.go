@@ -1,7 +1,7 @@
 package router
 
 import (
-	commonController "IdentifyService/internal/app/common/controller"
+	"IdentifyService/internal/app/system/controller"
 	"IdentifyService/internal/app/system/service"
 	"IdentifyService/library/libUtils"
 	"IdentifyService/library/libWebsocket"
@@ -50,7 +50,7 @@ func NewClient(r *ghttp.Request, socket *websocket.Conn, firstTime uint64) (clie
 		CloseSignal:   make(chan struct{}, 1),
 		FirstTime:     firstTime,
 		HeartbeatTime: firstTime,
-		User:          service.Context().GetLoginUser(r.Context()),
+		User:          service.ContextService().Get(r.Context()).User,
 		IP:            libUtils.GetClientIp(r.Context()),
 		UserAgent:     r.UserAgent(),
 	}
@@ -59,10 +59,6 @@ func NewClient(r *ghttp.Request, socket *websocket.Conn, firstTime uint64) (clie
 
 func (router *Router) BindController(ctx context.Context, group *ghttp.RouterGroup) {
 	group.Group("/websocket", func(group *ghttp.RouterGroup) {
-		//登录验证拦截
-		service.GfToken().Middleware(group)
-		//context拦截器
-		group.Middleware(service.Middleware().Ctx)
 
 		group.GET("/", WsPage)
 	})
@@ -71,6 +67,6 @@ func (router *Router) BindController(ctx context.Context, group *ghttp.RouterGro
 
 	// 注册消息路由
 	libWebsocket.RegisterMsg(libWebsocket.EventHandlers{
-		"ping": commonController.Ping.Ping, // 心跳
+		"ping": controller.Ping.Ping, // 心跳
 	})
 }

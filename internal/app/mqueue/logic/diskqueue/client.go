@@ -110,7 +110,7 @@ func (c *client) RemoveConsumer(channel, id string) {
 	c.Lock()
 	c.Unlock()
 	for i, ch := range c.channelConsumers[channel] {
-		if ch.Id == id {
+		if ch.ID == id {
 			if len(c.channelConsumers[channel]) <= 1 {
 				delete(c.channelConsumers, channel)
 				// 用空字符清理一下start中的ReadChan()管道
