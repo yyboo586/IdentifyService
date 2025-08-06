@@ -175,7 +175,6 @@ func (s *logicsLog) ListOperLog(ctx context.Context, in *system.ListOperLogReq) 
 
 func (s *logicsLog) OperationLog(r *ghttp.Request) {
 	operatorInfo := service.ContextService().Get(r.GetCtx())
-
 	data := &model.OperLog{
 		OrgID:      operatorInfo.User.OrgID,
 		OperName:   operatorInfo.User.Name,
@@ -184,7 +183,6 @@ func (s *logicsLog) OperationLog(r *ghttp.Request) {
 		OperIP:     libUtils.GetClientIp(r.GetCtx()),
 		OperTime:   gtime.Now(),
 	}
-
 	service.Log().InvokeOperLog(data)
 }
 

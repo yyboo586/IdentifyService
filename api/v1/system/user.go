@@ -66,16 +66,25 @@ type EditUserPersonalInfoRes struct {
 	g.Meta `mime:"application/json"`
 }
 
-type EditUserPermissionReq struct {
-	g.Meta `path:"/user/{id}/permission" tags:"账户管理" method:"put" summary:"修改用户权限(全量更新)"`
+type EditUserRolesReq struct {
+	g.Meta `path:"/user/{id}/roles" tags:"账户管理" method:"put" summary:"修改用户角色(全量更新)"`
 	model.Author
 	ID      string  `p:"id" v:"required#用户ID不能为空" dc:"用户ID"`
-	Enabled bool    `json:"enabled" dc:"用户是否启用"`
-	IsAdmin int     `json:"is_admin" dc:"是否是后台管理员(0:否,1:是)"`
 	RoleIDs []int64 `json:"role_ids" dc:"用户关联角色ID列表"`
 }
 
-type EditUserPermissionRes struct {
+type EditUserRolesRes struct {
+	g.Meta `mime:"application/json"`
+}
+
+type EditUserStatusReq struct {
+	g.Meta `path:"/user/{id}/status" tags:"账户管理" method:"put" summary:"修改用户状态"`
+	model.Author
+	ID      string `p:"id" v:"required#用户ID不能为空" dc:"用户ID"`
+	Enabled bool   `json:"enabled" dc:"用户是否启用(true:启用,false:禁用)"`
+}
+
+type EditUserStatusRes struct {
 	g.Meta `mime:"application/json"`
 }
 
@@ -97,7 +106,7 @@ type GetUserInfoReq struct {
 
 type GetUserInfoRes struct {
 	g.Meta `mime:"application/json"`
-	User   *User `json:"user" dc:"用户信息"`
+	*User
 }
 
 type UserListReq struct {
@@ -117,10 +126,11 @@ type UserListRes struct {
 type User struct {
 	ID        string      `json:"id" dc:"用户ID"`
 	Name      string      `json:"name" dc:"用户名称"`
-	Nickname  string      `json:"nickname" dc:"用户昵称"`
+	Nickname  string      `json:"nick_name" dc:"用户昵称"`
 	Mobile    string      `json:"mobile" dc:"用户手机号"`
 	Email     string      `json:"email" dc:"用户邮箱"`
-	Enabled   bool        `json:"enabled" dc:"用户状态"`
+	Enabled   bool        `json:"enabled" dc:"用户状态(true:启用,false:禁用)"`
+	RoleIDs   []int64     `json:"role_ids" dc:"用户关联角色ID列表"`
 	CreatedAt *gtime.Time `json:"created_at" dc:"创建时间"`
 	UpdatedAt *gtime.Time `json:"updated_at" dc:"更新时间"`
 }

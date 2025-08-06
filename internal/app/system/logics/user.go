@@ -2,6 +2,7 @@ package logics
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 	"sync"
@@ -51,12 +52,6 @@ func NewUser() service.IUser {
 	return userInstance
 }
 
-/*
-1、创建角色
-2、创建用户，并绑定到角色
-3、修改角色的权限
-4、用户登录，似乎没有新增的权限。
-*/
 func (u *user) Create(ctx context.Context, req *system.UserCreateReq) (userID string, err error) {
 	operatorInfo := service.ContextService().Get(ctx)
 	if req.OrgID == "" {
@@ -87,7 +82,6 @@ func (u *user) Create(ctx context.Context, req *system.UserCreateReq) (userID st
 			return
 		}
 	}
-	g.Log().Info(ctx, "[DEBUG] roleIDs: ", "roleIDs", req.RoleIDs)
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
 		_, err = dao.User.Ctx(ctx).TX(tx).Insert(userInsertData)
 		if err != nil {
@@ -131,7 +125,7 @@ func (u *user) Register(ctx context.Context, req *system.UserRegisterReq) (userI
 		dao.User.Columns().Status:   model.UserStatusEnabled,
 	}
 	orgInsetData := &model.Org{
-		PID:         consts.DefaultFrontOrgID,
+		PID:         "",
 		Name:        fmt.Sprintf("Org-%v", userID),
 		ManagerID:   userID,
 		ManagerName: req.UserName,
@@ -199,16 +193,8 @@ func (u *user) EditPersonalInfo(ctx context.Context, req *system.EditUserPersona
 	return
 }
 
-func (u *user) EditUserPermission(ctx context.Context, req *system.EditUserPermissionReq) (err error) {
+func (u *user) EditUserRoles(ctx context.Context, req *system.EditUserRolesReq) (err error) {
 	operatorInfo := service.ContextService().Get(ctx)
-	dataUpdate := map[string]interface{}{
-		dao.User.Columns().Status:  model.UserStatusEnabled,
-		dao.User.Columns().IsAdmin: req.IsAdmin,
-	}
-	if !req.Enabled {
-		dataUpdate[dao.User.Columns().Status] = model.UserStatusDisable
-	}
-
 	if len(req.RoleIDs) > 0 {
 		req.RoleIDs, err = roleInstance.FilterRoleIDs(ctx, req.RoleIDs, operatorInfo.User.ID, false)
 		if err != nil {
@@ -217,12 +203,6 @@ func (u *user) EditUserPermission(ctx context.Context, req *system.EditUserPermi
 		}
 	}
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
-		_, err = dao.User.Ctx(ctx).TX(tx).Where(dao.User.Columns().ID, req.ID).Update(dataUpdate)
-		if err != nil {
-			g.Log().Error(ctx, err)
-			return err
-		}
-
 		if len(req.RoleIDs) > 0 {
 			err = u.removeUserRoles(ctx, req.ID)
 			if err != nil {
@@ -247,6 +227,18 @@ func (u *user) EditUserPermission(ctx context.Context, req *system.EditUserPermi
 	return
 }
 
+func (u *user) EditUserStatus(ctx context.Context, req *system.EditUserStatusReq) (err error) {
+	dataUpdate := map[string]interface{}{
+		dao.User.Columns().Status: model.UserStatusDisable,
+	}
+	if req.Enabled {
+		dataUpdate[dao.User.Columns().Status] = model.UserStatusEnabled
+	}
+
+	_, err = dao.User.Ctx(ctx).Where(dao.User.Columns().ID, req.ID).Update(dataUpdate)
+	return
+}
+
 func (u *user) ResetUserPwd(ctx context.Context, req *system.UserResetPwdReq) (err error) {
 	salt := grand.S(10)
 	password := libUtils.EncryptPassword(u.defaultPassword, salt)
@@ -267,36 +259,43 @@ func (u *user) IsSuperAdmin(ctx context.Context, userID string) bool {
 	return userID == consts.DefaultSuperAdminID
 }
 
-func (u *user) ValidateUsernameAndPassword(ctx context.Context, userName, password string) (out *model.User, err error) {
-	out, err = u.getUserInfoByUsername(ctx, userName)
-	if err != nil {
-		err = fmt.Errorf("账号/密码错误")
-		return
-	}
-	if libUtils.EncryptPassword(password, out.Salt) != out.Password {
+func (u *user) ValidateUsernameAndPassword(ctx context.Context, hashPassword, salt, password string) (err error) {
+	if libUtils.EncryptPassword(password, salt) != hashPassword {
 		err = fmt.Errorf("账号/密码错误")
 		g.Log().Error(ctx, err)
 		return
 	}
-	if out.Status != model.UserStatusEnabled {
-		err = fmt.Errorf("账号已被冻结")
-		return
-	}
-
 	return
 }
 
-func (u *user) GetUserInfoByID(ctx context.Context, id string) (out *model.User, err error) {
+func (u *user) GetByID(ctx context.Context, id string) (out *model.User, err error) {
 	var userEntity entity.User
 	err = dao.User.Ctx(ctx).Where(dao.User.Columns().ID, id).Scan(&userEntity)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			err = fmt.Errorf("用户不存在")
+		}
+		g.Log().Error(ctx, err)
 		return
 	}
 	out = u.convertEntityToModel(&userEntity)
 	return
 }
 
+func (u *user) GetByUsername(ctx context.Context, username string) (user *model.User, err error) {
+	return u.getUserInfoByUsername(ctx, username)
+}
+
+// List 根据组织ID获取用户列表
+// 1、如果当前用户是超级管理员，则可以获取所有用户列表
+// 2、如果当前用户不是超级管理员，则只能获取当前组织下的用户列表
 func (u *user) List(ctx context.Context, req *system.UserListReq) (total interface{}, out []*model.User, err error) {
+	operatorInfo := service.ContextService().Get(ctx)
+	if !u.IsSuperAdmin(ctx, operatorInfo.User.ID) && req.OrgID != operatorInfo.User.OrgID {
+		err = fmt.Errorf("无数据权限访问")
+		return
+	}
+
 	if req.PageSize == 0 {
 		req.PageSize = consts.PageSize
 	}
@@ -304,7 +303,11 @@ func (u *user) List(ctx context.Context, req *system.UserListReq) (total interfa
 		req.PageNum = 1
 	}
 
-	m := dao.User.Ctx(ctx).Where(dao.User.Columns().OrgID, req.OrgID)
+	m := dao.User.Ctx(ctx)
+	if !u.IsSuperAdmin(ctx, operatorInfo.User.ID) {
+		m = m.Where(dao.User.Columns().OrgID, req.OrgID)
+	}
+
 	if req.Name != "" {
 		m = m.Where(dao.User.Columns().Name, req.Name)
 	}
@@ -355,8 +358,11 @@ func (u *user) assignUserRoles(ctx context.Context, roleIDs []int64, userID stri
 // getUserInfoByUsername 通过用户名获取用户信息
 func (u *user) getUserInfoByUsername(ctx context.Context, userName string) (user *model.User, err error) {
 	var userEntity entity.User
-	err = dao.User.Ctx(ctx).Fields(userEntity).Where(dao.User.Columns().Name, userName).Scan(&userEntity)
+	err = dao.User.Ctx(ctx).Where(dao.User.Columns().Name, userName).Scan(&userEntity)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			err = fmt.Errorf("用户不存在: %s", userName)
+		}
 		return
 	}
 

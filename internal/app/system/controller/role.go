@@ -34,30 +34,31 @@ func (c *roleController) Edit(ctx context.Context, req *system.RoleEditReq) (res
 	return
 }
 
+func (c *roleController) EditStatus(ctx context.Context, req *system.RoleEditStatusReq) (res *system.RoleEditStatusRes, err error) {
+	err = service.Role().EditStatus(ctx, req.ID, req.Enabled)
+	return
+}
+
 func (c *roleController) Get(ctx context.Context, req *system.RoleGetReq) (res *system.RoleGetRes, err error) {
-	var roleInfo *model.Role
-	roleInfo, err = service.Role().Get(ctx, req.ID)
+	out, err := service.Role().Get(ctx, req.ID)
 	if err != nil {
 		return
 	}
 
 	res = new(system.RoleGetRes)
-	res.Role = c.formatRoleInfo(roleInfo)
-	res.MenuIDs, err = service.Role().GetFilteredNamedPolicy(ctx, req.ID)
+	res.Role = c.formatRoleInfo(out)
+	res.MenuIDs = out.MenuIDs
 	return
 }
 
-func (c *roleController) ListByOrgID(ctx context.Context, req *system.RoleListReq) (res *system.RoleListRes, err error) {
-	list, err := service.Role().ListByOrgID(ctx, req.OrgID)
+func (c *roleController) ListTreesByOrgID(ctx context.Context, req *system.RoleListReq) (res *system.RoleListRes, err error) {
+	out, err := service.Role().ListTreesByOrgID(ctx, req.OrgID)
 	if err != nil {
 		return
 	}
 
 	res = new(system.RoleListRes)
-	res.List = make([]*system.RoleInfo, 0, len(list))
-	for _, v := range list {
-		res.List = append(res.List, c.formatRoleInfo(v))
-	}
+	res.List = out
 	return
 }
 

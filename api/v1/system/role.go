@@ -32,16 +32,26 @@ type RoleDeleteRes struct {
 }
 
 type RoleEditReq struct {
-	g.Meta `path:"/role/{id}" tags:"角色管理" method:"put" summary:"编辑角色"`
+	g.Meta `path:"/role/{id}" tags:"角色管理" method:"put" summary:"编辑角色(全量更新)"`
 	model.Author
 	ID      int64   `p:"id" v:"required#角色ID必须" dc:"角色ID"`
 	Pid     int64   `json:"pid" dc:"父级ID"`
 	Name    string  `json:"name" dc:"角色名称"`
-	Status  int     `json:"status" dc:"状态"`
 	MenuIDs []int64 `json:"menu_ids" dc:"资源ID列表"`
 }
 
 type RoleEditRes struct {
+	g.Meta `mime:"application/json"`
+}
+
+type RoleEditStatusReq struct {
+	g.Meta `path:"/role/{id}/status" tags:"角色管理" method:"put" summary:"编辑角色状态"`
+	model.Author
+	ID      int64 `p:"id" v:"required#角色ID不能为空" dc:"角色ID"`
+	Enabled bool  `json:"enabled" v:"required#状态不能为空" dc:"状态(启用/禁用)"`
+}
+
+type RoleEditStatusRes struct {
 	g.Meta `mime:"application/json"`
 }
 
@@ -58,7 +68,7 @@ type RoleGetRes struct {
 }
 
 type RoleListReq struct {
-	g.Meta `path:"/role" tags:"角色管理" method:"get" summary:"角色列表"`
+	g.Meta `path:"/role/trees" tags:"角色管理" method:"get" summary:"角色列表(树形结构)"`
 	model.Author
 	OrgID string `json:"org_id" v:"required#组织ID不能为空" dc:"组织ID"`
 	model.PageReq
@@ -66,7 +76,7 @@ type RoleListReq struct {
 
 type RoleListRes struct {
 	g.Meta `mime:"application/json"`
-	List   []*RoleInfo `json:"list" dc:"角色列表"`
+	List   []*RoleNode `json:"list" dc:"角色列表"`
 	model.PageRes
 }
 
@@ -79,4 +89,9 @@ type RoleInfo struct {
 	CreatorID string      `json:"creator_id" dc:"创建人ID"`
 	CreatedAt *gtime.Time `json:"created_at" dc:"创建时间"`
 	UpdatedAt *gtime.Time `json:"updated_at" dc:"更新时间"`
+}
+
+type RoleNode struct {
+	*RoleInfo
+	Children []*RoleNode `json:"children"`
 }

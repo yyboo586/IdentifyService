@@ -20,9 +20,7 @@ CREATE TABLE IF NOT EXISTS `t_org`  (
 INSERT INTO `t_org` 
 (`id`,                                   `pid`,  `name`,                   `manager_id`,                           `manager_name`, `status`)
 VALUES 
-("00000000-0000-0000-0000-000000000000", '0',    'Org-Background-Default', '00000000-0000-0000-0000-000000000001', 'admin',         1),
-("11111111-0000-0000-0000-000000000000", '0',    'Org-Front-Default',      '00000000-0000-0000-0000-000000000001', 'admin',         1);
-
+("00000000-0000-0000-0000-000000000000", '',     'Org-Background-Default', '11111111-0000-0000-0000-000000000000', 'admin',         1);
 
 CREATE TABLE IF NOT EXISTS `t_user`  (
   `id` VARCHAR(40) NOT NULL,
@@ -49,12 +47,12 @@ CREATE TABLE IF NOT EXISTS `t_user`  (
 INSERT INTO `t_user` 
 (`id`,                                   `name`,  `nickname`, `password`,                         `salt`,      `status`, `org_id`)
 VALUES 
-('00000000-0000-0000-0000-000000000001', 'admin', 'admin',    'c567ae329f9929b518759d3bea13f492', 'f9aZTAa8yz', 1,       '00000000-0000-0000-0000-000000000000');
+('11111111-0000-0000-0000-000000000000', 'admin', 'admin',    'c567ae329f9929b518759d3bea13f492', 'f9aZTAa8yz', 1,       '00000000-0000-0000-0000-000000000000');
 
 CREATE TABLE IF NOT EXISTS `t_role`  (
   `id` INT(10) NOT NULL AUTO_INCREMENT,
-  `org_id` VARCHAR(40) NOT NULL COMMENT '组织ID',
   `pid` INT(10) NOT NULL COMMENT '父级ID',
+  `org_id` VARCHAR(40) NOT NULL COMMENT '组织ID',
   `name` VARCHAR(20) NOT NULL COMMENT '角色名称',
   `status` TINYINT(4) NOT NULL COMMENT '状态',
   `creator_id` VARCHAR(40) NOT NULL COMMENT '创建人ID',
@@ -69,8 +67,8 @@ CREATE TABLE IF NOT EXISTS `t_role`  (
 INSERT INTO `t_role`
 (`id`, `pid`, `org_id`,                               `name`,          `status`, `creator_id`) 
 VALUES 
-(1,    0,     '00000000-0000-0000-0000-000000000000', 'SuperAdmin',    1,        '00000000-0000-0000-0000-000000000001'),
-(2,    0,     '11111111-0000-0000-0000-000000000000', 'FrontOrgAdmin', 1,        '00000000-0000-0000-0000-000000000001');
+(1,    0,     '00000000-0000-0000-0000-000000000000', 'SuperAdmin',    1,        '11111111-0000-0000-0000-000000000000'),
+(2,    0,     '00000000-0000-0000-0000-000000000000', 'FrontOrgAdmin', 1,        '11111111-0000-0000-0000-000000000000');
 
 
 CREATE TABLE IF NOT EXISTS `t_auth_rule`  (
@@ -120,16 +118,29 @@ VALUES
 (2,1,'Analytics',1,'/analytics','/dashboard/analytics/index','page.dashboard.analytics','lucide:area-chart','',0,0,0,0,0,'[\"null\"]','','','',0,'/analytics',1,0,'',0,'',0,0,0,0,'',0,'2025-07-30 13:46:41','2025-07-31 14:30:36'),
 (3,0,'System',0,'/system','','system.title','ion:settings-outline','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,9997,NULL,0,'2025-07-30 13:50:43','2025-07-30 13:50:43'),
 (4,3,'SystemMenu',1,'/system/menu','/system/menu/list','system.menu.title','mdi:menu','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/menu',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 13:53:06','2025-07-31 14:29:58'),
-(5,3,'SystemDept',1,'/system/dept','../../views/system/dept/list.vue','system.dept.title','charm:organisation','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-07-30 13:58:16','2025-07-30 13:58:16'),
-(6,3,'SystemRole',1,'/system/role','../../views/system/role/list.vue','system.role.title','mdi:account-group','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/role',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 13:58:44','2025-07-31 14:30:18'),
-(7,3,'SystemUser',1,'/system/user','../../views/system/user/list.vue','system.user.title','carbon:user','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/user',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 14:00:55','2025-07-31 14:30:11'),
-(8,0,'Device',1,'/device','../../views/device/list.vue','device.title','carbon:tool-kit','',0,0,0,0,0,'null','','','',0,'/device',0,0,'',0,'',0,0,0,0,NULL,0,'2025-07-31 16:05:27','2025-07-31 16:05:27'),
-(9,0,'LogManagement',0,'/logmanagement','','log.title','carbon:account','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-02 13:55:01','2025-08-02 13:55:01'),
-(10,0,'configration',0,'/configration','','config.title','carbon:task-settings','',0,0,0,0,0,'[\"null\"]','','','',0,'',0,0,'',0,'',0,0,0,0,'',0,'2025-08-02 14:05:42','2025-08-02 14:07:27'),
-(11,10,'AlarmConfiguration',1,'/alarmconfiguration','../../views/configration/alarm/list.vue','config.Alarm.title','','',0,0,0,0,0,'null','','','',0,'/alarmconfiguration',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-02 16:21:45','2025-08-02 16:21:45'),
-(12,9,'AlarmLog',1,'/alarmlog','../../views/log/alarm/list.vue','log.alarm.title','carbon:notification','',0,0,0,0,0,'null','','','',0,'/alarmlog',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-04 14:17:55','2025-08-04 14:17:55'),
-(13,9,'ActionLog',1,'/actionlog','../../views/log/action/list.vue','log.action.title','carbon:touch-interaction','',0,0,0,0,0,'null','','','',0,'/actionlog',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-04 17:10:20','2025-08-04 17:10:20'),
-(14,9,'LoginLog',1,'/loginLog','../../views/log/login/list.vue','log.login.title','carbon:login','',0,0,0,0,0,'null','','','',0,'/loginLog',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-04 17:18:41','2025-08-04 17:18:41');
+(5,4,'addMenu',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 11:09:00','2025-08-07 11:09:00'),
+(6,4,'editMenu',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 11:09:13','2025-08-07 11:09:13'),
+(7,4,'deleteMenu',2,'','','','','',0,0,0,0,0,'[\"null\"]','','','',0,'',0,0,'',0,'',0,0,0,0,'',0,'2025-08-07 11:15:40','2025-08-07 11:15:52'),
+(8,3,'SystemDept',1,'/system/dept','../../views/system/dept/list.vue','system.dept.title','charm:organisation','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/dept',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 13:58:16','2025-08-06 15:32:55'),
+(9,8,'addDept',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:55:41','2025-08-07 10:55:41'),
+(10,8,'editDept',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:55:58','2025-08-07 10:55:58'),
+(11,8,'deleteDept',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:56:41','2025-08-07 10:56:41'),
+(12,3,'SystemRole',1,'/system/role','../../views/system/role/list.vue','system.role.title','mdi:account-group','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/role',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 13:58:44','2025-07-31 14:30:18'),
+(13,12,'addRole',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:44:11','2025-08-07 10:44:11'),
+(14,12,'editRole',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:45:05','2025-08-07 10:45:05'),
+(15,12,'deleteRole',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:45:15','2025-08-07 10:45:15'),
+(16,3,'SystemUser',1,'/system/user','../../views/system/user/list.vue','system.user.title','carbon:user','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/user',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 14:00:55','2025-07-31 14:30:11'),
+(17,16,'addUser',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:45:48','2025-08-07 10:45:48'),
+(18,16,'deleteUser',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:46:04','2025-08-07 10:46:04'),
+(19,16,'editUser',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:46:20','2025-08-07 10:46:20'),
+(20,0,'Device',0,'/device','','device.title','carbon:tool-kit','',0,0,0,0,0,'null','','','',0,'/device',0,0,'',0,'',0,0,0,0,NULL,0,'2025-07-31 16:05:27','2025-08-07 15:08:23'),
+(21,20,'DeviceList',1,'/devicelist','../../views/device/list.vue','device.list.title','carbon:edge-device','',0,0,0,0,0,'[]','','normal','',0,'/devicelist',0,0,'',0,'',-1,0,0,0,'',0,'2025-08-07 15:10:44','2025-08-07 17:17:07'),
+(22,0,'LogManagement',0,'/logmanagement','','log.title','carbon:account','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-02 13:55:01','2025-08-02 13:55:01'),
+(23,22,'AlarmLog',1,'/alarmlog','../../views/log/alarm/list.vue','log.alarm.title','carbon:notification','',0,0,0,0,0,'null','','','',0,'/alarmlog',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-04 14:17:55','2025-08-04 14:17:55'),
+(24,22,'ActionLog',1,'/actionlog','../../views/log/action/list.vue','log.action.title','carbon:touch-interaction','',0,0,0,0,0,'null','','','',0,'/actionlog',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-04 17:10:20','2025-08-04 17:10:20'),
+(25,22,'LoginLog',1,'/loginLog','../../views/log/login/list.vue','log.login.title','carbon:login','',0,0,0,0,0,'null','','','',0,'/loginLog',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-04 17:18:41','2025-08-04 17:18:41'),
+(26,0,'configration',0,'/configration','','config.title','carbon:task-settings','',0,0,0,0,0,'[\"null\"]','','','',0,'',0,0,'',0,'',0,0,0,0,'',0,'2025-08-02 14:05:42','2025-08-02 14:07:27'),
+(27,26,'AlarmConfiguration',1,'/alarmconfiguration','../../views/configration/alarm/list.vue','config.Alarm.title','','',0,0,0,0,0,'null','','','',0,'/alarmconfiguration',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-02 16:21:45','2025-08-02 16:21:45');
 
 
 -- ptype: 策略的类型标识
@@ -142,7 +153,9 @@ CREATE TABLE IF NOT EXISTS `t_casbin_rule`  (
   `v2` VARCHAR(256) NOT NULL DEFAULT '',
   `v3` VARCHAR(256) NOT NULL DEFAULT '',
   `v4` VARCHAR(256) NOT NULL DEFAULT '',
-  `v5` VARCHAR(256) NOT NULL DEFAULT ''
+  `v5` VARCHAR(256) NOT NULL DEFAULT '',
+  KEY `idx_ptype_v0` (`ptype`, `v0`),
+  KEY `idx_ptype_v1` (`ptype`, `v1`)
 ) ENGINE = InnoDB COMMENT = 'casbin规则表';
 
 INSERT INTO `t_casbin_rule`
@@ -151,24 +164,28 @@ VALUES
 ('p', '2', '1', 'ALL'), 
 ('p', '2', '2', 'ALL'), 
 ('p', '2', '3', 'ALL'),
-('p', '2', '4', 'ALL'),
-('p', '2', '6', 'ALL'), 
-('p', '2', '7', 'ALL'), 
-('p', '2', '8', 'ALL'),
-('p', '2', '9', 'ALL'),
-('p', '2', '10', 'ALL'),
-('p', '2', '11', 'ALL'), 
 ('p', '2', '12', 'ALL'), 
 ('p', '2', '13', 'ALL'),
-('p', '2', '14', 'ALL');
+('p', '2', '14', 'ALL'),
+('p', '2', '15', 'ALL'),
+('p', '2', '16', 'ALL'),
+('p', '2', '17', 'ALL'),
+('p', '2', '18', 'ALL'),
+('p', '2', '19', 'ALL'),
+('p', '2', '20', 'ALL'),
+('p', '2', '21', 'ALL'),
+('p', '2', '22', 'ALL'),
+('p', '2', '23', 'ALL'),
+('p', '2', '24', 'ALL'),
+('p', '2', '25', 'ALL'),
+('p', '2', '26', 'ALL'),
+('p', '2', '27', 'ALL');
+
 
 INSERT INTO `t_casbin_rule`
 (`ptype`, `v0`, `v1`)
 VALUES 
-('g', 'u_00000000-0000-0000-0000-000000000001', '1');
-
-
-
+('g', 'u_11111111-0000-0000-0000-000000000000', '1');
 
 
 CREATE TABLE IF NOT EXISTS `sys_role_scope`  (

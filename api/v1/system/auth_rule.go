@@ -102,31 +102,6 @@ type RuleUpdateRes struct {
 	g.Meta `mime:"application/json"`
 }
 
-/*
-	type RuleGetReq struct {
-		g.Meta `path:"/menu/{id}" tags:"菜单管理" method:"get" summary:"获取菜单详情"`
-		model.Author
-		ID int64 `p:"id" v:"required#菜单id必须" dc:"菜单ID"`
-	}
-
-	type RuleGetRes struct {
-		g.Meta `mime:"application/json"`
-		*model.AuthRule
-	}
-
-	type RuleGetTreeReq struct {
-		g.Meta `path:"/menu/{id}/tree" tags:"菜单管理" method:"get" summary:"菜单详情(树形结构)"`
-		model.Author
-		ID int64 `p:"id" v:"required#菜单id必须" dc:"菜单ID"`
-	}
-
-	type RuleGetTreeRes struct {
-		g.Meta `mime:"application/json"`
-		*model.AuthRuleNode
-	}
-
-*/
-
 type RuleListTreeReq struct {
 	g.Meta `path:"/menu" tags:"菜单管理" method:"get" summary:"菜单列表(树形结构)"`
 	model.Author

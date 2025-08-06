@@ -38,8 +38,13 @@ func (c *userController) EditPersonalInfo(ctx context.Context, req *system.EditU
 	return
 }
 
-func (c *userController) EditUserPermission(ctx context.Context, req *system.EditUserPermissionReq) (res *system.EditUserPermissionRes, err error) {
-	err = service.User().EditUserPermission(ctx, req)
+func (c *userController) EditUserRoles(ctx context.Context, req *system.EditUserRolesReq) (res *system.EditUserRolesRes, err error) {
+	err = service.User().EditUserRoles(ctx, req)
+	return
+}
+
+func (c *userController) EditUserStatus(ctx context.Context, req *system.EditUserStatusReq) (res *system.EditUserStatusRes, err error) {
+	err = service.User().EditUserStatus(ctx, req)
 	return
 }
 
@@ -48,12 +53,21 @@ func (c *userController) ResetPwd(ctx context.Context, req *system.UserResetPwdR
 	return
 }
 
-func (c *userController) GetUserInfo(ctx context.Context, req *system.GetUserInfoReq) (res *system.GetUserInfoRes, err error) {
-	user, err := service.User().GetUserInfoByID(ctx, req.ID)
+func (c *userController) GetByID(ctx context.Context, req *system.GetUserInfoReq) (res *system.GetUserInfoRes, err error) {
+	user, err := service.User().GetByID(ctx, req.ID)
 	if err != nil {
 		return
 	}
-	res.User = c.format(user)
+
+	roleIDs, err := service.Role().GetRoleIDsByUserID(ctx, req.ID)
+	if err != nil {
+		return
+	}
+
+	res = &system.GetUserInfoRes{
+		User: c.format(user),
+	}
+	res.User.RoleIDs = roleIDs
 	return
 }
 
@@ -66,7 +80,15 @@ func (c *userController) List(ctx context.Context, req *system.UserListReq) (res
 	res = new(system.UserListRes)
 	res.Total = gconv.Int(total)
 	for _, v := range out {
-		res.List = append(res.List, c.format(v))
+		var roleIDs []int64
+		roleIDs, err = service.Role().GetRoleIDsByUserID(ctx, v.ID)
+		if err != nil {
+			return
+		}
+
+		item := c.format(v)
+		item.RoleIDs = roleIDs
+		res.List = append(res.List, item)
 	}
 	return
 }

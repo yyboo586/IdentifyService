@@ -9,27 +9,29 @@ import (
 
 type (
 	IAuthRule interface {
-		// 添加菜单/按钮
+		// ========== 基础CRUD操作 ==========
+		// 添加目录/菜单/按钮
 		Add(ctx context.Context, req *system.RuleAddReq) (id int64, err error)
-		// 删除菜单/按钮
+		// 删除目录/菜单/按钮
 		DeleteByIDs(ctx context.Context, ids []int64) (err error)
-		// 更新菜单/按钮
+		// 更新目录/菜单/按钮
 		Update(ctx context.Context, req *system.RuleUpdateReq) (err error)
 
-		// 根据用户ID获取用户目录/菜单树形结构
-		GetMenuTreesByUserID(ctx context.Context, userID string, includeButton bool) (out []*model.AuthRuleNode, err error)
-		// 根据用户ID获取用户按钮列表
-		GetButtonListByUserID(ctx context.Context, userID string) (out []*model.AuthRule, err error)
+		// ========== 登录场景接口 ==========
+		// 获取用户登录后的菜单树（目录+菜单，不包含按钮）
+		GetUserMenuTree(ctx context.Context, userID string) (out []*model.AuthRuleNode, err error)
+		// 获取用户登录后的按钮权限列表
+		GetUserButtonList(ctx context.Context, userID string) (out []*model.AuthRule, err error)
 
-		// 根据角色ID获取用户目录/菜单列表
-		// GetMenuListByRoleID(ctx context.Context, roleID int64) (out []*model.AuthRule, err error)
+		// ========== 权限管理场景接口 ==========
+		// 获取完整的权限树（目录+菜单+按钮），用于权限管理界面
+		GetFullAuthRuleTree(ctx context.Context, userID string) (out []*model.AuthRuleNode, err error)
 
-		// 获取单个菜单详细信息，不包含子节点
-		// GetDetailsByID(ctx context.Context, id int64) (out *model.AuthRule, err error)
-		// 获取单个菜单的树形结构，包含子节点
-		// GetTreeByID(ctx context.Context, id int64) (out *model.AuthRuleNode, err error)
-		// GetAllAuthRules 获取所有AuthRule
-		GetAllAuthRules(ctx context.Context) (list []*model.AuthRule, err error)
+		// ========== 权限过滤工具 ==========
+		// 根据用户角色过滤权限ID列表
+		FilterRuleIDsByUserID(ctx context.Context, ruleIDs []int64, userID string) (out []int64, err error)
+		// 检查用户是否有指定权限
+		HasPermission(ctx context.Context, userID string, ruleID int64) (hasPermission bool, err error)
 	}
 )
 

@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"IdentifyService/api/v1/system"
 
@@ -29,14 +31,14 @@ type authController struct {
 // 5、返回登录结果
 func (c *authController) Login(ctx context.Context, req *system.UserLoginReq) (res *system.UserLoginRes, err error) {
 	var (
-		userInfo   *model.User
-		token      string
-		buttonList []*system.Button
-		menuList   []*model.AuthRuleNode
+		userInfo *model.User
+		token    string
+		menuList []*model.AuthRuleNode
 	)
 
 	defer func(ctx context.Context) {
 		loginLog := &model.LoginLog{
+			OrgID:     "",
 			LoginName: req.Username,
 			IP:        libUtils.GetClientIp(ctx),
 			Browser:   libUtils.GetUserAgent(ctx),
@@ -45,14 +47,38 @@ func (c *authController) Login(ctx context.Context, req *system.UserLoginReq) (r
 			LoginTime: gtime.Now(),
 		}
 		if err != nil {
+			if !strings.Contains(err.Error(), "用户不存在") {
+				loginLog.OrgID = userInfo.OrgID
+			}
 			loginLog.Success = false
 			loginLog.Message = "登录失败:" + err.Error()
 			g.Log().Error(ctx, err)
+		} else {
+			loginLog.OrgID = userInfo.OrgID
 		}
 		service.Log().InvokeLoginLog(loginLog)
 	}(ctx)
 
-	userInfo, err = service.User().ValidateUsernameAndPassword(ctx, req.Username, req.Password)
+	userInfo, err = service.User().GetByUsername(ctx, req.Username)
+	if err != nil {
+		g.Log().Error(ctx, err)
+		return
+	}
+	if userInfo.Status != model.UserStatusEnabled {
+		err = fmt.Errorf("账号已被冻结")
+		return
+	}
+
+	orgInfo, err := service.Org().Get(ctx, userInfo.OrgID)
+	if err != nil {
+		return
+	}
+	if !orgInfo.Enabled {
+		err = fmt.Errorf("组织已禁用")
+		return
+	}
+
+	err = service.User().ValidateUsernameAndPassword(ctx, userInfo.Password, userInfo.Salt, req.Password)
 	if err != nil {
 		return
 	}
@@ -63,22 +89,14 @@ func (c *authController) Login(ctx context.Context, req *system.UserLoginReq) (r
 		return
 	}
 
-	menuList, err = service.AuthRule().GetMenuTreesByUserID(ctx, userInfo.ID, false)
+	menuList, err = service.AuthRule().GetUserMenuTree(ctx, userInfo.ID)
 	if err != nil {
 		return
 	}
 
-	buttons, err := service.AuthRule().GetButtonListByUserID(ctx, userInfo.ID)
+	buttons, err := service.AuthRule().GetUserButtonList(ctx, userInfo.ID)
 	if err != nil {
 		return
-	}
-	for _, v := range buttons {
-		buttonList = append(buttonList, &system.Button{
-			ID:   v.ID,
-			Pid:  v.Pid,
-			Name: v.Name,
-			Type: int64(v.Type),
-		})
 	}
 
 	res = &system.UserLoginRes{
@@ -94,7 +112,7 @@ func (c *authController) Login(ctx context.Context, req *system.UserLoginReq) (r
 		},
 		Token:      token,
 		MenuList:   menuList,
-		ButtonList: buttonList,
+		ButtonList: buttons,
 	}
 	return
 }

@@ -25,7 +25,7 @@ const (
 type UserLoginRes struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
-	Nickname string `json:"nickname"`
+	Nickname string `json:"nick_name"`
 	Mobile   string `json:"mobile"`
 	Status   int64  `json:"status"`
 	IsAdmin  bool   `json:"is_admin"`
@@ -36,13 +36,13 @@ type UserLoginRes struct {
 type LinkUserRes struct {
 	gmeta.Meta `orm:"table:t_user"`
 	ID         uint64 `orm:"id"       json:"id"`
-	Nickname   string `orm:"nickname"    json:"nickname"`
+	Nickname   string `orm:"nickname"    json:"nick_name"`
 }
 
 type User struct {
 	ID        string      `json:"id"`
 	Name      string      `json:"name"`
-	Nickname  string      `json:"nickname"`
+	Nickname  string      `json:"nick_name"`
 	Password  string      `json:"password"`
 	Salt      string      `json:"salt"`
 	Status    UserStatus  `json:"status"`

@@ -33,39 +33,12 @@ func (c *menuController) Update(ctx context.Context, req *system.RuleUpdateReq) 
 	return
 }
 
-func (c *menuController) ListTree(ctx context.Context, req *system.RuleListTreeReq) (res *system.RuleListTreeRes, err error) {
+// 权限管理场景：获取完整权限树
+func (c *menuController) GetFullAuthRuleTree(ctx context.Context, req *system.RuleListTreeReq) (res *system.RuleListTreeRes, err error) {
 	res = &system.RuleListTreeRes{}
-	res.List, err = service.AuthRule().GetMenuTreesByUserID(ctx, service.ContextService().Get(ctx).User.ID, true)
+	res.List, err = service.AuthRule().GetFullAuthRuleTree(ctx, service.ContextService().Get(ctx).User.ID)
 	if err != nil {
 		return
 	}
 	return
 }
-
-/*
-	func (c *menuController) Get(ctx context.Context, req *system.RuleGetReq) (res *system.RuleGetRes, err error) {
-		out, err := service.AuthRule().GetDetailsByID(ctx, req.ID)
-		if err != nil {
-			return
-		}
-
-		res = &system.RuleGetRes{
-			AuthRule: out,
-		}
-		return
-	}
-
-	func (c *menuController) GetTree(ctx context.Context, req *system.RuleGetTreeReq) (res *system.RuleGetTreeRes, err error) {
-		out, err := service.AuthRule().GetTreeByID(ctx, req.ID)
-		if err != nil {
-			return
-		}
-
-		res = &system.RuleGetTreeRes{
-			AuthRuleNode: out,
-		}
-		return
-	}
-
-
-*/

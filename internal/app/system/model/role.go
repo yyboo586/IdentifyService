@@ -28,4 +28,6 @@ type Role struct {
 	CreatorID string      `json:"creator_id" dc:"创建人ID"`
 	CreatedAt *gtime.Time `json:"created_at" dc:"创建时间"`
 	UpdatedAt *gtime.Time `json:"updated_at" dc:"更新时间"`
+
+	MenuIDs []int64 `json:"menu_ids" dc:"资源ID列表"`
 }

@@ -8,6 +8,7 @@ import (
 	"IdentifyService/internal/app/system/model/entity"
 	"IdentifyService/internal/app/system/service"
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"sync"
@@ -59,7 +60,7 @@ func (s *org) Add(ctx context.Context, in *model.Org) (orgID string, err error) 
 // 3、删除组织下的所有角色
 // 4、删除组织下的所有权限
 func (s *org) Delete(ctx context.Context, id string) (err error) {
-	if id == consts.DefaultBackgroundOrgID || id == consts.DefaultFrontOrgID {
+	if id == consts.DefaultBackgroundOrgID {
 		err = errors.New("默认组织不能删除")
 		return
 	}
@@ -138,6 +139,9 @@ func (s *org) GetTree(ctx context.Context, id string) (out *system.OrgTreeNode, 
 	var orgs *entity.Org
 	err = dao.Org.Ctx(ctx).Where(dao.Org.Columns().ID, id).Scan(&orgs)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			err = fmt.Errorf("组织不存在: %s", id)
+		}
 		err = fmt.Errorf("获取组织失败: %w", err)
 		g.Log().Error(ctx, err)
 		return
@@ -175,7 +179,7 @@ func (s *org) GetTree(ctx context.Context, id string) (out *system.OrgTreeNode, 
 // 2、获取根组织节点下的所有子节点
 func (s *org) ListTrees(ctx context.Context) (out []*system.OrgTreeNode, err error) {
 	var rootNodes []*entity.Org
-	err = dao.Org.Ctx(ctx).Where(dao.Org.Columns().PID, "0").Scan(&rootNodes)
+	err = dao.Org.Ctx(ctx).Where(dao.Org.Columns().PID, "").Scan(&rootNodes)
 	if err != nil {
 		err = fmt.Errorf("获取根组织列表失败: %w", err)
 		g.Log().Error(ctx, err)

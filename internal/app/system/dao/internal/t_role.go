@@ -18,7 +18,7 @@ type RoleDao struct {
 type RoleColumns struct {
 	ID        string // 角色ID
 	OrgID     string // 组织ID
-	Pid       string // 父角色ID
+	PID       string // 父角色ID
 	Name      string // 角色名称
 	Status    string // 状态
 	CreatedAt string // 创建时间
@@ -30,7 +30,7 @@ type RoleColumns struct {
 var roleColumns = RoleColumns{
 	ID:        "id",
 	OrgID:     "org_id",
-	Pid:       "pid",
+	PID:       "pid",
 	Name:      "name",
 	Status:    "status",
 	CreatorID: "creator_id",

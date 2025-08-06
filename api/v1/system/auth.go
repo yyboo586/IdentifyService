@@ -17,14 +17,7 @@ type UserLoginRes struct {
 	UserInfo   *model.UserLoginRes   `json:"user_info"`
 	Token      string                `json:"token"`
 	MenuList   []*model.AuthRuleNode `json:"menu_list"`
-	ButtonList []*Button             `json:"button_list"`
-}
-
-type Button struct {
-	ID   int64  `json:"id"`
-	Pid  int64  `json:"pid"`
-	Name string `json:"name"`
-	Type int64  `json:"type"`
+	ButtonList []*model.AuthRule     `json:"button_list"`
 }
 
 type UserLoginOutReq struct {
