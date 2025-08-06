@@ -398,7 +398,7 @@ func (a *authRule) listTrees(ctx context.Context, includeButton bool) (list []*m
 
 	// 构建子树
 	for _, v := range rootNodes {
-		if !includeButton && v.Type == int(model.MenuTypeButton) {
+		if v.Type == int(model.MenuTypeButton) && !includeButton {
 			continue
 		}
 
@@ -530,7 +530,7 @@ func (a *authRule) getTreeByID(ctx context.Context, id int64, includeButton bool
 	}
 
 	var children []*entity.AuthRule
-	err = dao.AuthRule.Ctx(ctx).Fields(dao.AuthRule.Columns().ID).Where(dao.AuthRule.Columns().Pid, id).Scan(&children)
+	err = dao.AuthRule.Ctx(ctx).Fields(dao.AuthRule.Columns().ID, dao.AuthRule.Columns().Type).Where(dao.AuthRule.Columns().Pid, id).Scan(&children)
 	if err != nil {
 		g.Log().Error(ctx, err)
 		return
