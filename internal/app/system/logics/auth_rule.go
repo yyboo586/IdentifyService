@@ -390,7 +390,7 @@ func (a *authRule) GetAllAuthRules(ctx context.Context) (list []*model.AuthRule,
 func (a *authRule) listTrees(ctx context.Context, includeButton bool) (list []*model.AuthRuleNode, err error) {
 	// 获取顶层目录ID
 	var rootNodes []*entity.AuthRule
-	err = dao.AuthRule.Ctx(ctx).Fields(dao.AuthRule.Columns().ID).Where(dao.AuthRule.Columns().Pid, 0).Scan(&rootNodes)
+	err = dao.AuthRule.Ctx(ctx).Fields(dao.AuthRule.Columns().ID, dao.AuthRule.Columns().Type).Where(dao.AuthRule.Columns().Pid, 0).Scan(&rootNodes)
 	if err != nil {
 		g.Log().Error(ctx, err)
 		return
@@ -398,6 +398,10 @@ func (a *authRule) listTrees(ctx context.Context, includeButton bool) (list []*m
 
 	// 构建子树
 	for _, v := range rootNodes {
+		if !includeButton && v.Type == int(model.MenuTypeButton) {
+			continue
+		}
+
 		var treeNode *model.AuthRuleNode
 		treeNode, err = a.getTreeByID(ctx, v.ID, includeButton)
 		if err != nil {
@@ -534,6 +538,10 @@ func (a *authRule) getTreeByID(ctx context.Context, id int64, includeButton bool
 
 	if len(children) > 0 {
 		for _, v := range children {
+			if !includeButton && v.Type == int(model.MenuTypeButton) {
+				continue
+			}
+
 			var child *model.AuthRuleNode
 			child, err = a.getTreeByID(ctx, v.ID, includeButton)
 			if err != nil {
