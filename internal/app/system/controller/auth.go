@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"IdentifyService/api/v1/system"
@@ -138,6 +140,14 @@ func (c *authController) LoginOut(ctx context.Context, req *system.UserLoginOutR
 func (c *authController) Introspect(ctx context.Context, req *system.IntrospectReq) (res *model.IntrospectRes, err error) {
 	res, err = service.TokenService().Introspect(ctx, req.Authorization)
 	if err != nil {
+		if errors.Is(err, service.ErrTokenInvalid) || errors.Is(err, service.ErrTokenExpired) {
+			g.RequestFromCtx(ctx).Response.Status = http.StatusOK
+			g.RequestFromCtx(ctx).Response.WriteJson(g.Map{
+				"code":    http.StatusUnauthorized,
+				"message": "Unauthorized",
+			})
+			return
+		}
 		return
 	}
 	return

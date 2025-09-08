@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"slices"
 
 	"IdentifyService/internal/app/system/controller"
 	"IdentifyService/internal/app/system/model"
@@ -43,8 +44,15 @@ func (router *Router) BindController(ctx context.Context, group *ghttp.RouterGro
 }
 
 func InjectCtx(r *ghttp.Request) {
+	ctx := r.GetCtx()
 	data, err := service.TokenService().Parse(r)
 	if err != nil {
+		excludePaths := g.Cfg().MustGet(ctx, "gfToken.excludePaths").Strings()
+		if slices.Contains(excludePaths, r.URL.Path) {
+			g.Log().Debug(r.Context(), "InjectCtx: ", r.URL.Path, " is excluded")
+			r.Middleware.Next()
+			return
+		}
 		if errors.Is(err, service.ErrTokenInvalid) || errors.Is(err, service.ErrTokenExpired) {
 			r.Response.Status = http.StatusOK
 			r.Response.WriteJson(g.Map{

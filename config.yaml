@@ -47,6 +47,8 @@ gfToken:
   excludePaths:
     - "/api/v1/identify-service/user/login"
     - "/api/v1/identify-service/user/logout"
+    - "/api/v1/identify-service/token/introspect"
+    - "/api/v1/identify-service/user/register"
 
 
 # Redis 配置示例
