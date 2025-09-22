@@ -1,8 +1,8 @@
 server:
   address: "0.0.0.0:9500"
+  routeOverWrite: true
   openapiPath: "/api.json"
   swaggerPath: "/swagger"
-  routeOverWrite: true
 
 casbin:
   modelFile: "./resource/casbin/rbac_model.conf"
@@ -28,7 +28,7 @@ database:
     Path: "resource/log/sql"
 
   default:
-    link: "mysql:root:alsnvlkansda@tcp(47.109.79.103:9234)/identify_service?charset=utf8mb4&parseTime=true&loc=Local"
+    link: "mysql:root:12345678@tcp(127.0.0.1:3306)/identify_service?charset=utf8mb4&parseTime=true&loc=Local"
     debug:  true
     charset: "utf8mb4" #数据库编码
     dryRun: false #空跑
@@ -45,11 +45,19 @@ gfToken:
   cacheModel: "dist"  #缓存模式 memory OR redis OR dist
   distPath: "./resource/data/distTokenDb" #使用磁盘缓存时配置数据缓存的目录
   excludePaths:
-    - "/api/v1/identify-service/user/login"
-    - "/api/v1/identify-service/user/logout"
     - "/api/v1/identify-service/token/introspect"
     - "/api/v1/identify-service/user/register"
 
+# 消息队列
+mq:
+  type: "nsq"
+  topics:
+    - "core.device.online"
+    - "core.device.offline"
+    - "core.device.alarm"
+  nsq:
+    addr: "124.220.236.38:4150"
+    lookupdAddr: "124.220.236.38:4160"
 
 # Redis 配置示例
 redis:
@@ -64,34 +72,4 @@ redis:
     readTimeout: "30s" #TCP的Read操作超时时间，使用时间字符串例如30s/1m/1d
     writeTimeout: "30s" #TCP的Write操作超时时间，使用时间字符串例如30s/1m/1d
     maxActive: 100
-
-system:
-  notCheckAuthAdminIds: ["1"]  #无需验证后台权限的用户id
-  dataDir: "./resource/data"
-  cache:
-    model: "memory"  #缓存模式 memory OR redis OR dist
-    distPath: "./resource/data/distCacheDb" #使用磁盘缓存时配置数据缓存的目录
-    prefix: "gFastV3Cache:" #缓存前缀
-  verifyStatus: 0 #0关闭验证码 1图形验证码 2交互验证码
-
-# 消息队列
-mqueue:
-  enable: false
-  closeWaitTime: 5                             # 关闭服务器时等待刷盘时间(秒),最好不要小于5
-  driver: "diskQueue"                          # 驱动类型 nsq|diskQueue|rocketmq
-  channel: "channel"                           # 默认频道名称
-  nsq:
-    address: "192.168.75.3"                    # nsq地址
-    producer_port: 4150                        # 生产者端口
-    consumer_port: 4161                        # 消费者http端口
-  rocketmq:
-    nameServers: "192.168.75.3:9876"           # 服务器地址
-    retry: 2                                   # 重试次数
-    logLevel: "warn"                           # 日志级别 debug|error|warn|fatal
-  diskQueue:
-    dataPath: "./resource/data/storage/diskqueue"            # 存储路径
-    maxBytesPerFile: 2097152                   # 单个单件最大字节数(byte)，默认：2m(2097152)
-    syncEvery: 2500                            # 多少次读写后刷盘
-    syncTimeout: 2                             # 刷盘间隔（秒）
-    maxMsgSize: 128144                         # 最大消息字节数(byte)
-    minMsgSize: 0                              # 最小消息字节数
+    
