@@ -216,3 +216,21 @@ func DiffSlice[T comparable](s1, s2 []T) []T {
 	}
 	return diff
 }
+
+func SliceContains[T comparable](slice []T, item T) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}
+
+func MapContains[T comparable](m map[T]T, item T) bool {
+	for _, v := range m {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}

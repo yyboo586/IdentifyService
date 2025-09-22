@@ -1,6 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 CREATE DATABASE IF NOT EXISTS `identify_service` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 USE identify_service;
 
 CREATE TABLE IF NOT EXISTS `t_org`  (
@@ -16,11 +17,6 @@ CREATE TABLE IF NOT EXISTS `t_org`  (
   INDEX `idx_pid`(`pid`),
   KEY `idx_manager_id`(`manager_id`)
 ) ENGINE = InnoDB COMMENT = '组织表';
-
-INSERT INTO `t_org` 
-(`id`,                                   `pid`,  `name`,                   `manager_id`,                           `manager_name`, `status`)
-VALUES 
-("00000000-0000-0000-0000-000000000000", '',     'Org-Background-Default', '11111111-0000-0000-0000-000000000000', 'admin',         1);
 
 CREATE TABLE IF NOT EXISTS `t_user`  (
   `id` VARCHAR(40) NOT NULL,
@@ -41,151 +37,67 @@ CREATE TABLE IF NOT EXISTS `t_user`  (
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `idx_name`(`name`),
-  INDEX `idx_ord_id`(`org_id`)
+  INDEX `idx_ord_status`(`org_id`, `status`)
 ) ENGINE = InnoDB COMMENT = '用户表';
-
-INSERT INTO `t_user` 
-(`id`,                                   `name`,  `nickname`, `password`,                         `salt`,      `status`, `org_id`)
-VALUES 
-('11111111-0000-0000-0000-000000000000', 'admin', 'admin',    'c567ae329f9929b518759d3bea13f492', 'f9aZTAa8yz', 1,       '00000000-0000-0000-0000-000000000000');
 
 CREATE TABLE IF NOT EXISTS `t_role`  (
   `id` INT(10) NOT NULL AUTO_INCREMENT,
   `pid` INT(10) NOT NULL COMMENT '父级ID',
   `org_id` VARCHAR(40) NOT NULL COMMENT '组织ID',
   `name` VARCHAR(20) NOT NULL COMMENT '角色名称',
-  `status` TINYINT(4) NOT NULL COMMENT '状态',
   `creator_id` VARCHAR(40) NOT NULL COMMENT '创建人ID',
+  `deletor_id` VARCHAR(40) DEFAULT '' COMMENT '删除人ID',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted_at` DATETIME DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_org_id_name`(`org_id`, `name`),
   INDEX `idx_pid`(`pid`),
-  INDEX `idx_name`(`name`),
-  INDEX `idx_creator_id`(`creator_id`)
+  INDEX `idx_name_deleted_at`(`name`,`deleted_at`)
 ) ENGINE = InnoDB COMMENT = '角色表';
 
-INSERT INTO `t_role`
-(`id`, `pid`, `org_id`,                               `name`,          `status`, `creator_id`) 
-VALUES 
-(1,    0,     '00000000-0000-0000-0000-000000000000', 'SuperAdmin',    1,        '11111111-0000-0000-0000-000000000000'),
-(2,    0,     '00000000-0000-0000-0000-000000000000', 'FrontOrgAdmin', 1,        '11111111-0000-0000-0000-000000000000');
-
-
-CREATE TABLE IF NOT EXISTS `t_auth_rule`  (
+CREATE TABLE IF NOT EXISTS `t_resource` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `pid` BIGINT(20) NOT NULL DEFAULT 0,
-  `name` VARCHAR(100) NOT NULL DEFAULT '',
-  `type` TINYINT(1) NOT NULL DEFAULT 0,
-  `path` VARCHAR(100) NOT NULL DEFAULT '',
-  `component` VARCHAR(100) NOT NULL DEFAULT '',
-  
-  `title` VARCHAR(50) NOT NULL DEFAULT '',
-  `icon` VARCHAR(300) NOT NULL DEFAULT '',
-  `active_icon` VARCHAR(300) NOT NULL DEFAULT '',
-  `keep_alive` TINYINT(4) NOT NULL DEFAULT 0,
-  `hide_in_menu` TINYINT(4) NOT NULL DEFAULT 0,
-  `hide_in_tab` TINYINT(4) NOT NULL DEFAULT 0,
-  `hide_in_breadcrumb` TINYINT(4) NOT NULL DEFAULT 0,
-  `hide_children_in_menu` TINYINT(4) NOT NULL DEFAULT 0,
-  `authority` VARCHAR(255) NOT NULL DEFAULT '',
-  `badge` VARCHAR(255) NOT NULL DEFAULT '',
-  `badge_type` VARCHAR(255) NOT NULL DEFAULT 'normal',
-  `badge_variants` VARCHAR(255) NOT NULL DEFAULT '',
-  `full_path_key` TINYINT(4)  NOT NULL DEFAULT 0,
-  `active_path` VARCHAR(255) NOT NULL DEFAULT '',
-  `affix_tab` TINYINT(4)  NOT NULL DEFAULT 0,
-  `affix_tab_order` TINYINT(4) NOT NULL DEFAULT 0,
-  `iframe_src` VARCHAR(255) NOT NULL DEFAULT '',
-  `ignore_access` TINYINT(4) NOT NULL DEFAULT 0,
-  `link` VARCHAR(255) NOT NULL DEFAULT '',
-  `max_num_of_open_tab` TINYINT(4) NOT NULL DEFAULT -1,
-  `menu_visible_with_forbidden` TINYINT(4) NOT NULL DEFAULT 0,
-  `open_in_new_window` TINYINT(1) NOT NULL DEFAULT 0,
-  `order` INT NOT NULL DEFAULT 0,
-  `query` TEXT,
-  `no_basic_layout` TINYINT(4) NOT NULL DEFAULT 0,
-  
+  `type` VARCHAR(20) NOT NULL COMMENT '资源类型',
+  `code` VARCHAR(100) NOT NULL COMMENT '资源代码',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `idx_name`(`name`),
-  INDEX `pid`(`pid`)
-) ENGINE = InnoDB COMMENT = '菜单表';
+  UNIQUE INDEX `idx_type_code`(`type`, `code`)
+)ENGINE = InnoDB COMMENT = '资源表';
 
-INSERT INTO `t_auth_rule` 
-VALUES 
-(1,0,'Dashboard',0,'/dashboard','','page.dashboard.title','lucide:layout-dashboard','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,-1,NULL,0,'2025-07-30 13:40:19','2025-07-30 13:40:19'),
-(2,1,'Analytics',1,'/analytics','/dashboard/analytics/index','page.dashboard.analytics','lucide:area-chart','',0,0,0,0,0,'[\"null\"]','','','',0,'/analytics',1,0,'',0,'',0,0,0,0,'',0,'2025-07-30 13:46:41','2025-07-31 14:30:36'),
-(3,0,'System',0,'/system','','system.title','ion:settings-outline','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,9997,NULL,0,'2025-07-30 13:50:43','2025-07-30 13:50:43'),
-(4,3,'SystemMenu',1,'/system/menu','/system/menu/list','system.menu.title','mdi:menu','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/menu',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 13:53:06','2025-07-31 14:29:58'),
-(5,4,'addMenu',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 11:09:00','2025-08-07 11:09:00'),
-(6,4,'editMenu',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 11:09:13','2025-08-07 11:09:13'),
-(7,4,'deleteMenu',2,'','','','','',0,0,0,0,0,'[\"null\"]','','','',0,'',0,0,'',0,'',0,0,0,0,'',0,'2025-08-07 11:15:40','2025-08-07 11:15:52'),
-(8,3,'SystemDept',1,'/system/dept','../../views/system/dept/list.vue','system.dept.title','charm:organisation','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/dept',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 13:58:16','2025-08-06 15:32:55'),
-(9,8,'addDept',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:55:41','2025-08-07 10:55:41'),
-(10,8,'editDept',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:55:58','2025-08-07 10:55:58'),
-(11,8,'deleteDept',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:56:41','2025-08-07 10:56:41'),
-(12,3,'SystemRole',1,'/system/role','../../views/system/role/list.vue','system.role.title','mdi:account-group','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/role',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 13:58:44','2025-07-31 14:30:18'),
-(13,12,'addRole',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:44:11','2025-08-07 10:44:11'),
-(14,12,'editRole',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:45:05','2025-08-07 10:45:05'),
-(15,12,'deleteRole',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:45:15','2025-08-07 10:45:15'),
-(16,3,'SystemUser',1,'/system/user','../../views/system/user/list.vue','system.user.title','carbon:user','',0,0,0,0,0,'[\"null\"]','','','',0,'/system/user',0,0,'',0,'',0,0,0,0,'',0,'2025-07-30 14:00:55','2025-07-31 14:30:11'),
-(17,16,'addUser',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:45:48','2025-08-07 10:45:48'),
-(18,16,'deleteUser',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:46:04','2025-08-07 10:46:04'),
-(19,16,'editUser',2,'','','','','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-07 10:46:20','2025-08-07 10:46:20'),
-(20,0,'Device',0,'/device','','device.title','carbon:tool-kit','',0,0,0,0,0,'null','','','',0,'/device',0,0,'',0,'',0,0,0,0,NULL,0,'2025-07-31 16:05:27','2025-08-07 15:08:23'),
-(21,20,'DeviceList',1,'/devicelist','../../views/device/list.vue','device.list.title','carbon:edge-device','',0,0,0,0,0,'[]','','normal','',0,'/devicelist',0,0,'',0,'',-1,0,0,0,'',0,'2025-08-07 15:10:44','2025-08-07 17:17:07'),
-(22,0,'LogManagement',0,'/logmanagement','','log.title','carbon:account','',0,0,0,0,0,'null','','','',0,'',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-02 13:55:01','2025-08-02 13:55:01'),
-(23,22,'AlarmLog',1,'/alarmlog','../../views/log/alarm/list.vue','log.alarm.title','carbon:notification','',0,0,0,0,0,'null','','','',0,'/alarmlog',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-04 14:17:55','2025-08-04 14:17:55'),
-(24,22,'ActionLog',1,'/actionlog','../../views/log/action/list.vue','log.action.title','carbon:touch-interaction','',0,0,0,0,0,'null','','','',0,'/actionlog',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-04 17:10:20','2025-08-04 17:10:20'),
-(25,22,'LoginLog',1,'/loginLog','../../views/log/login/list.vue','log.login.title','carbon:login','',0,0,0,0,0,'null','','','',0,'/loginLog',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-04 17:18:41','2025-08-04 17:18:41'),
-(26,0,'configration',0,'/configration','','config.title','carbon:task-settings','',0,0,0,0,0,'[\"null\"]','','','',0,'',0,0,'',0,'',0,0,0,0,'',0,'2025-08-02 14:05:42','2025-08-02 14:07:27'),
-(27,26,'AlarmConfiguration',1,'/alarmconfiguration','../../views/configration/alarm/list.vue','config.Alarm.title','','',0,0,0,0,0,'null','','','',0,'/alarmconfiguration',0,0,'',0,'',0,0,0,0,NULL,0,'2025-08-02 16:21:45','2025-08-02 16:21:45');
+CREATE TABLE IF NOT EXISTS `t_permission` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+  `code` VARCHAR(100) NOT NULL COMMENT '权限点代码',
+  `code_name` VARCHAR(100) NOT NULL COMMENT '权限点名称',
+  `resource_id` BIGINT(20) NOT NULL COMMENT '资源ID',
+  `description` TEXT COMMENT '权限点描述',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_code_resource_id`(`code`,`resource_id`)
+) ENGINE = InnoDB COMMENT = '权限点表';
 
+CREATE TABLE IF NOT EXISTS `t_permission_resource` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+  `permission_id` BIGINT(20) NOT NULL COMMENT '权限点ID',
+  `resource_id` BIGINT(20) NOT NULL COMMENT '资源ID',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_permission_id_resource_id`(`permission_id`, `resource_id`)
+) ENGINE = InnoDB COMMENT = '权限点资源表';
 
--- ptype: 策略的类型标识
--- p: 基本的权限策略，定义 主体 对 资源 的 权限。p, tom, resource1, read 表示 tom 对 resource1 有 read 权限
--- g: 角色继承关系。基础角色的稳定性。
-CREATE TABLE IF NOT EXISTS `t_casbin_rule`  (
-  `ptype` VARCHAR(10) NOT NULL DEFAULT '',
-  `v0` VARCHAR(256) NOT NULL DEFAULT '',
-  `v1` VARCHAR(256) NOT NULL DEFAULT '',
-  `v2` VARCHAR(256) NOT NULL DEFAULT '',
-  `v3` VARCHAR(256) NOT NULL DEFAULT '',
-  `v4` VARCHAR(256) NOT NULL DEFAULT '',
-  `v5` VARCHAR(256) NOT NULL DEFAULT '',
-  KEY `idx_ptype_v0` (`ptype`, `v0`),
-  KEY `idx_ptype_v1` (`ptype`, `v1`)
-) ENGINE = InnoDB COMMENT = 'casbin规则表';
+INSERT INTO `t_org` (`id`, `pid`, `name`, `manager_id`, `manager_name`, `status`)
+VALUES ("00000000-0000-0000-0000-000000000000", '', 'Org-Background-Default', '11111111-0000-0000-0000-000000000000', 'admin', 1);
 
-INSERT INTO `t_casbin_rule`
-(`ptype`, `v0`, `v1`, `v2`)
-VALUES 
-('p', '2', '1', 'ALL'), 
-('p', '2', '2', 'ALL'), 
-('p', '2', '3', 'ALL'),
-('p', '2', '12', 'ALL'), 
-('p', '2', '13', 'ALL'),
-('p', '2', '14', 'ALL'),
-('p', '2', '15', 'ALL'),
-('p', '2', '16', 'ALL'),
-('p', '2', '17', 'ALL'),
-('p', '2', '18', 'ALL'),
-('p', '2', '19', 'ALL'),
-('p', '2', '20', 'ALL'),
-('p', '2', '21', 'ALL'),
-('p', '2', '22', 'ALL'),
-('p', '2', '23', 'ALL'),
-('p', '2', '24', 'ALL'),
-('p', '2', '25', 'ALL'),
-('p', '2', '26', 'ALL'),
-('p', '2', '27', 'ALL');
+INSERT INTO `t_user` (`id`, `name`, `nickname`, `password`, `salt`, `status`, `org_id`)
+VALUES ('11111111-0000-0000-0000-000000000000', 'admin', 'admin', 'c567ae329f9929b518759d3bea13f492', 'f9aZTAa8yz', 1, '00000000-0000-0000-0000-000000000000');
 
+INSERT INTO `t_role` (`id`, `pid`, `org_id`, `name`, `creator_id`) 
+VALUES (1, 0, '00000000-0000-0000-0000-000000000000', 'SuperAdmin', '11111111-0000-0000-0000-000000000000');
 
-INSERT INTO `t_casbin_rule`
-(`ptype`, `v0`, `v1`)
-VALUES 
-('g', 'u_11111111-0000-0000-0000-000000000000', '1');
+INSERT INTO `t_casbin_rule` (`ptype`, `v0`, `v1`)
+VALUES ('g', 'u_11111111-0000-0000-0000-000000000000', '1');
 
 
 CREATE TABLE IF NOT EXISTS `sys_role_scope`  (
@@ -240,35 +152,6 @@ CREATE TABLE IF NOT EXISTS `sys_job_log`  (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB COMMENT = '任务日志表';
 
-CREATE TABLE IF NOT EXISTS `t_login_log`  (
-  `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `org_id` VARCHAR(40) NOT NULL COMMENT '组织ID',
-  `login_name` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '登录账号',
-  `ip` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '登录IP地址',
-  `browser` VARCHAR(512) NOT NULL DEFAULT '' COMMENT '浏览器类型',
-  `status` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '登录状态',
-  `message` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '提示消息',
-  `login_time` DATETIME NOT NULL COMMENT '登录时间',
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  INDEX `idx_org_id_name_time` (`org_id`, `login_name`, `login_time`),
-  INDEX `idx_org_id_time`(`org_id`, `login_time`)
-) ENGINE = InnoDB COMMENT = '登录日志表';
-
-CREATE TABLE IF NOT EXISTS `t_oper_log`  (
-  `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '日志主键',
-  `org_id` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '组织ID',
-  `oper_name` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '操作人员',
-  `oper_url` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '操作URL',
-  `oper_method` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '操作方法',
-  `oper_ip` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '操作IP',
-  `oper_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  INDEX `idx_org_id_name_time`(`org_id`, `oper_name`, `oper_time`),
-  INDEX `idx_org_id_method_name`(`org_id`, `oper_method`, `oper_name`),
-  INDEX `idx_org_id_time`(`org_id`, `oper_time`)
-) ENGINE = InnoDB COMMENT = '操作日志记录';
 
 CREATE TABLE IF NOT EXISTS `sys_notice`  (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -300,3 +183,4 @@ CREATE TABLE IF NOT EXISTS `sys_notice_read`  (
 ) ENGINE = InnoDB COMMENT = '已读记录';
 
 SET FOREIGN_KEY_CHECKS = 1;
+
