@@ -55,7 +55,7 @@ gfToken:
   cacheModel: "redis"
   excludePaths:
     - "/api/v1/system/login"
-    - "api/v1/system/logout"
+    - "/api/v1/system/logout"
     - "/api/v1/system/login2"
     - "/api/v1/system/user/updateUserType"
 

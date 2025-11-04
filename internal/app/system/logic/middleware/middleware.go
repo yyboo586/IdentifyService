@@ -42,7 +42,7 @@ type sMiddleware struct{}
 func (s *sMiddleware) Ctx(r *ghttp.Request) {
 	ctx := r.GetCtx()
 	// 初始化登录用户信息
-	data, err := service.GfToken().Parse(r)
+	data, err := service.Token().Parse(r)
 	if err != nil {
 		// 执行下一步请求逻辑
 		r.Middleware.Next()

@@ -72,7 +72,7 @@ func (i *thirdService) GetSettleInfo(ctx context.Context, userID int64, userType
 }
 
 func (i *thirdService) getSPSettleInfo(ctx context.Context, userID int64) (settleInfo *model.SettleInfo, err error) {
-	url := fmt.Sprintf("%s/api/v1/exhibition-service/service-provider/check", i.ExEngineAddr)
+	url := fmt.Sprintf("%s/api/v1/service-provider/check", i.ExEngineAddr)
 	body := map[string]interface{}{
 		"user_id": userID,
 	}
@@ -104,7 +104,7 @@ func (i *thirdService) getSPSettleInfo(ctx context.Context, userID int64) (settl
 }
 
 func (i *thirdService) getMerchantSettleInfo(ctx context.Context, userID int64) (settleInfo *model.SettleInfo, err error) {
-	url := fmt.Sprintf("%s/api/v1/exhibition-service/merchant/check", i.ExEngineAddr)
+	url := fmt.Sprintf("%s/api/v1/merchant/check", i.ExEngineAddr)
 	body := map[string]interface{}{
 		"user_id": userID,
 	}

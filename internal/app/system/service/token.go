@@ -1,37 +1,18 @@
-/*
-* @desc:token功能
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu
-* @Date:   2022/3/8 15:54
- */
-
 package service
 
 import (
-	"context"
-
-	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/yyboo586/common/authUtils/tokenUtils"
 )
 
-type IGfToken interface {
-	Generate(ctx context.Context, data interface{}) (token string, err error)
-	Refresh(ctx context.Context, token string) (newToken string, err error)
+var t tokenUtils.IToken
 
-	GetTokenFromRequest(r *ghttp.Request) (token string)
-	Parse(r *ghttp.Request) (*tokenUtils.CustomClaims, error)
-	Middleware(group *ghttp.RouterGroup) error
+func RegisterToken(in tokenUtils.IToken) {
+	t = in
 }
 
-var gt IGfToken
-
-func RegisterGToken(gtk IGfToken) {
-	gt = gtk
-}
-
-func GfToken() IGfToken {
-	if gt == nil {
-		panic("implement not found for interface IGfToken, forgot register?")
+func Token() tokenUtils.IToken {
+	if t == nil {
+		panic("implement not found for interface tokenUtils.IToken, forgot register?")
 	}
-	return gt
+	return t
 }

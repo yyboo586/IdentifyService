@@ -63,6 +63,6 @@ func (c *personalController) RefreshToken(ctx context.Context, req *system.Refre
 }
 
 func (c *personalController) genToken(ctx context.Context, userInfo *model.LoginUserRes, ip, userAgent string) (token string, err error) {
-	token, err = service.GfToken().Generate(ctx, userInfo)
+	token, err = service.Token().Generate(ctx, userInfo)
 	return
 }

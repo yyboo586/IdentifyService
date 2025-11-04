@@ -4,6 +4,8 @@ go 1.23.0
 
 toolchain go1.24.2
 
+replace github.com/yyboo586/common v0.0.0-20251104053044-1523e2e9c4ee => ../../common
+
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.8+incompatible
 	github.com/apache/rocketmq-client-go/v2 v2.1.1

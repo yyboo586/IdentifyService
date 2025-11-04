@@ -9,6 +9,7 @@ package router
 
 import (
 	"context"
+
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/tiger1103/gfast/v3/internal/app/system/controller"
 	"github.com/tiger1103/gfast/v3/internal/app/system/service"
@@ -31,8 +32,6 @@ func (router *Router) BindController(ctx context.Context, group *ghttp.RouterGro
 		if err := libRouter.RouterAutoBindBefore(ctx, router, group); err != nil {
 			panic(err)
 		}
-		//登录验证拦截
-		service.GfToken().Middleware(group)
 		group.Middleware(service.Middleware().Auth)
 		//后台操作日志记录
 		group.Hook("/*", ghttp.HookAfterOutput, service.OperateLog().OperationLog)

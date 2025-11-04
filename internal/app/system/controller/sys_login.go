@@ -67,7 +67,7 @@ func (c *loginController) Login(ctx context.Context, req *system.UserLoginReq) (
 		Msg:       "登录成功",
 		Module:    "系统后台",
 	})
-	token, err = service.GfToken().Generate(ctx, user)
+	token, err = service.Token().Generate(ctx, user)
 	if err != nil {
 		g.Log().Error(ctx, err)
 		err = gerror.New("登录失败，后端服务出现错误")
@@ -119,7 +119,7 @@ func (c *loginController) Login2(ctx context.Context, req *system.UserLogin2Req)
 
 	// ip := libUtils.GetClientIp(ctx)
 	// userAgent := libUtils.GetUserAgent(ctx)
-	token, err = service.GfToken().Generate(ctx, userInfo)
+	token, err = service.Token().Generate(ctx, userInfo)
 	if err != nil {
 		return nil, gerror.Wrap(err, "登录失败，后端服务出现错误")
 	}
@@ -141,7 +141,7 @@ func (c *loginController) Login2(ctx context.Context, req *system.UserLogin2Req)
 
 func (c *loginController) TokenInspect(ctx context.Context, req *system.TokenIntrospectReq) (res *system.TokenIntrospectRes, err error) {
 	// 初始化登录用户信息
-	data, err := service.GfToken().Parse(ghttp.RequestFromCtx(ctx))
+	data, err := service.Token().Parse(ghttp.RequestFromCtx(ctx))
 	if err != nil {
 		return nil, gerror.Wrap(err, "解析令牌失败")
 	}
@@ -164,12 +164,12 @@ func (c *loginController) TokenInspect(ctx context.Context, req *system.TokenInt
 }
 
 func (c *loginController) TokenRefresh(ctx context.Context, req *system.TokenRefreshReq) (res *system.TokenRefreshRes, err error) {
-	oldToken := service.GfToken().GetTokenFromRequest(g.RequestFromCtx(ctx))
+	oldToken := service.Token().GetTokenFromRequest(g.RequestFromCtx(ctx))
 	if oldToken == "" {
 		return nil, gerror.New("令牌不存在")
 	}
 
-	token, err := service.GfToken().Refresh(ctx, oldToken)
+	token, err := service.Token().Refresh(ctx, oldToken)
 	if err != nil {
 		return nil, gerror.Wrap(err, "刷新令牌失败")
 	}

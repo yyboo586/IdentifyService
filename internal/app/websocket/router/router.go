@@ -9,6 +9,8 @@ package router
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/guid"
@@ -17,7 +19,6 @@ import (
 	"github.com/tiger1103/gfast/v3/internal/app/system/service"
 	"github.com/tiger1103/gfast/v3/library/libUtils"
 	"github.com/tiger1103/gfast/v3/library/libWebsocket"
-	"net/http"
 )
 
 var R = new(Router)
@@ -65,8 +66,6 @@ func NewClient(r *ghttp.Request, socket *websocket.Conn, firstTime uint64) (clie
 
 func (router *Router) BindController(ctx context.Context, group *ghttp.RouterGroup) {
 	group.Group("/websocket", func(group *ghttp.RouterGroup) {
-		//登录验证拦截
-		service.GfToken().Middleware(group)
 		//context拦截器
 		group.Middleware(service.Middleware().Ctx)
 
