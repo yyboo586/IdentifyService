@@ -10,42 +10,38 @@ package cache
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/tiger1103/gfast-cache/adapter"
-	"github.com/tiger1103/gfast-cache/cache"
 	"github.com/tiger1103/gfast/v3/internal/app/common/consts"
 	"github.com/tiger1103/gfast/v3/internal/app/common/service"
+	"github.com/yyboo586/common/cacheUtils"
 )
 
 func init() {
 	service.RegisterCache(New())
 }
 
-func New() service.ICache {
+type Cache struct {
+	cacheUtils.ICache
+	prefix string
+}
+
+func New() cacheUtils.ICache {
 	var (
 		ctx            = gctx.New()
-		cacheContainer *cache.GfCache
+		cacheContainer cacheUtils.ICache
 	)
 	prefix := g.Cfg().MustGet(ctx, "system.cache.prefix").String()
 	model := g.Cfg().MustGet(ctx, "system.cache.model").String()
-	distPath := g.Cfg().MustGet(ctx, "system.cache.distPath").String()
-	if model == consts.CacheModelRedis {
-		// redis
-		cacheContainer = cache.NewRedis(prefix)
-	} else if model == consts.CacheModelDist {
-		// dist
-		adapter.SetConfig(&adapter.Config{Dir: distPath})
-		cacheContainer = cache.NewDist(prefix)
-	} else {
-		// memory
-		cacheContainer = cache.New(prefix)
-	}
-	return &sCache{
-		GfCache: cacheContainer,
-		prefix:  prefix,
-	}
-}
 
-type sCache struct {
-	*cache.GfCache
-	prefix string
+	switch model {
+	case consts.CacheModelRedis:
+		cacheContainer = cacheUtils.NewRedis(prefix)
+	case consts.CacheModelMem:
+		cacheContainer = cacheUtils.NewMemory(prefix)
+	default:
+		panic("invalid cache model, only support redis and memory")
+	}
+	return &Cache{
+		ICache: cacheContainer,
+		prefix: prefix,
+	}
 }

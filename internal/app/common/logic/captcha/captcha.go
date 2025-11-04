@@ -9,15 +9,25 @@ package captcha
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
+	"net/url"
+	"time"
+
 	"github.com/gogf/gf/v2/encoding/gbase64"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/gogf/gf/v2/util/grand"
 	"github.com/mojocn/base64Captcha"
+	"github.com/tiger1103/gfast/v3/internal/app/common/dao"
+	"github.com/tiger1103/gfast/v3/internal/app/common/model"
+	"github.com/tiger1103/gfast/v3/internal/app/common/model/entity"
 	"github.com/tiger1103/gfast/v3/internal/app/common/service"
 	captchaV2 "github.com/wenlng/go-captcha/captcha"
-	"net/url"
 )
 
 func init() {
@@ -114,4 +124,88 @@ func (s *sCaptcha) VerifyString(id, answer string) bool {
 	c := base64Captcha.NewCaptcha(s.driver, s.store)
 	answer = gstr.ToLower(answer)
 	return c.Verify(id, answer, true)
+}
+
+// 1、60秒内只能发送一次。如果60秒内发送过，则返回错误（"验证码已发送，请60秒后重试"）
+// 2、生成验证码，并保存到数据库，过期时间5分钟
+// 3、发送短信
+func (s *sCaptcha) SendSmsCode(ctx context.Context, phone string, bussinessType model.SMSBusinessType) (err error) {
+	// 检查60秒内是否发送过
+	cacheKey := fmt.Sprintf("sms_code_%s_%d", phone, bussinessType)
+	lastSendTime := service.Cache().Get(ctx, cacheKey)
+	if lastSendTime != nil && !lastSendTime.IsEmpty() {
+		return errors.New("验证码已发送, 请60秒后重试")
+	}
+
+	// 生成6位数字验证码
+	code := grand.Digits(6)
+
+	// 当前时间戳（秒）
+	now := gtime.Now().Unix()
+
+	// 设置过期时间为5分钟后
+	expiredAt := now + 5*60
+
+	// 保存到数据库
+	smsCode := &entity.TSmsCode{
+		BusinessType: int(bussinessType),
+		Phone:        phone,
+		Code:         code,
+		Status:       int(model.SMSCodeStatusInit),
+		CreatedAt:    now,
+		ExpiredAt:    expiredAt,
+		UpdatedAt:    now,
+	}
+
+	_, err = dao.TSmsCode.Ctx(ctx).Data(smsCode).Insert()
+	if err != nil {
+		return gerror.Newf(err.Error(), "保存验证码失败")
+	}
+
+	// 缓存发送时间，60秒过期
+	service.Cache().Set(ctx, cacheKey, now, 60*time.Second)
+
+	// TODO: 发送短信（这里可以调用实际的短信服务）
+	g.Log().Infof(ctx, fmt.Sprintf("发送短信验证码: phone=%s, code=%s", phone, code))
+
+	return nil
+}
+
+func (s *sCaptcha) ValidateSmsCode(ctx context.Context, phone string, bussinessType model.SMSBusinessType, code string) (err error) {
+	// 从数据库获取
+	var smsEntity entity.TSmsCode
+	err = dao.TSmsCode.Ctx(ctx).
+		Where(dao.TSmsCode.Columns().Phone, phone).
+		Where(dao.TSmsCode.Columns().BusinessType, bussinessType).
+		Order(dao.TSmsCode.Columns().CreatedAt, "DESC").
+		Limit(1).
+		Scan(&smsEntity)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return gerror.New("验证码错误")
+		}
+		return gerror.Newf(err.Error(), "获取验证码失败")
+	}
+
+	smsInfo := model.ConvertSmsEntity(&smsEntity)
+	if smsInfo.Status != model.SMSCodeStatusInit {
+		return gerror.New("验证码已被使用，请重新获取")
+	}
+	if smsInfo.ExpiredAt.Unix() < time.Now().Unix() {
+		return gerror.New("验证码已过期，请重新获取")
+	}
+	if smsInfo.Code != code {
+		return gerror.New("验证码错误")
+	}
+
+	dataUpdate := map[string]interface{}{
+		dao.TSmsCode.Columns().Status:    model.SMSCodeStatusUsed,
+		dao.TSmsCode.Columns().UpdatedAt: gtime.Now().Unix(),
+	}
+	_, err = dao.TSmsCode.Ctx(ctx).Where(dao.TSmsCode.Columns().Id, smsEntity.Id).Data(dataUpdate).Update()
+	if err != nil {
+		return gerror.Newf(err.Error(), "更新验证码状态失败")
+	}
+
+	return nil
 }

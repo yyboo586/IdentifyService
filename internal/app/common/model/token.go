@@ -14,8 +14,6 @@ import (
 type TokenOptions struct {
 	//  server name
 	ServerName string `json:"serverName"`
-	// 缓存key (每创建一个实例CacheKey必须不相同)
-	CacheKey string `json:"cacheKey"`
 	// 超时时间 默认10天（秒）
 	Timeout int64 `json:"timeout"`
 	// 缓存刷新时间 默认5天（秒）
@@ -28,7 +26,4 @@ type TokenOptions struct {
 	EncryptKey []byte `json:"encryptKey"`
 	// 拦截排除地址
 	ExcludePaths g.SliceStr `json:"excludePaths"`
-	CacheModel   string     `json:"cacheModel"`
-	//磁盘缓存路径
-	DistPath string `json:"distPath"`
 }

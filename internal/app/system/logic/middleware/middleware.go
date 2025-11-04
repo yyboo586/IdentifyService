@@ -10,6 +10,7 @@ package middleware
 import (
 	"context"
 	"errors"
+
 	"github.com/casbin/casbin/v2"
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/container/gmap"
@@ -41,7 +42,7 @@ type sMiddleware struct{}
 func (s *sMiddleware) Ctx(r *ghttp.Request) {
 	ctx := r.GetCtx()
 	// 初始化登录用户信息
-	data, err := service.GfToken().ParseToken(r)
+	data, err := service.GfToken().Parse(r)
 	if err != nil {
 		// 执行下一步请求逻辑
 		r.Middleware.Next()

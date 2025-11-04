@@ -6,6 +6,7 @@ package internal
 
 import (
 	"context"
+
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -41,6 +42,8 @@ type SysUserColumns struct {
 	UpdatedAt     string // 更新时间
 	DeletedAt     string // 删除时间
 	OpenId        string // 微信open id
+	IuqtID        string // IUQT ID
+	UserType      string // 用户类型(1:服务提供商,2:展商)
 }
 
 // sysUserColumns holds the columns for table sys_user.
@@ -67,6 +70,8 @@ var sysUserColumns = SysUserColumns{
 	UpdatedAt:     "updated_at",
 	DeletedAt:     "deleted_at",
 	OpenId:        "open_id",
+	IuqtID:        "iuqt_id",
+	UserType:      "user_type",
 }
 
 // NewSysUserDao creates and returns a new DAO object for table data access.

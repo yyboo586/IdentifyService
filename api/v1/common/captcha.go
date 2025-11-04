@@ -42,3 +42,24 @@ type CaptchaV2Res struct {
 type CheckCaptchaV2Res struct {
 	g.Meta `mime:"application/json"`
 }
+
+type SendSmsCodeReq struct {
+	g.Meta       `path:"/send_sms_code" tags:"通用接口/验证码" method:"post" summary:"发送短信验证码"`
+	Phone        string `json:"phone" v:"required#手机号不能为空"`
+	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码登录)"`
+}
+
+type SendSmsCodeRes struct {
+	g.Meta `mime:"application/json"`
+}
+
+type ValidateSMSCodeReq struct {
+	g.Meta       `path:"/validate_sms_code" tags:"通用接口/验证码" method:"post" summary:"验证短信验证码"`
+	Phone        string `json:"phone" v:"required#手机号不能为空" dc:"手机号"`
+	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码登录)"`
+	Code         string `json:"code" v:"required#验证码不能为空" dc:"验证码"`
+}
+
+type ValidateSMSCodeRes struct {
+	g.Meta `mime:"application/json"`
+}

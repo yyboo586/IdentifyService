@@ -10,11 +10,12 @@ package sysUser
 import (
 	"context"
 	"fmt"
+	"reflect"
+
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/encoding/gurl"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/tiger1103/gfast/v3/library/libWebsocket"
-	"reflect"
 
 	"github.com/gogf/gf/v2/container/gset"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -74,7 +75,7 @@ func (s *sSysUser) NotCheckAuthAdminIds(ctx context.Context) *gset.Set {
 
 func (s *sSysUser) GetAdminUserByUsernamePassword(ctx context.Context, req *system.UserLoginReq) (user *model.LoginUserRes, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
-		user, err = s.GetUserByUsername(ctx, req.Username)
+		user, err = s.GetUserByUsername(ctx, req.UserName)
 		liberr.ErrIsNil(ctx, err)
 		liberr.ValueIsNil(user, "账号密码错误")
 		//验证密码
@@ -105,6 +106,26 @@ func (s *sSysUser) GetUserByPhone(ctx context.Context, phone string) (user *mode
 			Scan(&user)
 		liberr.ErrIsNil(ctx, err, "登录失败，用户信息不存在")
 	})
+	return
+}
+
+func (s *sSysUser) GetUserByPhone2(ctx context.Context, phone string) (user *model.User, err error) {
+	var userEntity entity.SysUser
+	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().Mobile, phone).Scan(&userEntity)
+	if err != nil {
+		return nil, err
+	}
+	user = model.ConvertToUser(&userEntity)
+	return
+}
+
+func (s *sSysUser) GetUserByIUQTID(ctx context.Context, iuqtID string) (user *model.User, err error) {
+	var userEntity entity.SysUser
+	err = dao.SysUser.Ctx(ctx).Where(dao.SysUser.Columns().IuqtID, iuqtID).Scan(&userEntity)
+	if err != nil {
+		return nil, err
+	}
+	user = model.ConvertToUser(&userEntity)
 	return
 }
 

@@ -1,0 +1,13 @@
+[Unit]
+Description=Identify Service
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/usr/share/identify_service
+ExecStart=/usr/share/identify_service/identify_service
+Restart=on-failure
+RestartSec=30s
+
+[Install]
+WantedBy=multi-user.target

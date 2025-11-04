@@ -16,6 +16,7 @@ import (
 	_ "github.com/tiger1103/gfast/v3/internal/app/system/logic/sysRole"
 	_ "github.com/tiger1103/gfast/v3/internal/app/system/logic/sysUser"
 	_ "github.com/tiger1103/gfast/v3/internal/app/system/logic/sysUserOnline"
+	_ "github.com/tiger1103/gfast/v3/internal/app/system/logic/thirdService"
 	_ "github.com/tiger1103/gfast/v3/internal/app/system/logic/timeTask"
 	_ "github.com/tiger1103/gfast/v3/internal/app/system/logic/token"
 	_ "github.com/tiger1103/gfast/v3/internal/app/system/logic/toolsGenTable"

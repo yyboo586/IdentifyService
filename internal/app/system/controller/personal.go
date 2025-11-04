@@ -10,10 +10,7 @@ package controller
 import (
 	"context"
 	"errors"
-	"github.com/gogf/gf/v2/crypto/gmd5"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/gogf/gf/v2/util/gconv"
+
 	"github.com/tiger1103/gfast/v3/api/v1/system"
 	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 	"github.com/tiger1103/gfast/v3/internal/app/system/service"
@@ -66,11 +63,6 @@ func (c *personalController) RefreshToken(ctx context.Context, req *system.Refre
 }
 
 func (c *personalController) genToken(ctx context.Context, userInfo *model.LoginUserRes, ip, userAgent string) (token string, err error) {
-	key := gconv.String(userInfo.Id) + "-" + gmd5.MustEncryptString(userInfo.UserName) + gmd5.MustEncryptString(userInfo.UserPassword)
-	if g.Cfg().MustGet(ctx, "gfToken.multiLogin").Bool() {
-		key = gconv.String(userInfo.Id) + "-" + gmd5.MustEncryptString(userInfo.UserName) + gmd5.MustEncryptString(userInfo.UserPassword+ip+userAgent+gtime.Now().String())
-	}
-
-	token, err = service.GfToken().GenerateToken(ctx, key, userInfo)
+	token, err = service.GfToken().Generate(ctx, userInfo)
 	return
 }

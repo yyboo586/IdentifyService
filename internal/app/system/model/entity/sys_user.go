@@ -11,6 +11,7 @@ import (
 // SysUser is the golang structure for table sys_user.
 type SysUser struct {
 	Id            uint64      `json:"id"            description:""`
+	IUQTID        string      `json:"iuqt_id"      description:"IUQT ID"`
 	UserName      string      `json:"userName"      description:"用户名"`
 	Mobile        string      `json:"mobile"        description:"中国手机不带国家代码，国际手机号格式为：国家代码-手机号"`
 	UserNickname  string      `json:"userNickname"  description:"用户昵称"`
@@ -32,4 +33,5 @@ type SysUser struct {
 	UpdatedAt     *gtime.Time `json:"updatedAt"     description:"更新时间"`
 	DeletedAt     *gtime.Time `json:"deletedAt"     description:"删除时间"`
 	OpenId        string      `json:"openId "    description:"微信小程序open id"`
+	UserType      int         `json:"userType"      description:"用户类型(1:服务提供商,2:展商)"`
 }

@@ -7,6 +7,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/gogf/gf/v2/container/garray"
 
 	"github.com/gogf/gf/v2/container/gset"
@@ -60,6 +61,9 @@ type (
 		GetUsersByRoleId(ctx context.Context, roleId uint) (users []*model.SysUserRoleDeptRes, err error)
 		GetAuthWhere(ctx context.Context, m *gdb.Model, userInfo *model.ContextUser, field ...string) *gdb.Model
 		GetAuthDeptWhere(ctx context.Context, m *gdb.Model, userInfo *model.ContextUser, field ...string) *gdb.Model
+
+		Login2(ctx context.Context, req *system.UserLogin2Req) (userInfo *model.LoginUserRes, err error)
+		UpdateUserType(ctx context.Context, userID int64, userType string) (err error)
 	}
 )
 

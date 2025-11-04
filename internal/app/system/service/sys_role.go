@@ -7,6 +7,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 
 	"github.com/tiger1103/gfast/v3/api/v1/system"
@@ -30,6 +31,8 @@ type (
 		FindSonIdsByParentId(roleList []*entity.SysRole, id uint) []uint
 		GetRoleDataScope(ctx context.Context, roleId uint) (data []*model.ScopeAuthData, err error)
 		GetRoleMenuScope(ctx context.Context, roleIds []uint, menuId uint) (data []*model.ScopeAuthData, err error)
+
+		GetRoleByName(ctx context.Context, roleName string) (role *model.Role, err error)
 	}
 )
 

@@ -9,6 +9,7 @@ package sysUserOnline
 
 import (
 	"context"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/grpool"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -158,8 +159,8 @@ func (s *sSysUserOnline) GetOnlineListPage(ctx context.Context, req *system.SysU
 
 func (s *sSysUserOnline) UserIsOnline(ctx context.Context, token string) bool {
 	err := g.Try(ctx, func(ctx context.Context) {
-		_, _, err := service.GfToken().GetTokenData(ctx, token)
-		liberr.ErrIsNil(ctx, err)
+		//_, _, err := service.GfToken().GetTokenData(ctx, token)
+		//liberr.ErrIsNil(ctx, err)
 	})
 	return err == nil
 }
@@ -171,15 +172,18 @@ func (s *sSysUserOnline) DeleteOnlineByToken(ctx context.Context, token string) 
 
 func (s *sSysUserOnline) ForceLogout(ctx context.Context, ids []int) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
-		var onlineList []*entity.SysUserOnline
+		/*var onlineList []*entity.SysUserOnline
 		onlineList, err = s.GetInfosByIds(ctx, ids)
 		liberr.ErrIsNil(ctx, err)
+		*/
 		_, err = dao.SysUserOnline.Ctx(ctx).Where(dao.SysUserOnline.Columns().Id+" in(?)", ids).Delete()
 		liberr.ErrIsNil(ctx, err)
-		for _, v := range onlineList {
-			err = service.GfToken().RemoveToken(ctx, v.Token)
-			liberr.ErrIsNil(ctx, err)
-		}
+		/*
+			for _, v := range onlineList {
+				// err = service.GfToken().RemoveToken(ctx, v.Token)
+				liberr.ErrIsNil(ctx, err)
+			}
+		*/
 	})
 	return
 }

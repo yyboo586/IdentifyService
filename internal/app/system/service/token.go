@@ -11,17 +11,16 @@ import (
 	"context"
 
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/tiger1103/gfast-token/gftoken"
+	"github.com/yyboo586/common/authUtils/tokenUtils"
 )
 
 type IGfToken interface {
-	GenerateToken(ctx context.Context, key string, data interface{}) (keys string, err error)
+	Generate(ctx context.Context, data interface{}) (token string, err error)
+	Refresh(ctx context.Context, token string) (newToken string, err error)
+
+	GetTokenFromRequest(r *ghttp.Request) (token string)
+	Parse(r *ghttp.Request) (*tokenUtils.CustomClaims, error)
 	Middleware(group *ghttp.RouterGroup) error
-	ParseToken(r *ghttp.Request) (*gftoken.CustomClaims, error)
-	IsLogin(r *ghttp.Request) (b bool, failed *gftoken.AuthFailed)
-	GetRequestToken(r *ghttp.Request) (token string)
-	RemoveToken(ctx context.Context, token string) (err error)
-	GetTokenData(ctx context.Context, token string) (tData *gftoken.TokenData, key string, err error)
 }
 
 var gt IGfToken

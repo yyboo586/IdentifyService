@@ -10,6 +10,7 @@ package sysRole
 import (
 	"context"
 	"errors"
+
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -174,6 +175,17 @@ func (s *sSysRole) Get(ctx context.Context, id uint) (res *model.RoleInfoRes, er
 		if err != nil {
 			res.EffectiveTimeInfo = new(model.EffectiveTimeInfo)
 		}
+	})
+	return
+}
+
+func (s *sSysRole) GetRoleByName(ctx context.Context, roleName string) (role *model.Role, err error) {
+	err = g.Try(ctx, func(ctx context.Context) {
+		var roleEntity entity.SysRole
+		err = dao.SysRole.Ctx(ctx).
+			Where(dao.SysRole.Columns().Name, roleName).Scan(&roleEntity)
+		liberr.ErrIsNil(ctx, err, "获取角色信息失败")
+		role = model.ConvertRoleEntity(&roleEntity)
 	})
 	return
 }
