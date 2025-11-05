@@ -414,7 +414,6 @@ func fieldsEx() []string {
 		s.UserName,
 		s.Mobile,
 		s.UserNickname,
-		s.Birthday,
 		s.UserStatus,
 		s.UserEmail,
 		s.Sex,

@@ -15,7 +15,6 @@ type SysUser struct {
 	UserName      string      `json:"userName"      description:"用户名"`
 	Mobile        string      `json:"mobile"        description:"中国手机不带国家代码，国际手机号格式为：国家代码-手机号"`
 	UserNickname  string      `json:"userNickname"  description:"用户昵称"`
-	Birthday      int         `json:"birthday"      description:"生日"`
 	UserPassword  string      `json:"userPassword"  description:"登录密码;cmf_password加密"`
 	UserSalt      string      `json:"userSalt"      description:"加密盐"`
 	UserStatus    uint        `json:"userStatus"    description:"用户状态;0:禁用,1:正常,2:未验证"`

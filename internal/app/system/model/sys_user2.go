@@ -70,7 +70,6 @@ type User struct {
 	UserName      string      `json:"user_name"`
 	Mobile        string      `json:"mobile"`
 	UserNickname  string      `json:"user_nickname"`
-	Birthday      int         `json:"birthday"`
 	UserPassword  string      `json:"user_password"`
 	UserSalt      string      `json:"user_salt"`
 	UserStatus    UserStatus  `json:"user_status"`
@@ -99,7 +98,6 @@ func ConvertToUser(user *entity.SysUser) *User {
 		UserName:      user.UserName,
 		Mobile:        user.Mobile,
 		UserNickname:  user.UserNickname,
-		Birthday:      user.Birthday,
 		UserPassword:  user.UserPassword,
 		UserSalt:      user.UserSalt,
 		UserStatus:    UserStatus(user.UserStatus),

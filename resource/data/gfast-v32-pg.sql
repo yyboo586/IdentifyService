@@ -5613,7 +5613,6 @@ CREATE TABLE "sys_user" (
   "user_name" varchar(60) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
   "mobile" varchar(20) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
   "user_nickname" varchar(50) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
-  "birthday" int4 NOT NULL DEFAULT 0,
   "user_password" varchar(255) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
   "user_salt" char(10) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::bpchar,
   "user_status" int2 NOT NULL DEFAULT 1,
@@ -5636,7 +5635,6 @@ CREATE TABLE "sys_user" (
 COMMENT ON COLUMN "sys_user"."user_name" IS '用户名';
 COMMENT ON COLUMN "sys_user"."mobile" IS '中国手机不带国家代码，国际手机号格式为：国家代码-手机号';
 COMMENT ON COLUMN "sys_user"."user_nickname" IS '用户昵称';
-COMMENT ON COLUMN "sys_user"."birthday" IS '生日';
 COMMENT ON COLUMN "sys_user"."user_password" IS '登录密码;cmf_password加密';
 COMMENT ON COLUMN "sys_user"."user_salt" IS '加密盐';
 COMMENT ON COLUMN "sys_user"."user_status" IS '用户状态;0:禁用,1:正常,2:未验证';
