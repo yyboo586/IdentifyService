@@ -1,8 +1,9 @@
 package model
 
 import (
+	"IdentifyService/internal/app/system/model/entity"
+
 	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
 )
 
 type LoginType int

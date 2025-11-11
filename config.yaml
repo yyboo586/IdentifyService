@@ -100,7 +100,7 @@ gen:
   moduleName: "system"
   apiName: "api/v1"
   packageName: "internal/app/system"
-  goModName: "github.com/tiger1103/gfast/v3"
+  goModName: "IdentifyService"
   autoRemovePre: true   #是否自动删除表前缀
   tablePrefix: "table_,qxkj_"   #表前缀
   templatePath: "./resource/template/vm"  #代码生成模板路径

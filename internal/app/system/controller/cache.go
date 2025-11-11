@@ -1,21 +1,16 @@
-/*
-* @desc:缓存处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2023/2/1 18:14
- */
-
 package controller
 
 import (
 	"context"
+
+	"IdentifyService/api/v1/system"
+	commonConsts "IdentifyService/internal/app/common/consts"
+	"IdentifyService/internal/app/common/service"
+	"IdentifyService/internal/app/system/consts"
+
 	"github.com/gogf/gf/v2/container/gvar"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	commonConsts "github.com/tiger1103/gfast/v3/internal/app/common/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
 )
 
 var Cache = new(cacheController)

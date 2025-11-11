@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"IdentifyService/internal/app/system/model"
+
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 	"github.com/yyboo586/common/httpUtils"
 )
 

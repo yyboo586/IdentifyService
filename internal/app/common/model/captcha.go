@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/tiger1103/gfast/v3/internal/app/common/model/entity"
+	"IdentifyService/internal/app/common/model/entity"
 )
 
 type SMSBusinessType int

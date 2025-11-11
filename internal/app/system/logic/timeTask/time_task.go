@@ -1,16 +1,10 @@
-/*
-* @desc:定时任务栈
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2023/1/13 17:41
- */
-
 package timeTask
 
 import (
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
 	"sync"
+
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/service"
 )
 
 func init() {

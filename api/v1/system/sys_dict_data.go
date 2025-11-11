@@ -1,17 +1,11 @@
-/*
-* @desc:字典数据api
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/3/18 11:59
- */
-
 package system
 
 import (
+	commonApi "IdentifyService/api/v1/common"
+	commonModel "IdentifyService/internal/app/common/model"
+	commonEntity "IdentifyService/internal/app/common/model/entity"
+
 	"github.com/gogf/gf/v2/frame/g"
-	commonApi "github.com/tiger1103/gfast/v3/api/v1/common"
-	commonModel "github.com/tiger1103/gfast/v3/internal/app/common/model"
-	commonEntity "github.com/tiger1103/gfast/v3/internal/app/common/model/entity"
 )
 
 // GetDictReq 获取字典信息请求参数

@@ -1,18 +1,10 @@
-// ==========================================================================
-// GFast自动生成api操作代码。
-// 生成日期：2023-11-09 17:37:25
-// 生成路径: api/v1/system/sys_notice_read.go
-// 生成人：gfast
-// desc:已读记录相关参数
-// company:云南奇讯科技有限公司
-// ==========================================================================
-
 package system
 
 import (
+	commonApi "IdentifyService/api/v1/common"
+	"IdentifyService/internal/app/system/model"
+
 	"github.com/gogf/gf/v2/frame/g"
-	commonApi "github.com/tiger1103/gfast/v3/api/v1/common"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 )
 
 // SysNoticeReadSearchReq 分页请求参数

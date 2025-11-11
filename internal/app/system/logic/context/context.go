@@ -1,18 +1,13 @@
-/*
-* @desc:context-service
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/23 14:51
- */
-
 package context
 
 import (
 	"context"
+
+	"IdentifyService/internal/app/system/consts"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/service"
+
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
 )
 
 func init() {

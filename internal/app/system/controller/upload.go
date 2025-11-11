@@ -2,12 +2,14 @@ package controller
 
 import (
 	"context"
+
+	"IdentifyService/api/v1/system"
+	commonConsts "IdentifyService/internal/app/common/consts"
+	commonService "IdentifyService/internal/app/common/service"
+	"IdentifyService/internal/app/system/consts"
+	"IdentifyService/internal/app/system/service"
+
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	commonConsts "github.com/tiger1103/gfast/v3/internal/app/common/consts"
-	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
 )
 
 var Upload = new(uploadController)

@@ -1,17 +1,11 @@
-/*
-* @desc:缓存处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/27 16:33
- */
-
 package cache
 
 import (
+	"IdentifyService/internal/app/common/consts"
+	"IdentifyService/internal/app/common/service"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/tiger1103/gfast/v3/internal/app/common/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/common/service"
 	"github.com/yyboo586/common/cacheUtils"
 )
 

@@ -1,20 +1,15 @@
-/*
-* @desc:定时任务配置
-* @company:云南省奇讯科技有限公司
-* @Author: yixiaohu
-* @Date:   2021/7/16 15:45
- */
-
 package task
 
 import (
 	"context"
+
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/internal/mounter"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/internal/mounter"
 )
 
 func init() {

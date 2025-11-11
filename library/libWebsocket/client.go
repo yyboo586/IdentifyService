@@ -2,14 +2,16 @@ package libWebsocket
 
 import (
 	"context"
+	"runtime/debug"
+
+	systemModel "IdentifyService/internal/app/system/model"
+
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gorilla/websocket"
-	systemModel "github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"runtime/debug"
 )
 
 const (

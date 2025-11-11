@@ -1,10 +1,3 @@
-/*
-* @desc:公用model
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2023/5/11 22:43
- */
-
 package model
 
 // PageReq 公共请求参数

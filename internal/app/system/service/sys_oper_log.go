@@ -8,9 +8,10 @@ package service
 import (
 	"context"
 
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/system/model"
+
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 )
 
 type (

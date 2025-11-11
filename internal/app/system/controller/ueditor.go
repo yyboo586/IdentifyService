@@ -1,27 +1,22 @@
-/*
-* @desc:UEditor处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/11/17 14:40
- */
-
 package controller
 
 import (
 	"context"
 	"fmt"
+	"math"
+
+	"IdentifyService/api/v1/system"
+	commonConsts "IdentifyService/internal/app/common/consts"
+	"IdentifyService/internal/app/common/model"
+	commonService "IdentifyService/internal/app/common/service"
+	"IdentifyService/internal/app/system/consts"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/libUtils"
+
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	commonConsts "github.com/tiger1103/gfast/v3/internal/app/common/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model"
-	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/libUtils"
-	"math"
 )
 
 var UEditor = new(uEditorController)

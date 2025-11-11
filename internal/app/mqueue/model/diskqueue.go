@@ -1,10 +1,3 @@
-/**
- * @Company: 云南奇讯科技有限公司
- * @Author: yxf
- * @Description:
- * @Date: 2023/7/7 15:36
- */
-
 package model
 
 import "time"

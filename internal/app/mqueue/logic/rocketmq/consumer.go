@@ -1,22 +1,17 @@
-/**
- * @Company: 云南奇讯科技有限公司
- * @Author: yxf
- * @Description:
- * @Date: 2023/7/24 9:54
- */
-
 package rocketmq
 
 import (
 	"context"
 	"errors"
+
+	"IdentifyService/internal/app/mqueue/model"
+	"IdentifyService/internal/app/mqueue/service"
+
 	"github.com/apache/rocketmq-client-go/v2"
 	rmq_consumer "github.com/apache/rocketmq-client-go/v2/consumer"
 	"github.com/apache/rocketmq-client-go/v2/primitive"
 	"github.com/apache/rocketmq-client-go/v2/rlog"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/model"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/service"
 )
 
 type rocketmqConsumer struct {

@@ -1,10 +1,3 @@
-/*
-* @desc:用户处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/23 15:08
- */
-
 package sysUser
 
 import (
@@ -12,10 +5,22 @@ import (
 	"fmt"
 	"reflect"
 
+	"IdentifyService/library/libWebsocket"
+
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/encoding/gurl"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/tiger1103/gfast/v3/library/libWebsocket"
+
+	"IdentifyService/api/v1/system"
+	commonService "IdentifyService/internal/app/common/service"
+	"IdentifyService/internal/app/system/consts"
+	"IdentifyService/internal/app/system/dao"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/model/do"
+	"IdentifyService/internal/app/system/model/entity"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/libUtils"
+	"IdentifyService/library/liberr"
 
 	"github.com/gogf/gf/v2/container/gset"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -26,16 +31,6 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/gogf/gf/v2/util/grand"
 	"github.com/mssola/user_agent"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/do"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/libUtils"
-	"github.com/tiger1103/gfast/v3/library/liberr"
 )
 
 func init() {

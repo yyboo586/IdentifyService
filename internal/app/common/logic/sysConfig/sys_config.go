@@ -1,26 +1,21 @@
-/*
-* @desc:配置参数管理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/28 9:13
- */
-
 package sysConfig
 
 import (
 	"context"
 	"errors"
+
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/common/consts"
+	"IdentifyService/internal/app/common/dao"
+	"IdentifyService/internal/app/common/model/do"
+	"IdentifyService/internal/app/common/model/entity"
+	"IdentifyService/internal/app/common/service"
+	systemConsts "IdentifyService/internal/app/system/consts"
+	"IdentifyService/library/liberr"
+
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/common/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/common/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model/do"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/common/service"
-	systemConsts "github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/library/liberr"
 )
 
 func init() {

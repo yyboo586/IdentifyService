@@ -1,10 +1,3 @@
-/**
- * @Company: 云南奇讯科技有限公司
- * @Author: yxf
- * @Description:
- * @Date: 2023/7/7 14:54
- */
-
 package diskqueue
 
 import (
@@ -13,16 +6,18 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/util/grand"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/consts"
-	disk "github.com/tiger1103/gfast/v3/internal/app/mqueue/driver"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/model"
 	"io"
 	"os"
 	"sync"
 	"time"
+
+	"IdentifyService/internal/app/mqueue/consts"
+	disk "IdentifyService/internal/app/mqueue/driver"
+	"IdentifyService/internal/app/mqueue/model"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/util/grand"
 )
 
 func logger(ctx context.Context) disk.AppLogFunc {

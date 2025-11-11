@@ -1,15 +1,8 @@
-/**
- * @Company: 云南奇讯科技有限公司
- * @Author: yxf
- * @Description:
- * @Date: 2023/7/3 8:56
- */
-
 package service
 
 import (
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/model"
+	"IdentifyService/internal/app/mqueue/consts"
+	"IdentifyService/internal/app/mqueue/model"
 )
 
 type IConsumer interface {

@@ -1,27 +1,20 @@
-// ==========================================================================
-// GFast自动生成logic操作代码。
-// 生成日期：2024-10-23 16:10:12
-// 生成路径: internal/app/system/logic/sys_attachment.go
-// 生成人：gfast
-// desc:附件管理
-// company:云南奇讯科技有限公司
-// ==========================================================================
-
 package sysAttachment
 
 import (
 	"context"
+
+	"IdentifyService/internal/app/common/dao"
+	"IdentifyService/internal/app/common/model"
+	"IdentifyService/internal/app/common/model/do"
+	"IdentifyService/internal/app/common/service"
+	"IdentifyService/internal/app/system/consts"
+	"IdentifyService/library/liberr"
+
 	"github.com/gogf/gf/v2/container/gset"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/internal/app/common/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model/do"
-	"github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/library/liberr"
 )
 
 var fileKind = map[string]*gset.StrSet{

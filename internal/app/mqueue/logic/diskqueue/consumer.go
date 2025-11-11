@@ -1,18 +1,13 @@
-/**
- * @Company: 云南奇讯科技有限公司
- * @Author: yxf
- * @Description:
- * @Date: 2023/7/12 10:22
- */
-
 package diskqueue
 
 import (
 	"context"
+
+	"IdentifyService/internal/app/mqueue/model"
+	"IdentifyService/internal/app/mqueue/service"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/grand"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/model"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/service"
 )
 
 type consumer struct {

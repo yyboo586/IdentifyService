@@ -7,9 +7,10 @@ package service
 
 import (
 	"context"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
 
-	"github.com/tiger1103/gfast/v3/api/v1/system"
+	"IdentifyService/internal/app/system/model"
+
+	"IdentifyService/api/v1/system"
 )
 
 type (

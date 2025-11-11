@@ -1,28 +1,23 @@
-/*
-* @desc:菜单处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/23 16:14
- */
-
 package sysAuthRule
 
 import (
 	"context"
 	"fmt"
+
+	"IdentifyService/api/v1/system"
+	commonService "IdentifyService/internal/app/common/service"
+	"IdentifyService/internal/app/system/consts"
+	"IdentifyService/internal/app/system/dao"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/model/do"
+	"IdentifyService/internal/app/system/model/entity"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/liberr"
+
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/do"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/liberr"
 )
 
 func init() {

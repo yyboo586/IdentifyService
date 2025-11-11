@@ -1,15 +1,16 @@
-/*
-* @desc:中间件
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/23 15:05
- */
-
 package middleware
 
 import (
 	"context"
 	"errors"
+
+	commonService "IdentifyService/internal/app/common/service"
+	"IdentifyService/internal/app/system/consts"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/model/entity"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/libResponse"
+	"IdentifyService/library/liberr"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gogf/gf/v2/container/garray"
@@ -19,13 +20,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
-	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/libResponse"
-	"github.com/tiger1103/gfast/v3/library/liberr"
 )
 
 func init() {
@@ -69,9 +63,6 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 	//获取登陆用户id
 	adminId := service.Context().GetUserId(ctx)
 	url := gstr.TrimLeft(r.Request.URL.Path, "/")
-	/*if r.Method != "GET" && adminId != 1 && url != "api/v1/system/login" {
-		libResponse.FailJson(true, r, "对不起！演示系统，不能删改数据！")
-	}*/
 	//获取无需验证权限的用户id
 	tagSuperAdmin := service.SysUser().IsSupperAdmin(ctx, service.Context().GetUserId(ctx))
 	if tagSuperAdmin {

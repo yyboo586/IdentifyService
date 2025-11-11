@@ -1,29 +1,23 @@
-/*
-* @desc:用户在线状态处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2023/1/10 14:50
- */
-
 package sysUserOnline
 
 import (
 	"context"
 
+	"IdentifyService/api/v1/common"
+	"IdentifyService/api/v1/system"
+	comModel "IdentifyService/internal/app/common/model"
+	"IdentifyService/internal/app/system/consts"
+	"IdentifyService/internal/app/system/dao"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/model/do"
+	"IdentifyService/internal/app/system/model/entity"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/liberr"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/grpool"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/mssola/user_agent"
-	"github.com/tiger1103/gfast/v3/api/v1/common"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	comModel "github.com/tiger1103/gfast/v3/internal/app/common/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/do"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/liberr"
 )
 
 func init() {
@@ -172,18 +166,8 @@ func (s *sSysUserOnline) DeleteOnlineByToken(ctx context.Context, token string) 
 
 func (s *sSysUserOnline) ForceLogout(ctx context.Context, ids []int) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
-		/*var onlineList []*entity.SysUserOnline
-		onlineList, err = s.GetInfosByIds(ctx, ids)
-		liberr.ErrIsNil(ctx, err)
-		*/
 		_, err = dao.SysUserOnline.Ctx(ctx).Where(dao.SysUserOnline.Columns().Id+" in(?)", ids).Delete()
 		liberr.ErrIsNil(ctx, err)
-		/*
-			for _, v := range onlineList {
-				// err = service.GfToken().RemoveToken(ctx, v.Token)
-				liberr.ErrIsNil(ctx, err)
-			}
-		*/
 	})
 	return
 }

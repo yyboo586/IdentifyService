@@ -1,26 +1,21 @@
-/*
-* @desc:代码生成字段处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/10/28 10:10
- */
-
 package toolsGenTableColumn
 
 import (
 	"context"
 	"fmt"
+	"strings"
+
+	"IdentifyService/internal/app/system/dao"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/model/entity"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/liberr"
+
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/liberr"
-	"strings"
 )
 
 func init() {

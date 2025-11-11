@@ -1,17 +1,11 @@
-/*
-* @desc:token功能
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/27 17:01
- */
-
 package token
 
 import (
+	commonModel "IdentifyService/internal/app/common/model"
+	"IdentifyService/internal/app/system/service"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	commonModel "github.com/tiger1103/gfast/v3/internal/app/common/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
 	"github.com/yyboo586/common/authUtils/tokenUtils"
 )
 

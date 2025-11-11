@@ -1,25 +1,20 @@
-/*
-* @desc:xxxx功能描述
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/11/3 9:55
- */
-
 package personal
 
 import (
 	"context"
+
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/system/dao"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/model/do"
+	"IdentifyService/internal/app/system/model/entity"
+	service "IdentifyService/internal/app/system/service"
+	"IdentifyService/library/libUtils"
+	"IdentifyService/library/liberr"
+
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/grand"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/do"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
-	service "github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/libUtils"
-	"github.com/tiger1103/gfast/v3/library/liberr"
 )
 
 func init() {

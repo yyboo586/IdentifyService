@@ -1,15 +1,13 @@
-/*
-* @desc:登录
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu
-* @Date:   2022/4/27 21:52
- */
-
 package controller
 
 import (
 	"context"
 	"fmt"
+
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/libUtils"
 
 	"github.com/gogf/gf/v2/crypto/gmd5"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -17,10 +15,6 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/libUtils"
 )
 
 var (

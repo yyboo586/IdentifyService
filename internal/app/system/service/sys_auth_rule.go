@@ -8,9 +8,9 @@ package service
 import (
 	"context"
 
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/model/entity"
 )
 
 type (
@@ -28,7 +28,7 @@ type (
 		GetMenuListTree(pid uint, list []*model.SysAuthRuleInfoRes) []*model.SysAuthRuleTreeRes
 		DeleteMenuByIds(ctx context.Context, ids []int) (err error)
 		FindSonByParentId(list []*model.SysAuthRuleInfoRes, pid uint) []*model.SysAuthRuleInfoRes
-		GetIdByName(ctx context.Context,name string)(id uint,err error)
+		GetIdByName(ctx context.Context, name string) (id uint, err error)
 	}
 )
 

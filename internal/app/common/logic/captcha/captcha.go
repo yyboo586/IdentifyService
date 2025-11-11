@@ -1,10 +1,3 @@
-/*
-* @desc:验证码处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/28 9:01
- */
-
 package captcha
 
 import (
@@ -15,6 +8,11 @@ import (
 	"net/url"
 	"time"
 
+	"IdentifyService/internal/app/common/dao"
+	"IdentifyService/internal/app/common/model"
+	"IdentifyService/internal/app/common/model/entity"
+	"IdentifyService/internal/app/common/service"
+
 	"github.com/gogf/gf/v2/encoding/gbase64"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
@@ -23,10 +21,6 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/gogf/gf/v2/util/grand"
 	"github.com/mojocn/base64Captcha"
-	"github.com/tiger1103/gfast/v3/internal/app/common/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/common/service"
 	captchaV2 "github.com/wenlng/go-captcha/captcha"
 )
 

@@ -1,15 +1,9 @@
-/*
-* @desc:角色
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/3/30 9:11
- */
-
 package model
 
 import (
+	"IdentifyService/internal/app/system/model/entity"
+
 	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
 )
 
 type EffectiveTimeInfo struct {

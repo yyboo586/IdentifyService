@@ -1,10 +1,3 @@
-/*
-* @desc:上传处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/28 9:37
- */
-
 package upload
 
 import (
@@ -13,20 +6,22 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
+
+	"IdentifyService/internal/app/common/consts"
+	"IdentifyService/internal/app/common/model"
+	"IdentifyService/internal/app/common/model/entity"
+	"IdentifyService/internal/app/common/service"
+	"IdentifyService/library/libUtils"
+	"IdentifyService/library/liberr"
+	"IdentifyService/library/upload"
+
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/internal/app/common/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/library/libUtils"
-	"github.com/tiger1103/gfast/v3/library/liberr"
-	"github.com/tiger1103/gfast/v3/library/upload"
-	"io"
 )
 
 func init() {

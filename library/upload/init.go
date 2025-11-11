@@ -2,9 +2,11 @@ package upload
 
 import (
 	"context"
+
+	"IdentifyService/internal/app/common/model"
+	"IdentifyService/internal/mounter"
+
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model"
-	"github.com/tiger1103/gfast/v3/internal/mounter"
 )
 
 const (

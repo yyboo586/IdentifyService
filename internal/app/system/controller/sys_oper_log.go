@@ -1,16 +1,10 @@
-/*
-* @desc:系统后台操作日志
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/21 16:10
- */
-
 package controller
 
 import (
 	"context"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
+
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/system/service"
 )
 
 var OperLog = new(operateLogController)

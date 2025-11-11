@@ -11,8 +11,9 @@ package controller
 
 import (
 	"context"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
+
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/system/service"
 )
 
 type sysJobController struct {

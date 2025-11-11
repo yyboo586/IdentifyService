@@ -1,14 +1,14 @@
-/*
-* @desc:oss上传
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2023/8/23 11:11
- */
-
 package upload
 
 import (
 	"context"
+	"mime/multipart"
+	"strconv"
+	"strings"
+
+	"IdentifyService/internal/app/common/model"
+	"IdentifyService/library/liberr"
+
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
@@ -16,11 +16,6 @@ import (
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/grand"
-	"github.com/tiger1103/gfast/v3/internal/app/common/model"
-	"github.com/tiger1103/gfast/v3/library/liberr"
-	"mime/multipart"
-	"strconv"
-	"strings"
 )
 
 type OSS struct {

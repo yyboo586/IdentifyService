@@ -1,10 +1,3 @@
-/*
-* @desc:代码生成表数据处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/10/26 17:00
- */
-
 package toolsGenTable
 
 import (
@@ -12,6 +5,22 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io"
+	"os"
+	"reflect"
+	"sort"
+	"strings"
+
+	"IdentifyService/api/v1/system"
+	commonService "IdentifyService/internal/app/common/service"
+	"IdentifyService/internal/app/system/consts"
+	"IdentifyService/internal/app/system/dao"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/model/do"
+	"IdentifyService/internal/app/system/model/entity"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/liberr"
+
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/container/gset"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -24,21 +33,7 @@ import (
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/internal/app/system/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/do"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/liberr"
 	"golang.org/x/tools/imports"
-	"io"
-	"os"
-	"reflect"
-	"sort"
-	"strings"
 )
 
 func init() {
@@ -1482,7 +1477,7 @@ func (s *sToolsGenTable) genModuleBootLogic(curDir, moduleName, modulePath strin
 	}
 	code := fmt.Sprintf(`package boot
 import (
-	_ "github.com/tiger1103/gfast/v3/internal/app/%s/logic"
+	_ "IdentifyService/internal/app/%s/logic"
 )
 `, modulePath)
 	err = s.createFile(path, code, true)

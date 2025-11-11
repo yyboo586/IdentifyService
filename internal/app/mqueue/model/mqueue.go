@@ -1,14 +1,7 @@
-/**
- * @Company: 云南奇讯科技有限公司
- * @Author: yxf
- * @Description:
- * @Date: 2023/7/3 8:57
- */
-
 package model
 
 import (
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/consts"
+	"IdentifyService/internal/app/mqueue/consts"
 )
 
 type MQConsumerHandlerCallback func(m *MQMessage) error

@@ -1,16 +1,10 @@
-/*
-* @desc:代码生成表数据模型
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/10/28 11:43
- */
-
 package model
 
 import (
+	"IdentifyService/internal/app/system/model/entity"
+
 	"github.com/gogf/gf/v2/container/gmap"
 	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
 )
 
 // ToolsGenTableEx 实体扩展

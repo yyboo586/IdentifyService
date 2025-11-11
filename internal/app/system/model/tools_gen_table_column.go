@@ -1,10 +1,3 @@
-/*
-* @desc:代码生成表字段数据模型
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/10/28 11:41
- */
-
 package model
 
 import "github.com/gogf/gf/v2/container/gset"

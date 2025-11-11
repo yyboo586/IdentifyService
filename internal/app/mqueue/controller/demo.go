@@ -1,22 +1,17 @@
-/**
- * @Company: 云南奇讯科技有限公司
- * @Author: yxf
- * @Description:
- * @Date: 2023/7/28 14:21
- */
-
 package controller
 
 import (
 	"context"
 	"fmt"
+	"sync"
+
+	"IdentifyService/internal/app/mqueue/model"
+	"IdentifyService/internal/app/mqueue/service"
+	"IdentifyService/library/libResponse"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gorilla/websocket"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/model"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/service"
-	"github.com/tiger1103/gfast/v3/library/libResponse"
-	"sync"
 )
 
 type demo struct {

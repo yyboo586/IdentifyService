@@ -1,20 +1,12 @@
-// ==========================================================================
-// GFast自动生成api操作代码。
-// 生成日期：2023-01-12 17:43:50
-// 生成路径: api/v1/system/sys_job.go
-// 生成人：gfast
-// desc:定时任务相关参数
-// company:云南奇讯科技有限公司
-// ==========================================================================
-
 package system
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
+	"IdentifyService/internal/app/system/model/entity"
 
-	commonApi "github.com/tiger1103/gfast/v3/api/v1/common"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
+	"github.com/gogf/gf/v2/frame/g"
+
+	commonApi "IdentifyService/api/v1/common"
+	"IdentifyService/internal/app/system/model"
 )
 
 // SysJobSearchReq 分页请求参数

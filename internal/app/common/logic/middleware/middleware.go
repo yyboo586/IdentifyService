@@ -1,15 +1,9 @@
-/*
-* @desc:中间件处理
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/9/28 9:08
- */
-
 package middleware
 
 import (
+	"IdentifyService/internal/app/common/service"
+
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/tiger1103/gfast/v3/internal/app/common/service"
 )
 
 func init() {

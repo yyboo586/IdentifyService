@@ -1,18 +1,12 @@
-/*
-* @desc:角色api
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/3/30 9:16
- */
-
 package system
 
 import (
+	commonApi "IdentifyService/api/v1/common"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/model/entity"
+
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
-	commonApi "github.com/tiger1103/gfast/v3/api/v1/common"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
 )
 
 type RoleListReq struct {

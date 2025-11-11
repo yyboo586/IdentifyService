@@ -1,13 +1,6 @@
-/*
-* @desc:缓存键
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu
-* @Date:   2022/3/9 12:06
- */
-
 package consts
 
-import commonConsts "github.com/tiger1103/gfast/v3/internal/app/common/consts"
+import commonConsts "IdentifyService/internal/app/common/consts"
 
 const (
 	// CacheSysAuthMenu 缓存菜单key

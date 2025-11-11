@@ -1,23 +1,17 @@
-/**
- * @Company: 云南奇讯科技有限公司
- * @Author: yxf
- * @Description:
- * @Date: 2023/7/7 11:26
- */
-
 package mqueue
 
 import (
 	"bytes"
 	"fmt"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/logic/diskqueue"
-	_ "github.com/tiger1103/gfast/v3/internal/app/mqueue/logic/mqueue"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/model"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/service"
 	"sync"
 	"testing"
 	"time"
+
+	"IdentifyService/internal/app/mqueue/consts"
+	"IdentifyService/internal/app/mqueue/logic/diskqueue"
+	_ "IdentifyService/internal/app/mqueue/logic/mqueue"
+	"IdentifyService/internal/app/mqueue/model"
+	"IdentifyService/internal/app/mqueue/service"
 )
 
 var mBody = []byte("gfast-mqueue 测试消息队列内容")

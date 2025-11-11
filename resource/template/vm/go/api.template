@@ -1,12 +1,3 @@
-// ==========================================================================
-// GFast自动生成api操作代码。
-// 生成日期：{{date "Y-m-d H:i:s"}}
-// 生成路径: api/v1/{{.table.ModuleName }}/{{.table.TableName}}.go
-// 生成人：{{.table.FunctionAuthor}}
-// desc:{{.table.FunctionName}}相关参数
-// company:云南奇讯科技有限公司
-// ==========================================================================
-////
 package {{.table.ModuleName }}
 ////
 import (

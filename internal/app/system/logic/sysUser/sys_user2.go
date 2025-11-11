@@ -6,16 +6,17 @@ import (
 	"fmt"
 	"strings"
 
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/system/dao"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/libUtils"
+
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/util/grand"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/system/dao"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/libUtils"
 
-	commonModel "github.com/tiger1103/gfast/v3/internal/app/common/model"
-	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
+	commonModel "IdentifyService/internal/app/common/model"
+	commonService "IdentifyService/internal/app/common/service"
 )
 
 func (s *sSysUser) Login2(ctx context.Context, req *system.UserLogin2Req) (out *model.LoginUserRes, err error) {

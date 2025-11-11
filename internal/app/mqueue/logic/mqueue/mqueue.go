@@ -1,30 +1,25 @@
-/**
- * @Company: 云南奇讯科技有限公司
- * @Author: yxf
- * @Description:
- * @Date: 2023/6/28 11:14
- */
-
 package mqueue
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gogf/gf/v2/container/gpool"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/glog"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/consts"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/logic/diskqueue"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/logic/nsq"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/logic/rocketmq"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/model"
-	"github.com/tiger1103/gfast/v3/internal/app/mqueue/service"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+
+	"IdentifyService/internal/app/mqueue/consts"
+	"IdentifyService/internal/app/mqueue/logic/diskqueue"
+	"IdentifyService/internal/app/mqueue/logic/nsq"
+	"IdentifyService/internal/app/mqueue/logic/rocketmq"
+	"IdentifyService/internal/app/mqueue/model"
+	"IdentifyService/internal/app/mqueue/service"
+
+	"github.com/gogf/gf/v2/container/gpool"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/glog"
 )
 
 var ctx = context.TODO()

@@ -3,6 +3,14 @@ package controller
 import (
 	"context"
 	"fmt"
+	"os"
+	"runtime"
+	"strconv"
+	"time"
+
+	"IdentifyService/api/v1/system"
+	"IdentifyService/library/libUtils"
+
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -11,12 +19,6 @@ import (
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/process"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/library/libUtils"
-	"os"
-	"runtime"
-	"strconv"
-	"time"
 )
 
 var Monitor = sysMonitorController{

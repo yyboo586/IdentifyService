@@ -1,20 +1,15 @@
-/*
-* @desc:代码生成
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/10/26 16:55
- */
-
 package controller
 
 import (
 	"context"
+
+	"IdentifyService/api/v1/common"
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/system/model/entity"
+	"IdentifyService/internal/app/system/service"
+
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/tiger1103/gfast/v3/api/v1/common"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model/entity"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
 )
 
 var ToolsGenTable = new(toolsGenTableController)

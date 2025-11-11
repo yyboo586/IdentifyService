@@ -1,20 +1,15 @@
-/*
-* @desc:路由绑定
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu
-* @Date:   2022/2/18 16:23
- */
-
 package router
 
 import (
 	"context"
+
+	commonRouter "IdentifyService/internal/app/common/router"
+	commonService "IdentifyService/internal/app/common/service"
+	mqueueRouter "IdentifyService/internal/app/mqueue/router"
+	systemRouter "IdentifyService/internal/app/system/router"
+	"IdentifyService/library/libRouter"
+
 	"github.com/gogf/gf/v2/net/ghttp"
-	commonRouter "github.com/tiger1103/gfast/v3/internal/app/common/router"
-	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
-	mqueueRouter "github.com/tiger1103/gfast/v3/internal/app/mqueue/router"
-	systemRouter "github.com/tiger1103/gfast/v3/internal/app/system/router"
-	"github.com/tiger1103/gfast/v3/library/libRouter"
 )
 
 var R = new(Router)

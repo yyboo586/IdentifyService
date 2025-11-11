@@ -1,17 +1,11 @@
-/*
-* @desc:系统参数配置
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu
-* @Date:   2022/4/18 21:17
- */
-
 package controller
 
 import (
 	"context"
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	commonService "github.com/tiger1103/gfast/v3/internal/app/common/service"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
+
+	"IdentifyService/api/v1/system"
+	commonService "IdentifyService/internal/app/common/service"
+	"IdentifyService/internal/app/system/service"
 )
 
 var Config = configController{}

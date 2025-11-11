@@ -1,20 +1,13 @@
-/*
-* @desc:xxxx功能描述
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2022/11/3 10:32
- */
-
 package controller
 
 import (
 	"context"
 	"errors"
 
-	"github.com/tiger1103/gfast/v3/api/v1/system"
-	"github.com/tiger1103/gfast/v3/internal/app/system/model"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/libUtils"
+	"IdentifyService/api/v1/system"
+	"IdentifyService/internal/app/system/model"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/libUtils"
 )
 
 var Personal = new(personalController)

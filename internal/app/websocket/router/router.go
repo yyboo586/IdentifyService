@@ -1,24 +1,18 @@
-/*
-* @desc:websocket路由
-* @company:云南奇讯科技有限公司
-* @Author: yixiaohu<yxh669@qq.com>
-* @Date:   2023/11/30 15:06
- */
-
 package router
 
 import (
 	"context"
 	"net/http"
 
+	commonController "IdentifyService/internal/app/common/controller"
+	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/libUtils"
+	"IdentifyService/library/libWebsocket"
+
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/guid"
 	"github.com/gorilla/websocket"
-	commonController "github.com/tiger1103/gfast/v3/internal/app/common/controller"
-	"github.com/tiger1103/gfast/v3/internal/app/system/service"
-	"github.com/tiger1103/gfast/v3/library/libUtils"
-	"github.com/tiger1103/gfast/v3/library/libWebsocket"
 )
 
 var R = new(Router)
