@@ -86,8 +86,8 @@ type SysNoticeAddReq struct {
 	Remark    string   `p:"remark"  dc:"备注"`
 	Sort      int      `p:"sort"  dc:"排序"`
 	Status    int      `p:"status" v:"required#状态不能为空" dc:"状态"`
-	Receiver  []uint64 `p:"receiver"`
-	CreatedBy uint64
+	Receiver  []string `p:"receiver"`
+	CreatedBy string
 }
 
 // SysNoticeEditReq 修改操作请求参数
@@ -100,8 +100,8 @@ type SysNoticeEditReq struct {
 	Remark    string   `p:"remark"  dc:"备注"`
 	Sort      int      `p:"sort"  dc:"排序"`
 	Status    int      `p:"status" v:"required#状态不能为空" dc:"状态"`
-	Receiver  []uint64 `p:"receiver"`
-	UpdatedBy uint64
+	Receiver  []string `p:"receiver"`
+	UpdatedBy string
 }
 
 type SysNoticeIndexRes struct {

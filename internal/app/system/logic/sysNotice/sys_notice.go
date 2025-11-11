@@ -47,7 +47,7 @@ type sSysNotice struct{}
 func (s *sSysNotice) List(ctx context.Context, req *model.SysNoticeSearchReq) (listRes *model.SysNoticeSearchRes, err error) {
 	listRes = new(model.SysNoticeSearchRes)
 	currentUserId := service.Context().GetUserId(ctx)
-	if currentUserId <= 0 {
+	if currentUserId == "" {
 		err = errors.New("用户信息查询失败")
 		return
 	}
@@ -102,7 +102,7 @@ func (s *sSysNotice) List(ctx context.Context, req *model.SysNoticeSearchReq) (l
 func (s *sSysNotice) ListShow(ctx context.Context, req *model.SysNoticeSearchReq) (listRes *model.SysNoticeSearchRes, err error) {
 	listRes = new(model.SysNoticeSearchRes)
 	currentUserId := service.Context().GetUserId(ctx)
-	if currentUserId <= 0 {
+	if currentUserId == "" {
 		err = errors.New("用户信息查询失败")
 		return
 	}
@@ -332,8 +332,8 @@ func (s *sSysNotice) UnReadList(ctx context.Context) (res *model.SysNoticeListRe
 	panic("implement me")
 }
 
-func (s *sSysNotice) UnReadCount(ctx context.Context, currentUserId uint64) (sysNoticeUnreadCount *model.SysNoticeUnreadCount, err error) {
-	if currentUserId <= 0 {
+func (s *sSysNotice) UnReadCount(ctx context.Context, currentUserId string) (sysNoticeUnreadCount *model.SysNoticeUnreadCount, err error) {
+	if currentUserId == "" {
 		err = errors.New("获取用户信息失败")
 		return
 	}
@@ -366,7 +366,7 @@ func (s *sSysNotice) UnReadCount(ctx context.Context, currentUserId uint64) (sys
 
 func (s *sSysNotice) ReadAll(ctx context.Context, nType string) (err error) {
 	currentUserId := service.Context().GetUserId(ctx)
-	if currentUserId <= 0 {
+	if currentUserId == "" {
 		err = errors.New("获取当前用户信息失败")
 		return
 	}
@@ -378,7 +378,7 @@ func (s *sSysNotice) ReadAll(ctx context.Context, nType string) (err error) {
 		for _, record := range unReadIdMap {
 			insertList = append(insertList, &model.SysNoticeReadAddReq{
 				NoticeId:  record["id"].Int64(),
-				UserId:    int64(currentUserId),
+				UserId:    currentUserId,
 				CreatedAt: gtime.Now(),
 			})
 		}
@@ -401,7 +401,7 @@ func (s *sSysNotice) NoticeReadAddUserId(ctx context.Context, req *model.SysNoti
 	return
 }
 
-func (s *sSysNotice) CurrentUseWithIds(ctx context.Context, currentUserId uint64, noticeType int) (ids []int64, err error) {
+func (s *sSysNotice) CurrentUseWithIds(ctx context.Context, currentUserId string, noticeType int) (ids []int64, err error) {
 	m := dao.SysNotice.Ctx(ctx)
 	m = m.Where(dao.SysNotice.Columns().Status, 1).
 		Where(dao.SysNotice.Columns().Type, noticeType)

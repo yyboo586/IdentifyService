@@ -52,12 +52,12 @@ func (s *sContext) GetLoginUser(ctx context.Context) *model.ContextUser {
 }
 
 // GetUserId 获取当前登录用户id
-func (s *sContext) GetUserId(ctx context.Context) uint64 {
+func (s *sContext) GetUserId(ctx context.Context) string {
 	user := s.GetLoginUser(ctx)
 	if user != nil {
 		return user.Id
 	}
-	return 0
+	return ""
 }
 
 // GetDeptId 获取当前登录用户部门id

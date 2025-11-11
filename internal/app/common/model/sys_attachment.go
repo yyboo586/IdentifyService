@@ -75,13 +75,13 @@ type SysAttachmentAddReq struct {
 	Ext       string `p:"ext"  dc:"扩展名"`
 	Md5       string `p:"md5"  dc:"md5校验码"`
 	Status    bool   `p:"status" v:"required#状态不能为空" dc:"状态"`
-	CreatedBy uint64
+	CreatedBy string
 }
 
 type SysAttachmentAddAttribute struct {
 	Md5    string
 	Driver uint
-	UserId uint64
+	UserId string
 	AppId  string
 }
 

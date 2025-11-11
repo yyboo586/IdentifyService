@@ -52,7 +52,7 @@ func (s *sPersonal) GetPersonalInfo(ctx context.Context, req *system.PersonalInf
 
 func (s *sPersonal) EditPersonal(ctx context.Context, req *system.PersonalEditReq) (user *model.LoginUserRes, err error) {
 	userId := service.Context().GetUserId(ctx)
-	err = service.SysUser().UserNameOrMobileExists(ctx, "", req.Mobile, int64(userId))
+	err = service.SysUser().UserNameOrMobileExists(ctx, "", req.Mobile, userId)
 	if err != nil {
 		return
 	}

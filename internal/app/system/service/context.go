@@ -18,7 +18,7 @@ type IContext interface {
 	Get(ctx context.Context) *model.Context
 	SetUser(ctx context.Context, ctxUser *model.ContextUser)
 	GetLoginUser(ctx context.Context) *model.ContextUser
-	GetUserId(ctx context.Context) uint64
+	GetUserId(ctx context.Context) string
 	GetDeptId(ctx context.Context) uint64
 }
 

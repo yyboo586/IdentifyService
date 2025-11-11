@@ -63,7 +63,7 @@ func (s *sSysConfig) List(ctx context.Context, req *system.ConfigSearchReq) (res
 	return
 }
 
-func (s *sSysConfig) Add(ctx context.Context, req *system.ConfigAddReq, userId uint64) (err error) {
+func (s *sSysConfig) Add(ctx context.Context, req *system.ConfigAddReq, userId string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		err = s.CheckConfigKeyUnique(ctx, req.ConfigKey)
 		liberr.ErrIsNil(ctx, err)
@@ -110,7 +110,7 @@ func (s *sSysConfig) Get(ctx context.Context, id int) (res *system.ConfigGetRes,
 }
 
 // Edit 修改系统参数
-func (s *sSysConfig) Edit(ctx context.Context, req *system.ConfigEditReq, userId uint64) (err error) {
+func (s *sSysConfig) Edit(ctx context.Context, req *system.ConfigEditReq, userId string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		err = s.CheckConfigKeyUnique(ctx, req.ConfigKey, req.ConfigId)
 		liberr.ErrIsNil(ctx, err)

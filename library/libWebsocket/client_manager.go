@@ -3,11 +3,12 @@ package libWebsocket
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
+	"sync"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gtime"
-	"runtime/debug"
-	"sync"
 )
 
 // ClientManager 客户端管理
@@ -45,7 +46,7 @@ func Manager() *ClientManager {
 }
 
 // GetUserKey 获取用户key
-func GetUserKey(userId uint64) (key string) {
+func GetUserKey(userId string) (key string) {
 	key = fmt.Sprintf("%s_%d", "ws", userId)
 	return
 }
@@ -110,7 +111,7 @@ func (manager *ClientManager) GetClient(id string) (client *Client) {
 }
 
 // GetUserClient 获取用户的连接
-func (manager *ClientManager) GetUserClient(userId uint64) (clients []*Client) {
+func (manager *ClientManager) GetUserClient(userId string) (clients []*Client) {
 	manager.UserLock.RLock()
 	defer manager.UserLock.RUnlock()
 	userKey := GetUserKey(userId)
@@ -307,7 +308,7 @@ func SendToClientID(id string, response *WResponse) {
 }
 
 // SendToUser 发送单个用户
-func SendToUser(userID uint64, response *WResponse) {
+func SendToUser(userID string, response *WResponse) {
 	userRes := &UserWResponse{
 		UserID:    userID,
 		WResponse: response,

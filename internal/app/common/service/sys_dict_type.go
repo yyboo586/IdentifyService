@@ -9,8 +9,8 @@ import (
 
 type ISysDictType interface {
 	List(ctx context.Context, req *system.DictTypeSearchReq) (res *system.DictTypeSearchRes, err error)
-	Add(ctx context.Context, req *system.DictTypeAddReq, userId uint64) (err error)
-	Edit(ctx context.Context, req *system.DictTypeEditReq, userId uint64) (err error)
+	Add(ctx context.Context, req *system.DictTypeAddReq, userId string) (err error)
+	Edit(ctx context.Context, req *system.DictTypeEditReq, userId string) (err error)
 	Get(ctx context.Context, req *system.DictTypeGetReq) (dictType *entity.SysDictType, err error)
 	ExistsDictType(ctx context.Context, dictType string, dictId ...int64) (err error)
 	Delete(ctx context.Context, dictIds []int) (err error)

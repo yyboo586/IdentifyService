@@ -10,7 +10,7 @@ import (
 
 // SysUser is the golang structure for table sys_user.
 type SysUser struct {
-	Id            uint64      `json:"id"            description:""`
+	Id            string      `json:"id"            description:""`
 	IUQTID        string      `json:"iuqt_id"      description:"IUQT ID"`
 	UserName      string      `json:"userName"      description:"用户名"`
 	Mobile        string      `json:"mobile"        description:"中国手机不带国家代码，国际手机号格式为：国家代码-手机号"`

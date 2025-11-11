@@ -14,8 +14,8 @@ import (
 )
 
 type IUpload interface {
-	UploadFiles(ctx context.Context, files []*ghttp.UploadFile, checkFileType string, source int, userId uint64, appId string) (result []*model.UploadResponse, err error)
-	UploadFile(ctx context.Context, file *ghttp.UploadFile, checkFileType string, source int, userId uint64, appId string) (result *model.UploadResponse, err error)
+	UploadFiles(ctx context.Context, files []*ghttp.UploadFile, checkFileType string, source int, userId string, appId string) (result []*model.UploadResponse, err error)
+	UploadFile(ctx context.Context, file *ghttp.UploadFile, checkFileType string, source int, userId string, appId string) (result *model.UploadResponse, err error)
 	CheckSize(ctx context.Context, checkFileType string, fileSize int64) (err error)
 	CheckType(ctx context.Context, checkFileType string, fileName string) (err error)
 	CheckMultipart(ctx context.Context, req *model.CheckMultipartReq) (res *model.CheckMultipartRes, err error)

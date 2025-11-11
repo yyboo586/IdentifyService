@@ -23,7 +23,7 @@ type TagWResponse struct {
 }
 
 type UserWResponse struct {
-	UserID    uint64
+	UserID    string
 	WResponse *WResponse
 }
 

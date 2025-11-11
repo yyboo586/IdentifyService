@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/encoding/gurl"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/google/uuid"
 
 	"IdentifyService/api/v1/system"
 	commonService "IdentifyService/internal/app/common/service"
@@ -52,7 +53,7 @@ func (s *sSysUser) GetCasBinUserPrefix() string {
 }
 
 // IsSupperAdmin 判断用户是否超管
-func (s *sSysUser) IsSupperAdmin(ctx context.Context, userId uint64) bool {
+func (s *sSysUser) IsSupperAdmin(ctx context.Context, userId string) bool {
 	superAdminIds := s.NotCheckAuthAdminIds(ctx)
 	if superAdminIds.Contains(userId) {
 		return true
@@ -125,7 +126,7 @@ func (s *sSysUser) GetUserByIUQTID(ctx context.Context, iuqtID string) (user *mo
 }
 
 // GetUserById 通过用户名获取用户信息
-func (s *sSysUser) GetUserById(ctx context.Context, id uint64) (user *model.LoginUserRes, err error) {
+func (s *sSysUser) GetUserById(ctx context.Context, id string) (user *model.LoginUserRes, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		user = &model.LoginUserRes{}
 		err = dao.SysUser.Ctx(ctx).Fields(user).WherePri(id).Scan(user)
@@ -155,7 +156,7 @@ func (s *sSysUser) LoginLog(ctx context.Context, params *model.LoginLogParams) {
 	}
 }
 
-func (s *sSysUser) UpdateLoginInfo(ctx context.Context, id uint64, ip string, openId ...string) (err error) {
+func (s *sSysUser) UpdateLoginInfo(ctx context.Context, id string, ip string, openId ...string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		data := g.Map{
 			dao.SysUser.Columns().LastLoginIp:   ip,
@@ -171,7 +172,7 @@ func (s *sSysUser) UpdateLoginInfo(ctx context.Context, id uint64, ip string, op
 }
 
 // GetAdminRules 获取用户菜单数据
-func (s *sSysUser) GetAdminRules(ctx context.Context, userId uint64) (menuList []*model.UserMenus, permissions []string, err error) {
+func (s *sSysUser) GetAdminRules(ctx context.Context, userId string) (menuList []*model.UserMenus, permissions []string, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		//是否超管
 		isSuperAdmin := s.IsSupperAdmin(ctx, userId)
@@ -203,7 +204,7 @@ func (s *sSysUser) GetAdminRules(ctx context.Context, userId uint64) (menuList [
 }
 
 // GetAdminRole 获取用户角色
-func (s *sSysUser) GetAdminRole(ctx context.Context, userId uint64, allRoleList []*entity.SysRole) (roles []*entity.SysRole, err error) {
+func (s *sSysUser) GetAdminRole(ctx context.Context, userId string, allRoleList []*entity.SysRole) (roles []*entity.SysRole, err error) {
 	var roleIds []uint
 	roleIds, err = s.GetAdminRoleIds(ctx, userId)
 	if err != nil {
@@ -224,7 +225,7 @@ func (s *sSysUser) GetAdminRole(ctx context.Context, userId uint64, allRoleList 
 }
 
 // GetAdminRoleIds 获取用户角色ids
-func (s *sSysUser) GetAdminRoleIds(ctx context.Context, userId uint64, includeChildren ...bool) (roleIds []uint, err error) {
+func (s *sSysUser) GetAdminRoleIds(ctx context.Context, userId string, includeChildren ...bool) (roleIds []uint, err error) {
 	enforcer, e := commonService.CasbinEnforcer(ctx)
 	if e != nil {
 		err = e
@@ -619,7 +620,7 @@ func (s *sSysUser) getSearchDeptIds(ctx context.Context, deptId uint64) (deptIds
 }
 
 // 过滤用户可操作的角色
-func (s *sSysUser) filterRoleIds(ctx context.Context, roleIds []uint, userId uint64, includeChildren ...bool) (newRoleIds []uint, err error) {
+func (s *sSysUser) filterRoleIds(ctx context.Context, roleIds []uint, userId string, includeChildren ...bool) (newRoleIds []uint, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		var (
 			accessRoleList []uint
@@ -662,9 +663,11 @@ func (s *sSysUser) Add(ctx context.Context, req *system.UserAddReq) (err error) 
 	}
 	req.UserSalt = grand.S(10)
 	req.Password = libUtils.EncryptPassword(req.Password, req.UserSalt)
+	userId := uuid.New().String()
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		err = g.Try(ctx, func(ctx context.Context) {
-			userId, e := dao.SysUser.Ctx(ctx).TX(tx).InsertAndGetId(do.SysUser{
+			_, e := dao.SysUser.Ctx(ctx).TX(tx).InsertAndGetId(do.SysUser{
+				Id:           userId,
 				UserName:     req.UserName,
 				Mobile:       req.Mobile,
 				UserNickname: req.NickName,
@@ -721,7 +724,7 @@ func (s *sSysUser) Edit(ctx context.Context, req *system.UserEditReq) (err error
 			err = s.AddUserPost(ctx, tx, req.PostIds, req.UserId)
 			liberr.ErrIsNil(ctx, err)
 			//通知用户更新token
-			libWebsocket.SendToUser(gconv.Uint64(req.UserId), &libWebsocket.WResponse{
+			libWebsocket.SendToUser(req.UserId, &libWebsocket.WResponse{
 				Event: consts.WebsocketTypeTokenUpdated,
 				Data:  nil,
 			})
@@ -732,7 +735,7 @@ func (s *sSysUser) Edit(ctx context.Context, req *system.UserEditReq) (err error
 }
 
 // AddUserPost 添加用户岗位信息
-func (s *sSysUser) AddUserPost(ctx context.Context, tx gdb.TX, postIds []int64, userId int64) (err error) {
+func (s *sSysUser) AddUserPost(ctx context.Context, tx gdb.TX, postIds []int64, userId string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		//删除旧岗位信息
 		_, err = dao.SysUserPost.Ctx(ctx).TX(tx).Where(dao.SysUserPost.Columns().UserId, userId).Delete()
@@ -755,7 +758,7 @@ func (s *sSysUser) AddUserPost(ctx context.Context, tx gdb.TX, postIds []int64, 
 }
 
 // AddUserRole 添加用户角色信息
-func (s *sSysUser) addUserRole(ctx context.Context, roleIds []uint, userId int64) (err error) {
+func (s *sSysUser) addUserRole(ctx context.Context, roleIds []uint, userId string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		enforcer, e := commonService.CasbinEnforcer(ctx)
 		liberr.ErrIsNil(ctx, e)
@@ -768,7 +771,7 @@ func (s *sSysUser) addUserRole(ctx context.Context, roleIds []uint, userId int64
 }
 
 // EditUserRole 修改用户角色信息
-func (s *sSysUser) EditUserRole(ctx context.Context, roleIds []uint, userId int64) (err error) {
+func (s *sSysUser) EditUserRole(ctx context.Context, roleIds []uint, userId string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		enforcer, e := commonService.CasbinEnforcer(ctx)
 		liberr.ErrIsNil(ctx, e)
@@ -785,7 +788,7 @@ func (s *sSysUser) EditUserRole(ctx context.Context, roleIds []uint, userId int6
 }
 
 // SetUserRole 设置用户角色
-func (s *sSysUser) SetUserRole(ctx context.Context, roleId uint, userIds []uint64) (err error) {
+func (s *sSysUser) SetUserRole(ctx context.Context, roleId uint, userIds []string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		enforcer, e := commonService.CasbinEnforcer(ctx)
 		liberr.ErrIsNil(ctx, e)
@@ -806,7 +809,7 @@ func (s *sSysUser) SetUserRole(ctx context.Context, roleId uint, userIds []uint6
 	return
 }
 
-func (s *sSysUser) UserNameOrMobileExists(ctx context.Context, userName, mobile string, id ...int64) error {
+func (s *sSysUser) UserNameOrMobileExists(ctx context.Context, userName, mobile string, id ...string) error {
 	user := (*entity.SysUser)(nil)
 	err := g.Try(ctx, func(ctx context.Context) {
 		m := dao.SysUser.Ctx(ctx)
@@ -834,7 +837,7 @@ func (s *sSysUser) UserNameOrMobileExists(ctx context.Context, userName, mobile 
 }
 
 // GetEditUser 获取编辑用户信息
-func (s *sSysUser) GetEditUser(ctx context.Context, id uint64) (res *system.UserGetEditRes, err error) {
+func (s *sSysUser) GetEditUser(ctx context.Context, id string) (res *system.UserGetEditRes, err error) {
 	res = new(system.UserGetEditRes)
 	err = g.Try(ctx, func(ctx context.Context) {
 		//获取用户信息
@@ -850,7 +853,7 @@ func (s *sSysUser) GetEditUser(ctx context.Context, id uint64) (res *system.User
 }
 
 // GetUserInfoById 通过Id获取用户信息
-func (s *sSysUser) GetUserInfoById(ctx context.Context, id uint64, withPwd ...bool) (user *entity.SysUser, err error) {
+func (s *sSysUser) GetUserInfoById(ctx context.Context, id string, withPwd ...bool) (user *entity.SysUser, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		if len(withPwd) > 0 && withPwd[0] {
 			//用户用户信息
@@ -866,7 +869,7 @@ func (s *sSysUser) GetUserInfoById(ctx context.Context, id uint64, withPwd ...bo
 }
 
 // GetUserPostIds 获取用户岗位
-func (s *sSysUser) GetUserPostIds(ctx context.Context, userId uint64) (postIds []int64, err error) {
+func (s *sSysUser) GetUserPostIds(ctx context.Context, userId string) (postIds []int64, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		var list []*entity.SysUserPost
 		err = dao.SysUserPost.Ctx(ctx).Where(dao.SysUserPost.Columns().UserId, userId).Scan(&list)
@@ -1228,7 +1231,7 @@ func (s *sSysUser) HasAccessByDataWhere(ctx context.Context, where g.Map, uid in
 }
 
 // AccessRule 判断用户是否有某一菜单规则权限
-func (s *sSysUser) AccessRule(ctx context.Context, userId uint64, rule string) bool {
+func (s *sSysUser) AccessRule(ctx context.Context, userId string, rule string) bool {
 	//获取无需验证权限的用户id
 	tagSuperAdmin := s.IsSupperAdmin(ctx, userId)
 	if tagSuperAdmin {

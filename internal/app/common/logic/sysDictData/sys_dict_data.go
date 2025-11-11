@@ -107,7 +107,7 @@ func (s *sSysDictData) List(ctx context.Context, req *system.DictDataSearchReq) 
 	return
 }
 
-func (s *sSysDictData) Add(ctx context.Context, req *system.DictDataAddReq, userId uint64) (err error) {
+func (s *sSysDictData) Add(ctx context.Context, req *system.DictDataAddReq, userId string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		_, err = dao.SysDictData.Ctx(ctx).Insert(do.SysDictData{
 			DictSort:  req.DictSort,
@@ -139,7 +139,7 @@ func (s *sSysDictData) Get(ctx context.Context, dictCode uint) (res *system.Dict
 }
 
 // Edit 修改字典数据
-func (s *sSysDictData) Edit(ctx context.Context, req *system.DictDataEditReq, userId uint64) (err error) {
+func (s *sSysDictData) Edit(ctx context.Context, req *system.DictDataEditReq, userId string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		_, err = dao.SysDictData.Ctx(ctx).WherePri(req.DictCode).Update(do.SysDictData{
 			DictSort:  req.DictSort,

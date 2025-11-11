@@ -106,7 +106,7 @@ func (c *loginController) Login2(ctx context.Context, req *system.UserLogin2Req)
 		return
 	}
 
-	settleInfo, err = service.ThirdService().GetSettleInfo(ctx, int64(userInfo.Id), userInfo.UserType)
+	settleInfo, err = service.ThirdService().GetSettleInfo(ctx, userInfo.Id, userInfo.UserType)
 	if err != nil {
 		return
 	}
@@ -120,7 +120,7 @@ func (c *loginController) Login2(ctx context.Context, req *system.UserLogin2Req)
 
 	res = &system.UserLogin2Res{
 		UserInfo: &system.UserInfo2{
-			UserID:   fmt.Sprintf("%d", userInfo.Id),
+			UserID:   userInfo.Id,
 			IUQTID:   userInfo.IUQTID,
 			UserName: userInfo.UserName,
 			Mobile:   userInfo.Mobile,

@@ -35,7 +35,7 @@ func New() service.IUpload {
 type sUpload struct{}
 
 // UploadFiles 上传多文件
-func (s *sUpload) UploadFiles(ctx context.Context, files []*ghttp.UploadFile, checkFileType string, source int, userId uint64, appId string) (result []*model.UploadResponse, err error) {
+func (s *sUpload) UploadFiles(ctx context.Context, files []*ghttp.UploadFile, checkFileType string, source int, userId string, appId string) (result []*model.UploadResponse, err error) {
 	for _, item := range files {
 		f, e := s.UploadFile(ctx, item, checkFileType, source, userId, appId)
 		if e != nil {
@@ -49,7 +49,7 @@ func (s *sUpload) UploadFiles(ctx context.Context, files []*ghttp.UploadFile, ch
 // UploadFile 上传单文件
 func (s *sUpload) UploadFile(ctx context.Context,
 	file *ghttp.UploadFile, checkFileType string, source int,
-	userId uint64, appId string) (result *model.UploadResponse, err error) {
+	userId string, appId string) (result *model.UploadResponse, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		// 检查文件类型
 		err = s.CheckType(ctx, checkFileType, file.Filename)

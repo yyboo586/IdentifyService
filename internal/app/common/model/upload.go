@@ -28,7 +28,7 @@ type CheckMultipartReq struct {
 	Md5         string `p:"md5"         dc:"文件md5值"`
 	ShardsCount int    `p:"shardsCount"  dc:"分片数量"`
 	DriverType  int    //上传驱动
-	UserId      uint64
+	UserId      string
 	AppId       string
 }
 

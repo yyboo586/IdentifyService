@@ -62,7 +62,7 @@ func (s *sSysDictType) List(ctx context.Context, req *system.DictTypeSearchReq) 
 }
 
 // Add 添加字典类型
-func (s *sSysDictType) Add(ctx context.Context, req *system.DictTypeAddReq, userId uint64) (err error) {
+func (s *sSysDictType) Add(ctx context.Context, req *system.DictTypeAddReq, userId string) (err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		err = s.ExistsDictType(ctx, req.DictType)
 		liberr.ErrIsNil(ctx, err)
@@ -81,7 +81,7 @@ func (s *sSysDictType) Add(ctx context.Context, req *system.DictTypeAddReq, user
 }
 
 // Edit 修改字典类型
-func (s *sSysDictType) Edit(ctx context.Context, req *system.DictTypeEditReq, userId uint64) (err error) {
+func (s *sSysDictType) Edit(ctx context.Context, req *system.DictTypeEditReq, userId string) (err error) {
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		err = g.Try(ctx, func(ctx context.Context) {
 			err = s.ExistsDictType(ctx, req.DictType, req.DictId)

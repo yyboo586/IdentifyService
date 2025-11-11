@@ -112,7 +112,7 @@ func (s *sMiddleware) Auth(r *ghttp.Request) {
 	r.Middleware.Next()
 }
 
-func (s *sMiddleware) checkAuth(ctx context.Context, adminId uint64, menuId uint) (err error) {
+func (s *sMiddleware) checkAuth(ctx context.Context, adminId string, menuId uint) (err error) {
 	var (
 		roleIds    []uint
 		roleList   []*entity.SysRole

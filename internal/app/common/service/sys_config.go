@@ -9,10 +9,10 @@ import (
 
 type ISysConfig interface {
 	List(ctx context.Context, req *system.ConfigSearchReq) (res *system.ConfigSearchRes, err error)
-	Add(ctx context.Context, req *system.ConfigAddReq, userId uint64) (err error)
+	Add(ctx context.Context, req *system.ConfigAddReq, userId string) (err error)
 	CheckConfigKeyUnique(ctx context.Context, configKey string, configId ...int64) (err error)
 	Get(ctx context.Context, id int) (res *system.ConfigGetRes, err error)
-	Edit(ctx context.Context, req *system.ConfigEditReq, userId uint64) (err error)
+	Edit(ctx context.Context, req *system.ConfigEditReq, userId string) (err error)
 	Delete(ctx context.Context, ids []int) (err error)
 	GetConfigByKey(ctx context.Context, key string) (config *entity.SysConfig, err error)
 	GetByKey(ctx context.Context, key string) (config *entity.SysConfig, err error)

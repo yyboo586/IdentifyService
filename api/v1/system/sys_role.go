@@ -40,7 +40,7 @@ type RoleAddReq struct {
 	ListOrder uint   `p:"listOrder" `
 	Remark    string `p:"remark"    `
 	MenuIds   []uint `p:"menuIds"`
-	CreatedBy uint64
+	CreatedBy string
 	model.EffectiveTimeInfo
 }
 
@@ -120,7 +120,7 @@ type DataScopeRes struct {
 type SetRoleUserReq struct {
 	g.Meta  `path:"/role/setRoleUser" tags:"系统后台/角色管理" method:"put" summary:"角色用户授权"`
 	RoleId  uint     `p:"roleId" v:"required#角色ID不能为空"`
-	UserIds []uint64 `p:"userIds"`
+	UserIds []string `p:"userIds"`
 }
 
 type SetRoleUserRes struct {

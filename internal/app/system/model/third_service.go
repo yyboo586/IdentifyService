@@ -6,7 +6,7 @@ type IUQTUserInfo struct {
 }
 
 type SettleInfo struct {
-	UserID int64  `json:"user_id"`
+	UserID string `json:"user_id"`
 	Status string `json:"status"` // 入驻状态(未入驻、审核中、已入驻)
 	ID     string `json:"id"`     // 服务提供商ID/展商ID
 }

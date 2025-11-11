@@ -17,7 +17,7 @@ type IThirdService interface {
 	LoginByTicket(ctx context.Context, ticket string) (iuqtUserInfo *model.IUQTUserInfo, err error)
 
 	// ExhibitionService
-	GetSettleInfo(ctx context.Context, userID int64, userType model.UserType) (settleInfo *model.SettleInfo, err error)
+	GetSettleInfo(ctx context.Context, userID string, userType model.UserType) (settleInfo *model.SettleInfo, err error)
 }
 
 var localThirdService IThirdService
@@ -57,7 +57,7 @@ func (i *thirdService) LoginByTicket(ctx context.Context, ticket string) (iuqtUs
 	}, nil
 }
 
-func (i *thirdService) GetSettleInfo(ctx context.Context, userID int64, userType model.UserType) (settleInfo *model.SettleInfo, err error) {
+func (i *thirdService) GetSettleInfo(ctx context.Context, userID string, userType model.UserType) (settleInfo *model.SettleInfo, err error) {
 	switch userType {
 	case model.UserTypeServiceProvider:
 		return i.getSPSettleInfo(ctx, userID)
@@ -72,7 +72,7 @@ func (i *thirdService) GetSettleInfo(ctx context.Context, userID int64, userType
 	}
 }
 
-func (i *thirdService) getSPSettleInfo(ctx context.Context, userID int64) (settleInfo *model.SettleInfo, err error) {
+func (i *thirdService) getSPSettleInfo(ctx context.Context, userID string) (settleInfo *model.SettleInfo, err error) {
 	url := fmt.Sprintf("%s/api/v1/service-provider/check", i.ExEngineAddr)
 	body := map[string]interface{}{
 		"user_id": userID,
@@ -104,7 +104,7 @@ func (i *thirdService) getSPSettleInfo(ctx context.Context, userID int64) (settl
 	return
 }
 
-func (i *thirdService) getMerchantSettleInfo(ctx context.Context, userID int64) (settleInfo *model.SettleInfo, err error) {
+func (i *thirdService) getMerchantSettleInfo(ctx context.Context, userID string) (settleInfo *model.SettleInfo, err error) {
 	url := fmt.Sprintf("%s/api/v1/merchant/check", i.ExEngineAddr)
 	body := map[string]interface{}{
 		"user_id": userID,

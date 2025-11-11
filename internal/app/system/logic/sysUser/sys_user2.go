@@ -14,6 +14,7 @@ import (
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/util/grand"
+	"github.com/google/uuid"
 
 	commonModel "IdentifyService/internal/app/common/model"
 	commonService "IdentifyService/internal/app/common/service"
@@ -47,7 +48,7 @@ func (s *sSysUser) Login2(ctx context.Context, req *system.UserLogin2Req) (out *
 	}
 
 	out = &model.LoginUserRes{
-		Id:           uint64(userInfo.ID),
+		Id:           userInfo.ID,
 		UserName:     userInfo.UserName,
 		Mobile:       userInfo.Mobile,
 		UserStatus:   uint(userInfo.UserStatus),
@@ -160,13 +161,15 @@ func (s *sSysUser) loginBySSO(ctx context.Context, code string) (userInfo *model
 // 组织信息、部门信息
 // 角色信息
 // IsAdmin
-func (s *sSysUser) registerUser(ctx context.Context, userInfo map[string]interface{}) (userID int64, err error) {
+func (s *sSysUser) registerUser(ctx context.Context, userInfo map[string]interface{}) (userID string, err error) {
+	userID = uuid.New().String()
 	salt := grand.S(10)
 	password := libUtils.EncryptPassword("123456", salt)
+	userInfo[dao.SysUser.Columns().Id] = userID
 	userInfo[dao.SysUser.Columns().UserPassword] = password
 	userInfo[dao.SysUser.Columns().UserSalt] = salt
 
-	result, err := dao.SysUser.Ctx(ctx).Data(userInfo).Insert()
+	_, err = dao.SysUser.Ctx(ctx).Data(userInfo).Insert()
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			err = gerror.New("该手机号已注册,请更换手机号登录")
@@ -175,15 +178,10 @@ func (s *sSysUser) registerUser(ctx context.Context, userInfo map[string]interfa
 		return
 	}
 
-	userID, err = result.LastInsertId()
-	if err != nil {
-		return
-	}
-
 	return userID, nil
 }
 
-func (s *sSysUser) UpdateUserType(ctx context.Context, userID int64, userType string) (err error) {
+func (s *sSysUser) UpdateUserType(ctx context.Context, userID string, userType string) (err error) {
 	userTypeEnum := model.GetUserType(userType)
 	if userTypeEnum == model.UserTypeUnknown {
 		return gerror.New("无效的用户类型")

@@ -67,7 +67,7 @@ func GetUserTypeText(userType UserType) string {
 }
 
 type User struct {
-	ID            int64       `json:"id"`
+	ID            string      `json:"id"`
 	UserName      string      `json:"user_name"`
 	Mobile        string      `json:"mobile"`
 	UserNickname  string      `json:"user_nickname"`
@@ -94,7 +94,7 @@ type User struct {
 
 func ConvertToUser(user *entity.SysUser) *User {
 	return &User{
-		ID:            int64(user.Id),
+		ID:            user.Id,
 		IUQTID:        user.IUQTID,
 		UserName:      user.UserName,
 		Mobile:        user.Mobile,

@@ -26,7 +26,7 @@ type ISysNotice interface {
 	//IndexData(ctx context.Context) (res *model.SysNoticeIndexRes, err error)
 	/*首页相关数据接口*/
 	UnReadList(ctx context.Context) (res *model.SysNoticeListRes, err error)
-	UnReadCount(ctx context.Context, currentUser uint64) (sysNoticeUnreadIds *model.SysNoticeUnreadCount, err error)
+	UnReadCount(ctx context.Context, currentUser string) (sysNoticeUnreadIds *model.SysNoticeUnreadCount, err error)
 	ReadAll(ctx context.Context, nType string) (err error)
 	GetUserNameList(ctx context.Context, search string) (res []*model.SysNoticeUserNickname, err error)
 	//NoticeReadLengthAdd(ctx context.Context, id int64) (err error)

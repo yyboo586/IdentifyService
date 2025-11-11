@@ -9,9 +9,9 @@ import (
 type ISysDictData interface {
 	GetDictWithDataByType(ctx context.Context, dictType, defaultValue string) (dict *system.GetDictRes, err error)
 	List(ctx context.Context, req *system.DictDataSearchReq) (res *system.DictDataSearchRes, err error)
-	Add(ctx context.Context, req *system.DictDataAddReq, userId uint64) (err error)
+	Add(ctx context.Context, req *system.DictDataAddReq, userId string) (err error)
 	Get(ctx context.Context, dictCode uint) (res *system.DictDataGetRes, err error)
-	Edit(ctx context.Context, req *system.DictDataEditReq, userId uint64) (err error)
+	Edit(ctx context.Context, req *system.DictDataEditReq, userId string) (err error)
 	Delete(ctx context.Context, ids []int) (err error)
 }
 

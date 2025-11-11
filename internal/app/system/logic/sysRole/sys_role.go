@@ -417,7 +417,7 @@ func (s *sSysRole) refreshToken(ctx context.Context, roleId int64) {
 		for _, v := range userRoleIds {
 			userId := gstr.Split(v[0], "_")[1]
 			//通知用户更新token
-			libWebsocket.SendToUser(gconv.Uint64(userId), &libWebsocket.WResponse{
+			libWebsocket.SendToUser(userId, &libWebsocket.WResponse{
 				Event: consts.WebsocketTypeTokenUpdated,
 				Data:  nil,
 			})

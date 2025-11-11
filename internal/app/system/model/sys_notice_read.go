@@ -47,14 +47,14 @@ type SysNoticeReadSearchRes struct {
 // SysNoticeReadAddReq 添加操作请求参数
 type SysNoticeReadAddReq struct {
 	NoticeId  int64       `json:"noticeId" dc:"信息id"`
-	UserId    int64       `json:"userId" dc:"用户id"`
+	UserId    string      `json:"userId" dc:"用户id"`
 	CreatedAt *gtime.Time `json:"createdAt" dc:"阅读时间"`
 }
 
 // SysNoticeReadAddReq 添加操作请求参数
 type SysNoticeReadNoticeReq struct {
 	NoticeId  int64 `p:"noticeId" dc:"信息id"`
-	UserId    int64
+	UserId    string
 	CreatedAt *gtime.Time
 }
 

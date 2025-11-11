@@ -80,7 +80,7 @@ type UserAddRes struct {
 type UserEditReq struct {
 	g.Meta `path:"/user/edit" tags:"系统后台/用户管理" method:"put" summary:"修改用户"`
 	*SetUserReq
-	UserId int64 `p:"userId" v:"required#用户id不能为空"`
+	UserId string `p:"userId" v:"required#用户id不能为空"`
 }
 
 type UserEditRes struct {
@@ -88,7 +88,7 @@ type UserEditRes struct {
 
 type UserGetEditReq struct {
 	g.Meta `path:"/user/getEdit" tags:"系统后台/用户管理" method:"get" summary:"获取用户信息"`
-	Id     uint64 `p:"id"`
+	Id     string `p:"id"`
 }
 
 type UserGetEditRes struct {
@@ -101,7 +101,7 @@ type UserGetEditRes struct {
 // UserResetPwdReq 重置用户密码状态参数
 type UserResetPwdReq struct {
 	g.Meta   `path:"/user/resetPwd" tags:"系统后台/用户管理" method:"put" summary:"重置用户密码"`
-	Id       uint64 `p:"userId" v:"required#用户id不能为空"`
+	Id       string `p:"userId" v:"required#用户id不能为空"`
 	Password string `p:"password" v:"required|password2#密码不能为空|密码必须包含大小写字母和数字，长度在6~18之间"`
 }
 
@@ -111,7 +111,7 @@ type UserResetPwdRes struct {
 // UserStatusReq 设置用户状态参数
 type UserStatusReq struct {
 	g.Meta     `path:"/user/setStatus" tags:"系统后台/用户管理" method:"put" summary:"设置用户状态"`
-	Id         uint64 `p:"userId" v:"required#用户id不能为空"`
+	Id         string `p:"userId" v:"required#用户id不能为空"`
 	UserStatus uint   `p:"status" v:"required#用户状态不能为空"`
 }
 

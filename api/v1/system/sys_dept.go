@@ -12,7 +12,7 @@ type DeptSearchReq struct {
 	DeptName   string `p:"deptName"`
 	Status     string `p:"status"`
 	ShowAll    bool
-	UserId     uint64
+	UserId     string
 	UserDeptId uint64
 }
 
