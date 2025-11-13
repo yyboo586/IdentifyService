@@ -36,10 +36,17 @@ type sMiddleware struct{}
 func (s *sMiddleware) Ctx(r *ghttp.Request) {
 	ctx := r.GetCtx()
 	// 初始化登录用户信息
-	data, err := service.Token().Parse(r)
+	data, IsActive, err := service.Token().Parse(r)
 	if err != nil {
 		// 执行下一步请求逻辑
 		r.Middleware.Next()
+		return
+	}
+	if !IsActive {
+		g.RequestFromCtx(ctx).Response.WriteJson(g.Map{
+			"code": 401,
+			"msg":  "令牌已失效",
+		})
 		return
 	}
 	if data != nil {

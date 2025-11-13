@@ -2,7 +2,6 @@ package captcha
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/url"
@@ -10,7 +9,6 @@ import (
 
 	"IdentifyService/internal/app/common/dao"
 	"IdentifyService/internal/app/common/model"
-	"IdentifyService/internal/app/common/model/entity"
 	"IdentifyService/internal/app/common/service"
 
 	"github.com/gogf/gf/v2/encoding/gbase64"
@@ -123,16 +121,20 @@ func (s *sCaptcha) VerifyString(id, answer string) bool {
 // 1、60秒内只能发送一次。如果60秒内发送过，则返回错误（"验证码已发送，请60秒后重试"）
 // 2、生成验证码，并保存到数据库，过期时间5分钟
 // 3、发送短信
-func (s *sCaptcha) SendSmsCode(ctx context.Context, phone string, bussinessType model.SMSBusinessType) (err error) {
+func (s *sCaptcha) SendSmsCode(ctx context.Context, phone string, bussinessType model.SMSBusinessType) (code string, err error) {
+	if bussinessType == model.BusinessTypeUnknown {
+		return "", errors.New("不支持的业务类型")
+	}
+
 	// 检查60秒内是否发送过
 	cacheKey := fmt.Sprintf("sms_code_%s_%d", phone, bussinessType)
 	lastSendTime := service.Cache().Get(ctx, cacheKey)
 	if lastSendTime != nil && !lastSendTime.IsEmpty() {
-		return errors.New("验证码已发送, 请60秒后重试")
+		return "", errors.New("验证码已发送, 请60秒后重试")
 	}
 
 	// 生成6位数字验证码
-	code := grand.Digits(6)
+	code = grand.Digits(6)
 
 	// 当前时间戳（秒）
 	now := gtime.Now().Unix()
@@ -141,64 +143,59 @@ func (s *sCaptcha) SendSmsCode(ctx context.Context, phone string, bussinessType 
 	expiredAt := now + 5*60
 
 	// 保存到数据库
-	smsCode := &entity.TSmsCode{
-		BusinessType: int(bussinessType),
-		Phone:        phone,
-		Code:         code,
-		Status:       int(model.SMSCodeStatusInit),
-		CreatedAt:    now,
-		ExpiredAt:    expiredAt,
-		UpdatedAt:    now,
+	smsCode := map[string]interface{}{
+		dao.TSmsCode.Columns().BusinessType: int(bussinessType),
+		dao.TSmsCode.Columns().Phone:        phone,
+		dao.TSmsCode.Columns().Code:         code,
+		dao.TSmsCode.Columns().Status:       int(model.SMSCodeStatusInit),
+		dao.TSmsCode.Columns().CreatedAt:    now,
+		dao.TSmsCode.Columns().ExpiredAt:    expiredAt,
+		dao.TSmsCode.Columns().UpdatedAt:    now,
 	}
 
-	_, err = dao.TSmsCode.Ctx(ctx).Data(smsCode).Insert()
+	_, err = dao.TSmsCode.AddSmsCode(ctx, smsCode)
 	if err != nil {
-		return gerror.Newf(err.Error(), "保存验证码失败")
+		return "", gerror.Newf(err.Error(), "保存验证码失败")
 	}
 
 	// 缓存发送时间，60秒过期
 	service.Cache().Set(ctx, cacheKey, now, 60*time.Second)
 
-	// TODO: 发送短信（这里可以调用实际的短信服务）
-	g.Log().Infof(ctx, fmt.Sprintf("发送短信验证码: phone=%s, code=%s", phone, code))
-
-	return nil
+	return code, nil
 }
 
 func (s *sCaptcha) ValidateSmsCode(ctx context.Context, phone string, bussinessType model.SMSBusinessType, code string) (err error) {
-	// 从数据库获取
-	var smsEntity entity.TSmsCode
-	err = dao.TSmsCode.Ctx(ctx).
-		Where(dao.TSmsCode.Columns().Phone, phone).
-		Where(dao.TSmsCode.Columns().BusinessType, bussinessType).
-		Order(dao.TSmsCode.Columns().CreatedAt, "DESC").
-		Limit(1).
-		Scan(&smsEntity)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return gerror.New("验证码错误")
-		}
-		return gerror.Newf(err.Error(), "获取验证码失败")
+	if len(code) != 6 {
+		return errors.New("验证码格式不正确")
+	}
+	if bussinessType == model.BusinessTypeUnknown {
+		return errors.New("不支持的业务类型")
 	}
 
-	smsInfo := model.ConvertSmsEntity(&smsEntity)
+	// 从数据库获取
+	smsEntity, err := dao.TSmsCode.GetLastSmsCode(ctx, phone, bussinessType, code)
+	if err != nil {
+		g.Log().Error(ctx, err)
+		return gerror.Newf("验证码校验失败")
+	}
+	smsInfo := model.ConvertSmsEntity(smsEntity)
 	if smsInfo.Status != model.SMSCodeStatusInit {
-		return gerror.New("验证码已被使用，请重新获取")
+		g.Log().Error(ctx, "验证码已被使用")
+		return gerror.New("验证码校验失败")
 	}
 	if smsInfo.ExpiredAt.Unix() < time.Now().Unix() {
-		return gerror.New("验证码已过期，请重新获取")
+		g.Log().Error(ctx, "验证码已过期")
+		return gerror.New("验证码校验失败")
 	}
 	if smsInfo.Code != code {
-		return gerror.New("验证码错误")
+		g.Log().Error(ctx, "验证码不正确")
+		return gerror.New("验证码校验失败")
 	}
 
-	dataUpdate := map[string]interface{}{
-		dao.TSmsCode.Columns().Status:    model.SMSCodeStatusUsed,
-		dao.TSmsCode.Columns().UpdatedAt: gtime.Now().Unix(),
-	}
-	_, err = dao.TSmsCode.Ctx(ctx).Where(dao.TSmsCode.Columns().Id, smsEntity.Id).Data(dataUpdate).Update()
+	err = dao.TSmsCode.UpdateSmsCodeStatus(ctx, smsEntity.Id, model.SMSCodeStatusUsed)
 	if err != nil {
-		return gerror.Newf(err.Error(), "更新验证码状态失败")
+		g.Log().Error(ctx, err)
+		return nil
 	}
 
 	return nil

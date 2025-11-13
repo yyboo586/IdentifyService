@@ -24,47 +24,69 @@ type (
 		GetCasBinUserPrefix() string
 		IsSupperAdmin(ctx context.Context, userId string) bool
 		NotCheckAuthAdminIds(ctx context.Context) *gset.Set
-		GetAdminUserByUsernamePassword(ctx context.Context, req *system.UserLoginReq) (user *model.LoginUserRes, err error)
-		GetUserByUsername(ctx context.Context, userName string) (user *model.LoginUserRes, err error)
+
+		Add(ctx context.Context, req *system.UserAddReq) (err error)
+		Delete(ctx context.Context, ids []int) (err error)
 		GetUserByPhone(ctx context.Context, phone string) (user *model.LoginUserRes, err error)
+		Edit(ctx context.Context, req *system.UserEditReq) (err error)
 		GetUserById(ctx context.Context, id string) (user *model.LoginUserRes, err error)
+		// 获取待编辑用户的信息
+		GetEditUser(ctx context.Context, id string) (res *system.UserGetEditRes, err error)
+		GetUserInfoById(ctx context.Context, id string, withPwd ...bool) (user *entity.SysUser, err error)
+		GetUserByUsername(ctx context.Context, userName string) (user *model.LoginUserRes, err error)
+		List(ctx context.Context, req *system.UserSearchReq) (total interface{}, userList []*entity.SysUser, err error)
+		GetUsersByIDs(ctx context.Context, req *system.UserByIdsReq) (total interface{}, userList []*entity.SysUser, err error)
+		GetUsers(ctx context.Context, ids []interface{}) (users []*model.SysUserSimpleRes, err error)
+
+		ValidateByUserNameAndPassword(ctx context.Context, req *system.UserLoginReq) (user *model.LoginUserRes, err error)
+		ValidatePassword(ctx context.Context, userInfo *model.User, password string) (err error)
+		CheckUserNameOrMobileExists(ctx context.Context, userName, mobile string, id ...string) error
+		ResetUserPwd(ctx context.Context, req *system.UserResetPwdReq) (err error)
+		ChangeUserStatus(ctx context.Context, req *system.UserStatusReq) (err error)
+
 		LoginLog(ctx context.Context, params *model.LoginLogParams)
 		UpdateLoginInfo(ctx context.Context, id string, ip string, openId ...string) (err error)
+
+		EditUserRole(ctx context.Context, roleIds []uint, userId string) (err error)
+		SetUserRole(ctx context.Context, roleId uint, userIds []string) (err error)
+		GetUsersByRoleId(ctx context.Context, roleId uint) (users []*model.SysUserRoleDeptRes, err error)
 		GetAdminRules(ctx context.Context, userId string) (menuList []*model.UserMenus, permissions []string, err error)
 		GetAdminRole(ctx context.Context, userId string, allRoleList []*entity.SysRole) (roles []*entity.SysRole, err error)
 		GetAdminRoleIds(ctx context.Context, userId string, includeChildren ...bool) (roleIds []uint, err error)
+
 		GetAllMenus(ctx context.Context) (menus []*model.UserMenus, err error)
 		GetAdminMenusIdsByRoleIds(ctx context.Context, roleIds []uint) (menuIds *garray.Array, err error)
 		GetAdminMenusByRoleIds(ctx context.Context, roleIds []uint) (menus []*model.UserMenus, err error)
 		GetMenusTree(menus []*model.UserMenus, pid uint) []*model.UserMenus
+
 		GetPermissions(ctx context.Context, roleIds []uint) (userButtons []string, err error)
-		List(ctx context.Context, req *system.UserSearchReq) (total interface{}, userList []*entity.SysUser, err error)
-		GetByIdsUser(ctx context.Context, req *system.UserByIdsReq) (total interface{}, userList []*entity.SysUser, err error)
 		GetUsersRoleDept(ctx context.Context, userList []*entity.SysUser) (users []*model.SysUserRoleDeptRes, err error)
-		Add(ctx context.Context, req *system.UserAddReq) (err error)
-		Edit(ctx context.Context, req *system.UserEditReq) (err error)
 		AddUserPost(ctx context.Context, tx gdb.TX, postIds []int64, userId string) (err error)
-		EditUserRole(ctx context.Context, roleIds []uint, userId string) (err error)
-		SetUserRole(ctx context.Context, roleId uint, userIds []string) (err error)
-		UserNameOrMobileExists(ctx context.Context, userName, mobile string, id ...string) error
-		GetEditUser(ctx context.Context, id string) (res *system.UserGetEditRes, err error)
-		GetUserInfoById(ctx context.Context, id string, withPwd ...bool) (user *entity.SysUser, err error)
 		GetUserPostIds(ctx context.Context, userId string) (postIds []int64, err error)
-		ResetUserPwd(ctx context.Context, req *system.UserResetPwdReq) (err error)
-		ChangeUserStatus(ctx context.Context, req *system.UserStatusReq) (err error)
-		Delete(ctx context.Context, ids []int) (err error)
-		GetUsers(ctx context.Context, ids []interface{}) (users []*model.SysUserSimpleRes, err error)
+
 		// Deprecated : 此方法已废弃，请使用更简单的GetAuthWhere方法或GetAuthDeptWhere方法
 		GetDataWhere(ctx context.Context, userInfo *model.ContextUser, entityData interface{}, menuId uint) (where g.Map, err error)
 		HasAccessByDataWhere(ctx context.Context, where g.Map, uid interface{}) bool
 		AccessRule(ctx context.Context, userId string, rule string) bool
 		GetUserSelector(ctx context.Context, req *system.UserSelectorReq) (total interface{}, userList []*model.SysUserSimpleRes, err error)
-		GetUsersByRoleId(ctx context.Context, roleId uint) (users []*model.SysUserRoleDeptRes, err error)
 		GetAuthWhere(ctx context.Context, m *gdb.Model, userInfo *model.ContextUser, field ...string) *gdb.Model
 		GetAuthDeptWhere(ctx context.Context, m *gdb.Model, userInfo *model.ContextUser, field ...string) *gdb.Model
 
 		Login2(ctx context.Context, req *system.UserLogin2Req) (userInfo *model.LoginUserRes, err error)
 		UpdateUserType(ctx context.Context, userID string, userType string) (err error)
+
+		GetUserInfoByPhone(ctx context.Context, phone string) (userInfo *model.User, exists bool, err error)
+		SelfRegister(ctx context.Context, tx gdb.TX, userID string, deptID int64, phone string) (err error)
+		UnRegister(ctx context.Context, userID string) (err error)
+
+		GetUserPersonalInfo(ctx context.Context, userID string) (userInfo *model.User, err error)
+		EditUserPersonalInfo(ctx context.Context, userID string, userInfo *model.UserPersonalInfo) (err error)
+		UpdateUserPhone(ctx context.Context, userID string, phone string) (err error)
+		EditUserPassword(ctx context.Context, userID string, phone string, password string) (err error)
+		EditUserIDCard(ctx context.Context, userID string, phone string, idCard string, cardType string, realName string) (err error)
+		GetUserIDCard(ctx context.Context, userID string) (info *model.UserIDCardInfo, err error)
+		Add3(ctx context.Context, deptID int64, phone, userNickname string) (userID string, err error)
+		Delete3(ctx context.Context, userID string) (err error)
 	}
 )
 

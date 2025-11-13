@@ -21,23 +21,31 @@ type SysUserDao struct {
 // SysUserColumns defines and stores column names for table sys_user.
 type SysUserColumns struct {
 	Id           string //
+	DeptId       string // 部门id
 	UserName     string // 用户名
 	UserNickname string // 用户昵称
 	UserPassword string // 登录密码;cmf_password加密
 	UserSalt     string // 加密盐
 	UserStatus   string // 用户状态;0:禁用,1:正常,2:未验证
+	IsAdmin      string // 是否后台管理员 1 是  0   否
 
-	Sex       string // 性别;0:保密,1:男,2:女
 	Mobile    string // 中国手机不带国家代码，国际手机号格式为：国家代码-手机号
 	UserEmail string // 用户登录邮箱
+	Sex       string // 性别;0:保密,1:男,2:女
 	Avatar    string // 用户头像
+	City      string // 城市
+	Birthday  string // 生日
 	Address   string // 联系地址
+	Describe  string // 描述信息
+	Remark    string // 备注
 
-	DeptId  string // 部门id
-	IsAdmin string // 是否后台管理员 1 是  0   否
+	OpenId   string // 微信open id
+	IuqtID   string // IUQT ID
+	UserType string // 用户类型(1:服务提供商,2:展商)
 
-	Remark   string // 备注
-	Describe string // 描述信息
+	CardType string // 证件类型
+	IDCard   string // 证件号
+	RealName string // 真实姓名
 
 	LastLoginIp   string // 最后登录ip
 	LastLoginTime string // 最后登录时间
@@ -45,38 +53,43 @@ type SysUserColumns struct {
 	CreatedAt string // 创建时间
 	UpdatedAt string // 更新时间
 	DeletedAt string // 删除时间
-
-	OpenId   string // 微信open id
-	IuqtID   string // IUQT ID
-	UserType string // 用户类型(1:服务提供商,2:展商)
 }
 
 // sysUserColumns holds the columns for table sys_user.
 var sysUserColumns = SysUserColumns{
-	Id:            "id",
-	UserName:      "user_name",
-	Mobile:        "mobile",
-	UserNickname:  "user_nickname",
-	UserPassword:  "user_password",
-	UserSalt:      "user_salt",
-	UserStatus:    "user_status",
-	UserEmail:     "user_email",
-	Sex:           "sex",
-	Avatar:        "avatar",
-	DeptId:        "dept_id",
-	Remark:        "remark",
-	IsAdmin:       "is_admin",
-	Address:       "address",
-	Describe:      "describe",
-	LastLoginIp:   "last_login_ip",
-	LastLoginTime: "last_login_time",
-	CreatedAt:     "created_at",
-	UpdatedAt:     "updated_at",
-	DeletedAt:     "deleted_at",
+	Id:           "id",
+	DeptId:       "dept_id",
+	UserName:     "user_name",
+	UserNickname: "user_nickname",
+	UserPassword: "user_password",
+	UserSalt:     "user_salt",
+	UserStatus:   "user_status",
+	IsAdmin:      "is_admin",
+
+	Mobile:    "mobile",
+	UserEmail: "user_email",
+	Sex:       "sex",
+	Avatar:    "avatar",
+	City:      "city",
+	Birthday:  "birthday",
+	Address:   "address",
+	Describe:  "describe",
+	Remark:    "remark",
 
 	OpenId:   "open_id",
 	IuqtID:   "iuqt_id",
 	UserType: "user_type",
+
+	CardType: "card_type",
+	IDCard:   "id_card",
+	RealName: "real_name",
+
+	LastLoginIp:   "last_login_ip",
+	LastLoginTime: "last_login_time",
+
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
+	DeletedAt: "deleted_at",
 }
 
 // NewSysUserDao creates and returns a new DAO object for table data access.

@@ -1,6 +1,7 @@
 package logic
 
 import (
+	_ "IdentifyService/internal/app/system/logic/agreement"
 	_ "IdentifyService/internal/app/system/logic/context"
 	_ "IdentifyService/internal/app/system/logic/middleware"
 	_ "IdentifyService/internal/app/system/logic/personal"
@@ -21,4 +22,5 @@ import (
 	_ "IdentifyService/internal/app/system/logic/token"
 	_ "IdentifyService/internal/app/system/logic/toolsGenTable"
 	_ "IdentifyService/internal/app/system/logic/toolsGenTableColumn"
+	_ "IdentifyService/internal/app/system/logic/userDevice"
 )

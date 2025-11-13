@@ -14,7 +14,7 @@ type ICaptcha interface {
 	GetCaptchaV2(ctx context.Context) (dots map[int]captcha.CharDot, img, thumb, key string, err error)
 	CheckCaptchaV2(ctx context.Context, key string, dots string, removeKey ...bool) (err error)
 
-	SendSmsCode(ctx context.Context, phone string, bussinessType model.SMSBusinessType) (err error)
+	SendSmsCode(ctx context.Context, phone string, bussinessType model.SMSBusinessType) (code string, err error)
 	ValidateSmsCode(ctx context.Context, phone string, bussinessType model.SMSBusinessType, code string) (err error)
 }
 

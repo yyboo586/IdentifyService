@@ -6,6 +6,13 @@ package dao
 
 import (
 	"IdentifyService/internal/app/system/dao/internal"
+	"IdentifyService/internal/app/system/model/entity"
+	"context"
+	"database/sql"
+	"fmt"
+
+	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/os/gtime"
 )
 
 // sysUserDao is the data access object for table sys_user.
@@ -22,3 +29,88 @@ var (
 )
 
 // Fill with you ideas below.
+
+func (d *sysUserDao) Insert(ctx context.Context, tx gdb.TX, data map[string]interface{}) (err error) {
+	_, err = d.Ctx(ctx).TX(tx).Data(data).Insert()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *sysUserDao) Delete(ctx context.Context, userID string) (err error) {
+	_, err = d.Ctx(ctx).Where(d.Columns().Id, userID).Data(map[string]interface{}{
+		d.Columns().DeletedAt: gtime.Now(),
+	}).Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *sysUserDao) Update(ctx context.Context, userID string, data map[string]interface{}) (err error) {
+	_, err = d.Ctx(ctx).Where(d.Columns().Id, userID).Data(data).Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *sysUserDao) Get(ctx context.Context, id string) (userEntity *entity.SysUser, err error) {
+	userEntity = &entity.SysUser{}
+	err = d.Ctx(ctx).Where(d.Columns().Id, id).Scan(&userEntity)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("用户不存在")
+		}
+		return nil, err
+	}
+
+	return userEntity, nil
+}
+
+func (d *sysUserDao) GetUserByUserName(ctx context.Context, userName string) (user *entity.SysUser, err error) {
+	user = &entity.SysUser{}
+	err = d.Ctx(ctx).Where(d.Columns().UserName, userName).Scan(&user)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return user, nil
+}
+
+func (d *sysUserDao) GetUserByPhone(ctx context.Context, phone string) (user *entity.SysUser, exists bool, err error) {
+	var userEntity entity.SysUser
+	err = d.Ctx(ctx).Where(d.Columns().Mobile, phone).Scan(&userEntity)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	return &userEntity, true, nil
+}
+
+func (d *sysUserDao) GetUserPersonalInfo(ctx context.Context, userID string) (userEntity *entity.SysUser, err error) {
+	userEntity = &entity.SysUser{}
+	fields := []string{
+		d.Columns().Id,
+		d.Columns().UserName,
+		d.Columns().UserNickname,
+		d.Columns().Mobile,
+		d.Columns().UserEmail,
+		d.Columns().Sex,
+		d.Columns().Avatar,
+		d.Columns().City,
+		d.Columns().Birthday,
+	}
+
+	err = d.Ctx(ctx).Where(d.Columns().Id, userID).Fields(fields).Scan(userEntity)
+	if err != nil {
+		return nil, err
+	}
+
+	return userEntity, nil
+}

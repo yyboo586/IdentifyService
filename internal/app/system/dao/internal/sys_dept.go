@@ -6,6 +6,7 @@ package internal
 
 import (
 	"context"
+
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -30,6 +31,7 @@ type SysDeptColumns struct {
 	Status    string // 部门状态（0正常 1停用）
 	CreatedBy string // 创建人
 	UpdatedBy string // 修改人
+	ManagerID string // 负责人ID
 	CreatedAt string // 创建时间
 	UpdatedAt string // 修改时间
 	DeletedAt string // 删除时间
@@ -48,6 +50,7 @@ var sysDeptColumns = SysDeptColumns{
 	Status:    "status",
 	CreatedBy: "created_by",
 	UpdatedBy: "updated_by",
+	ManagerID: "manager_id",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 	DeletedAt: "deleted_at",

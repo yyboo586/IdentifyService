@@ -11,6 +11,8 @@ import (
 	"IdentifyService/api/v1/system"
 	"IdentifyService/internal/app/system/model"
 	"IdentifyService/internal/app/system/model/entity"
+
+	"github.com/gogf/gf/v2/database/gdb"
 )
 
 type ISysDept interface {
@@ -24,6 +26,9 @@ type ISysDept interface {
 	GetByDeptId(ctx context.Context, deptId uint64) (dept *entity.SysDept, err error)
 	GetByDept(ctx context.Context, deptId interface{}) (dept *model.LinkDeptRes)
 	GetTopIds(list []*entity.SysDept) (ids []uint64)
+
+	CreateDept(ctx context.Context, tx gdb.TX, deptName string, managerID string) (deptID int64, err error)
+	IsDeptManager(ctx context.Context, deptID uint64, userID string) (isManager bool, err error)
 }
 
 var localSysDept ISysDept

@@ -17,10 +17,14 @@ server:
   errorLogPattern: "error-{Ymd}.log"  # 异常错误日志文件格式。默认为"error-{Ymd}.log"
   accessLogEnabled: true              # 是否记录访问日志。默认为false
   accessLogPattern: "access-{Ymd}.log" # 访问日志文件格式。默认为"access-{Ymd}.log"
-  service:
+  security:
+    idCardEncryptKey: "12345678901234567890123456789012"
+  thirdService:
     exEngine:
       addr: "http://127.0.0.1:9900"
-
+    fileEngine:
+      addr: "http://124.221.243.128:9860"
+      
 logger:
   path: "resource/log/run"
   file: "{Y-m-d}.log"
@@ -52,7 +56,7 @@ gfToken:
   maxRefresh: 5400
   multiLogin: true
   encryptKey: "49c54195e750b04e74a8429b17896586"
-  cacheModel: "redis"
+  cacheModel: "memory"
   excludePaths:
     - "/api/v1/system/login"
     - "/api/v1/system/logout"
@@ -61,10 +65,10 @@ gfToken:
 
 
 system:
-  notCheckAuthAdminIds: [1,2,31]  #无需验证后台权限的用户id
+  notCheckAuthAdminIds: ["1"]  #无需验证后台权限的用户id
   dataDir: "./resource/data"
   cache:
-    model: "redis"  #缓存模式 memory OR redis
+    model: "memory"  #缓存模式 memory OR redis
     prefix: "gFastV3Cache:" #缓存前缀
 
 # Redis缓存配置

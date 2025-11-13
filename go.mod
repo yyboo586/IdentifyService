@@ -11,10 +11,10 @@ require (
 	github.com/apache/rocketmq-client-go/v2 v2.1.1
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/casbin/casbin/v2 v2.42.0
-	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.8.3
+	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.9.5
 	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.8.3
 	github.com/gogf/gf/contrib/nosql/redis/v2 v2.9.4
-	github.com/gogf/gf/v2 v2.9.4
+	github.com/gogf/gf/v2 v2.9.5
 	github.com/gorilla/websocket v1.5.3
 	github.com/mojocn/base64Captcha v1.3.6
 	github.com/mssola/user_agent v0.5.3

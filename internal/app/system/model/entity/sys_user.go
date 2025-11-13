@@ -10,27 +10,37 @@ import (
 
 // SysUser is the golang structure for table sys_user.
 type SysUser struct {
-	Id            string      `json:"id"            description:""`
-	IUQTID        string      `json:"iuqt_id"      description:"IUQT ID"`
-	UserName      string      `json:"userName"      description:"用户名"`
-	Mobile        string      `json:"mobile"        description:"中国手机不带国家代码，国际手机号格式为：国家代码-手机号"`
-	UserNickname  string      `json:"userNickname"  description:"用户昵称"`
-	UserPassword  string      `json:"userPassword"  description:"登录密码;cmf_password加密"`
-	UserSalt      string      `json:"userSalt"      description:"加密盐"`
-	UserStatus    uint        `json:"userStatus"    description:"用户状态;0:禁用,1:正常,2:未验证"`
-	UserEmail     string      `json:"userEmail"     description:"用户登录邮箱"`
-	Sex           int         `json:"sex"           description:"性别;0:保密,1:男,2:女"`
-	Avatar        string      `json:"avatar"        description:"用户头像"`
-	DeptId        uint64      `json:"deptId"        description:"部门id"`
-	Remark        string      `json:"remark"        description:"备注"`
-	IsAdmin       int         `json:"isAdmin"       description:"是否后台管理员 1 是  0   否"`
-	Address       string      `json:"address"       description:"联系地址"`
-	Describe      string      `json:"describe"      description:"描述信息"`
+	Id           string `json:"id"            description:""`
+	DeptId       uint64 `json:"deptId"        description:"部门id"`
+	UserName     string `json:"userName"      description:"用户名"`
+	UserNickname string `json:"userNickname"  description:"用户昵称"`
+	UserPassword string `json:"userPassword"  description:"登录密码;cmf_password加密"`
+	UserSalt     string `json:"userSalt"      description:"加密盐"`
+	UserStatus   uint   `json:"userStatus"    description:"用户状态;0:禁用,1:正常,2:未验证"`
+	IsAdmin      int    `json:"isAdmin"       description:"是否后台管理员 1 是  0   否"`
+
+	Mobile    string `json:"mobile"        description:"中国手机不带国家代码，国际手机号格式为：国家代码-手机号"`
+	UserEmail string `json:"userEmail"     description:"用户登录邮箱"`
+	Sex       int    `json:"sex"           description:"性别;0:保密,1:男,2:女"`
+	Avatar    string `json:"avatar"        description:"用户头像"`
+	City      string `json:"city"          description:"城市"`
+	Birthday  string `json:"birthday"      description:"生日"`
+	Address   string `json:"address"       description:"联系地址"`
+	Describe  string `json:"describe"      description:"描述信息"`
+	Remark    string `json:"remark"        description:"备注"`
+
 	LastLoginIp   string      `json:"lastLoginIp"   description:"最后登录ip"`
 	LastLoginTime *gtime.Time `json:"lastLoginTime" description:"最后登录时间"`
-	CreatedAt     *gtime.Time `json:"createdAt"     description:"创建时间"`
-	UpdatedAt     *gtime.Time `json:"updatedAt"     description:"更新时间"`
-	DeletedAt     *gtime.Time `json:"deletedAt"     description:"删除时间"`
-	OpenId        string      `json:"openId "    description:"微信小程序open id"`
-	UserType      int         `json:"userType"      description:"用户类型(1:服务提供商,2:展商)"`
+
+	OpenId   string `json:"openId "    description:"微信小程序open id"`
+	IUQTID   string `json:"iuqt_id"      description:"IUQT ID"`
+	UserType int    `json:"userType"      description:"用户类型(1:服务提供商,2:展商)"`
+
+	CardType string `json:"card_type"    description:"证件类型"`
+	IDCard   string `json:"id_card"      description:"证件号"`
+	RealName string `json:"real_name"    description:"真实姓名"`
+
+	CreatedAt *gtime.Time `json:"createdAt"     description:"创建时间"`
+	UpdatedAt *gtime.Time `json:"updatedAt"     description:"更新时间"`
+	DeletedAt *gtime.Time `json:"deletedAt"     description:"删除时间"`
 }

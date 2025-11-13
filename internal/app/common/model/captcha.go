@@ -9,14 +9,23 @@ import (
 type SMSBusinessType int
 
 const (
-	BusinessTypeUnknown  SMSBusinessType = iota
-	SMSBusinessTypeLogin                 // 验证码登录
+	BusinessTypeUnknown          SMSBusinessType = iota
+	SMSBusinessTypeAccountLogin                  // 验证码注册/登录
+	SMSBusinessTypeBindPhone                     // 绑定/换绑手机号
+	SMSBusinessTypeResetPassword                 // 修改密码
+	SMSBusinessTypeBindIDCard                    // 绑定身份证号
 )
 
 func GetSMSBusinessType(businessType string) SMSBusinessType {
 	switch businessType {
-	case "验证码登录":
-		return SMSBusinessTypeLogin
+	case "验证码注册/登录":
+		return SMSBusinessTypeAccountLogin
+	case "绑定/换绑手机号":
+		return SMSBusinessTypeBindPhone
+	case "修改密码":
+		return SMSBusinessTypeResetPassword
+	case "绑定身份证号":
+		return SMSBusinessTypeBindIDCard
 	default:
 		return BusinessTypeUnknown
 	}
@@ -25,21 +34,9 @@ func GetSMSBusinessType(businessType string) SMSBusinessType {
 type SMSCodeStatus int
 
 const (
-	SMSCodeStatusUnknown SMSCodeStatus = iota // 未知状态
-	SMSCodeStatusInit                         // 未使用
-	SMSCodeStatusUsed                         // 已使用
+	SMSCodeStatusInit SMSCodeStatus = iota // 未使用
+	SMSCodeStatusUsed                      // 已使用
 )
-
-func GetTSmsCodeStatus(status string) SMSCodeStatus {
-	switch status {
-	case "未使用":
-		return SMSCodeStatusInit
-	case "已使用":
-		return SMSCodeStatusUsed
-	default:
-		return SMSCodeStatusUnknown
-	}
-}
 
 type SMS struct {
 	Id           int64           `json:"id"`
