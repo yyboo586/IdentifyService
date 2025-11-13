@@ -26,116 +26,67 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `casbin_rule`;
 CREATE TABLE `casbin_rule`  (
-  `ptype` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `v0` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `v1` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `v2` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `v3` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `v4` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-  `v5` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = COMPACT;
+  `ptype` varchar(10) DEFAULT NULL,
+  `v0` varchar(256) DEFAULT NULL,
+  `v1` varchar(256) DEFAULT NULL,
+  `v2` varchar(256) DEFAULT NULL,
+  `v3` varchar(256) DEFAULT NULL,
+  `v4` varchar(256) DEFAULT NULL,
+  `v5` varchar(256) DEFAULT NULL
+) ENGINE = InnoDB COMMENT = 'casbin_rule';
 
 -- ----------------------------
 -- Records of casbin_rule
 -- ----------------------------
-INSERT INTO `casbin_rule` VALUES ('g', 'u_1', '1', '', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('g', 'u_43', '1', '', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '27', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '28', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '29', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '30', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '1', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '2', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '3', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '4', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '11', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '10', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '12', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '13', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '14', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '15', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '19', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '20', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '21', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '22', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '23', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '24', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '25', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '26', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '31', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '32', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '34', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '38', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '39', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '35', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '33', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '36', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '37', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '53', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '54', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '55', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '56', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '57', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '58', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '17', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '16', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '1', '18', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '27', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '28', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '29', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '30', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '1', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '2', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '3', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '4', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '11', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '10', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '12', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '13', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '14', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '15', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '19', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '20', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '21', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '22', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '23', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '24', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '25', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '9', '26', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('g', 'u_5', '2', '', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('g', 'u_31', '2', '', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('g', 'u_6', '2', '', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('g', 'u_16', '2', '', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('g', 'u_3', '2', '', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '1', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '2', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '3', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '4', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '11', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '10', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '12', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '13', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '14', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '114', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '115', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '15', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '19', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '20', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '21', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '22', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '23', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '24', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '25', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '26', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '116', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '117', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '118', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '119', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '31', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '32', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '34', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('p', '2', '33', 'All', '', '', '');
-INSERT INTO `casbin_rule` VALUES ('g', 'u_10', '2', '', '', '', '');
+INSERT INTO `casbin_rule` VALUES 
+('g','u_1','1','','','',''),
+('g','u_43','1','','','',''),
+('p','1','27','All','','',''),
+('p','1','28','All','','',''),
+('p','1','29','All','','',''),
+('p','1','30','All','','',''),
+('p','1','1','All','','',''),
+('p','1','2','All','','',''),
+('p','1','3','All','','',''),
+('p','1','4','All','','',''),
+('p','1','11','All','','',''),
+('p','1','10','All','','',''),
+('p','1','12','All','','',''),
+('p','1','13','All','','',''),
+('p','1','14','All','','',''),
+('p','1','15','All','','',''),
+('p','1','19','All','','',''),
+('p','1','20','All','','',''),
+('p','1','21','All','','',''),
+('p','1','22','All','','',''),
+('p','1','23','All','','',''),
+('p','1','24','All','','',''),
+('p','1','25','All','','',''),
+('p','1','26','All','','',''),
+('p','1','31','All','','',''),
+('p','1','32','All','','',''),
+('p','1','34','All','','',''),
+('p','1','38','All','','',''),
+('p','1','39','All','','',''),
+('p','1','35','All','','',''),
+('p','1','33','All','','',''),
+('p','1','36','All','','',''),
+('p','1','37','All','','',''),
+('p','1','53','All','','',''),
+('p','1','54','All','','',''),
+('p','1','55','All','','',''),
+('p','1','56','All','','',''),
+('p','1','57','All','','',''),
+('p','1','58','All','','',''),
+('p','1','17','All','','',''),
+('p','1','16','All','','',''),
+('p','1','18','All','','',''),
+('g','u_5','2','','','',''),
+('g','u_31','2','','','',''),
+('g','u_6','2','','','',''),
+('g','u_16','2','','','',''),
+('g','u_3','2','','','',''),
+('g','u_10','2','','','','');
 
 -- ----------------------------
 -- Table structure for demo_city_code
@@ -523,21 +474,25 @@ INSERT INTO `sys_config` VALUES (11, '静态资源', 'static.resource', '/', 1, 
 DROP TABLE IF EXISTS `sys_dept`;
 CREATE TABLE `sys_dept`  (
   `dept_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '部门id',
-  `parent_id` bigint(20) NULL DEFAULT 0 COMMENT '父部门id',
-  `ancestors` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '祖级列表',
-  `dept_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '部门名称',
+  `parent_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '父部门id',
+  `ancestors` varchar(50) NOT NULL DEFAULT '' COMMENT '祖级列表',
+  `dept_name` varchar(30) NOT NULL DEFAULT '' COMMENT '部门名称',
   `order_num` int(4) NULL DEFAULT 0 COMMENT '显示顺序',
-  `leader` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '负责人',
-  `phone` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '联系电话',
-  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '邮箱',
-  `status` tinyint(3) UNSIGNED NULL DEFAULT 0 COMMENT '部门状态（0正常 1停用）',
-  `created_by` bigint(20) UNSIGNED NULL DEFAULT 0 COMMENT '创建人',
+  `leader` varchar(20) NOT NULL DEFAULT '' COMMENT '负责人',
+  `phone` varchar(11) NOT NULL DEFAULT '' COMMENT '联系电话',
+  `email` varchar(50) NOT NULL DEFAULT '' COMMENT '邮箱',
+  `status` tinyint(3) UNSIGNED NULL DEFAULT 0 COMMENT '部门状态(0正常 1停用)',
+  `manager_id` VARCHAR(40) NULL DEFAULT '' COMMENT '负责人ID',
+  `created_by` bigint(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '创建人',
   `updated_by` bigint(20) NULL DEFAULT NULL COMMENT '修改人',
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime NULL DEFAULT NULL COMMENT '修改时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
-  PRIMARY KEY (`dept_id`) USING BTREE
+  PRIMARY KEY (`dept_id`) USING BTREE,
+  UNIQUE KEY `idx_manager_id` (`manager_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 204 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '部门表' ROW_FORMAT = COMPACT;
+
+ALTER TABLE `sys_dept` ADD COLUMN `manager_id` VARCHAR(40) NULL DEFAULT '' COMMENT '负责人ID' AFTER `status`;
 
 -- ----------------------------
 -- Records of sys_dept
@@ -923,22 +878,16 @@ CREATE TABLE `sys_role`  (
   `data_scope` tinyint(3) UNSIGNED NOT NULL DEFAULT 3 COMMENT '数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限）',
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `created_by` bigint(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '添加人',
-  `effectiveTime` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '角色有效日期',
+  `created_by` VARCHAR(40) NOT NULL DEFAULT '' COMMENT '添加人',
+  `effectiveTime` text COMMENT '角色有效日期',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '角色表' ROW_FORMAT = COMPACT;
+) ENGINE = InnoDB COMMENT = '角色表';
 
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES (1, 0, 1, 0, '超级管理员', '备注', 2, '2022-04-01 11:38:39', '2023-09-28 10:27:55', 0, NULL);
-INSERT INTO `sys_role` VALUES (2, 1, 1, 0, '普通管理员', '备注', 5, '2022-04-01 11:38:39', '2024-09-14 09:10:55', 0, '{\"effectiveType\":0,\"weekDay\":[1,2,3,4,5],\"dayRange\":[\"2024-04-12 08:00:00\",\"2024-04-12 18:00:00\"],\"dateRange\":null}');
-INSERT INTO `sys_role` VALUES (3, 0, 1, 0, '站点管理员', '站点管理人员', 3, '2022-04-01 11:38:39', '2022-04-01 11:38:39', 0, NULL);
-INSERT INTO `sys_role` VALUES (4, 5, 1, 0, '初级管理员', '初级管理员', 3, '2022-04-01 11:38:39', '2024-03-18 10:16:15', 0, '{\"effectiveType\":0,\"weekDay\":null,\"dayRange\":null,\"dateRange\":null}');
-INSERT INTO `sys_role` VALUES (5, 0, 1, 0, '高级管理员', '高级管理员', 2, '2022-04-01 11:38:39', '2022-04-01 11:38:39', 0, NULL);
-INSERT INTO `sys_role` VALUES (8, 0, 1, 0, '区级管理员', '', 2, '2022-04-01 11:38:39', '2022-04-06 09:53:40', 0, NULL);
-INSERT INTO `sys_role` VALUES (9, 0, 1, 0, '测试', '', 3, '2023-04-22 12:39:13', '2023-09-28 15:48:56', 3, NULL);
+INSERT INTO `sys_role` VALUES (1, 0, 1, 0, '超级管理员', '备注', 2, '2022-04-01 11:38:39', '2023-09-28 10:27:55', '', NULL);
 
 -- ----------------------------
 -- Table structure for sys_role_dept
@@ -1005,47 +954,7 @@ INSERT INTO `sys_role_scope` VALUES (98, 2, 141, 4, '[]');
 -- ----------------------------
 -- Table structure for sys_user
 -- ----------------------------
-DROP TABLE IF EXISTS `sys_user`;
-CREATE TABLE `sys_user`  (
-  `id` VARCHAR(40) NOT NULL AUTO_INCREMENT,
-  `user_name` VARCHAR(60) NOT NULL DEFAULT '' COMMENT '用户名',
-  `mobile` VARCHAR(20) NOT NULL DEFAULT '' COMMENT '中国手机不带国家代码，国际手机号格式为：国家代码-手机号',
-  `user_nickname` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '用户昵称',
-  `user_password` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '登录密码;cmf_password加密',
-  `user_salt` CHAR(10) NOT NULL COMMENT '加密盐',
-  `user_status` TINYINT(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '用户状态;0:禁用,1:正常,2:未验证',
-  `user_email` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '用户登录邮箱',
-  `sex` TINYINT(2) NOT NULL DEFAULT 0 COMMENT '性别;0:保密,1:男,2:女',
-  `avatar` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '用户头像',
-  `dept_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '部门id',
-  `remark` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '备注',
-  `is_admin` TINYINT(4) NOT NULL DEFAULT 1 COMMENT '是否后台管理员 1 是  0   否',
-  `address` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '联系地址',
-  `describe` VARCHAR(255) NOT NULL DEFAULT '' COMMENT ' 描述信息',
-  `last_login_ip` VARCHAR(15) NOT NULL DEFAULT '' COMMENT '最后登录ip',
-  `last_login_time` DATETIME NULL DEFAULT NULL COMMENT '最后登录时间',
-  `created_at` DATETIME NULL DEFAULT NULL COMMENT '创建时间',
-  `updated_at` DATETIME NULL DEFAULT NULL COMMENT '更新时间',
-  `deleted_at` DATETIME NULL DEFAULT NULL COMMENT '删除时间',
-  `open_id` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '微信open id',
-  `iuqt_id` VARCHAR(50) DEFAULT '' COMMENT 'IUQT ID',
-  `user_type` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '用户类型(1:服务提供商,2:展商)',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `user_login`(`user_name`, `deleted_at`) USING BTREE,
-  UNIQUE INDEX `mobile`(`mobile`, `deleted_at`) USING BTREE,
-  INDEX `user_nickname`(`user_nickname`) USING BTREE,
-  INDEX `open_id`(`open_id`) USING BTREE,
-  UNIQUE INDEX `iuqt_id`(`iuqt_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 44 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = COMPACT;
 
--- ----------------------------
--- Records of sys_user
--- ----------------------------
-INSERT INTO `sys_user` VALUES 
-(1, 'admin', '13578342363', '超级管理员', 'c567ae329f9929b518759d3bea13f492', 'f9aZTAa8yz', 1, 'yxh669@qq.com', 1, 'https://yxh-1301841944.cos.ap-chongqing.myqcloud.com/gfast/2021-07-19/ccwpeuqz1i2s769hua.jpeg', 101, '', 1, 'asdasfdsaf大发放打发士大夫发按时', '描述信息', '::1', '2023-10-31 11:22:06', '2021-06-22 17:58:00', '2023-04-22 14:39:18', NULL, ''),
-(2, 'yixiaohu', '13699885599', '奈斯', '542a6e44dbac171f260fc4a032cd5522', 'dlqVVBTADg', 1, 'yxh@qq.com', 1, 'upload_file/2022-11-04/co3e5ljknns8jhlp8s.jpg', 102, '备注', 1, '', '', '::1', '2022-11-04 09:54:56', '2021-06-22 17:58:00', '2022-11-04 17:54:56', NULL, ''),
-(3, 'zs', '16399669855', '张三', '41e3778c20338f4d7d6cc886fd3b2a52', 'redoHIj524', 1, 'zs@qq.com', 0, 'https://yxh-1301841944.cos.ap-chongqing.myqcloud.com/gfast/2021-08-02/cd8nif79egjg9kbkgk.jpeg', 101, '', 1, '', '', '::1', '2023-05-22 22:24:27', '2021-06-22 17:58:00', '2022-04-28 10:01:47', NULL, ''),
-(4, 'qlgl', '13758596696', '测试c', '542a6e44dbac171f260fc4a032cd5522', 'dlqVVBTADg', 1, 'qlgl@qq.com', 0, '', 102, '', 1, '', '', '127.0.0.1', NULL, '2021-06-22 17:58:00', '2022-11-03 15:44:20', NULL, '');
 
 -- ----------------------------
 -- Table structure for sys_user_online
@@ -1079,7 +988,7 @@ CREATE TABLE `sys_user_post`  (
   `user_id` VARCHAR(40) NOT NULL COMMENT '用户ID',
   `post_id` bigint(20) NOT NULL COMMENT '岗位ID',
   PRIMARY KEY (`user_id`, `post_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户与岗位关联表' ROW_FORMAT = COMPACT;
+) ENGINE = InnoDB COMMENT = '用户与岗位关联表';
 
 -- ----------------------------
 -- Records of sys_user_post

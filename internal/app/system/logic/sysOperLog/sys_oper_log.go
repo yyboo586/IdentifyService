@@ -20,6 +20,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 type sOperateLog struct {
@@ -38,8 +39,8 @@ func New() service.IOperateLog {
 
 // OperationLog 操作日志写入
 func (s *sOperateLog) OperationLog(r *ghttp.Request) {
-	userInfo := service.Context().GetLoginUser(r.GetCtx())
-	if userInfo == nil {
+	operator, err := MiddleWare.GetContextUser(r.GetCtx())
+	if err != nil {
 		return
 	}
 	url := r.Request.URL //请求地址
@@ -59,7 +60,12 @@ func (s *sOperateLog) OperationLog(r *ghttp.Request) {
 		}
 	}
 	data := &model.SysOperLogAdd{
-		User:         userInfo,
+		User: &model.ContextUser{
+			LoginUserRes: &model.LoginUserRes{
+				Id:       operator.UserID,
+				UserName: operator.UserName,
+			},
+		},
 		Menu:         menu,
 		Url:          url,
 		Params:       r.GetMap(),

@@ -5,7 +5,8 @@ import (
 
 	"IdentifyService/api/v1/system"
 	commonService "IdentifyService/internal/app/common/service"
-	"IdentifyService/internal/app/system/service"
+
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 var DictData = dictDataController{}
@@ -27,7 +28,11 @@ func (c *dictDataController) List(ctx context.Context, req *system.DictDataSearc
 
 // Add 添加字典数据
 func (c *dictDataController) Add(ctx context.Context, req *system.DictDataAddReq) (res *system.DictDataAddRes, err error) {
-	err = commonService.SysDictData().Add(ctx, req, service.Context().GetUserId(ctx))
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = commonService.SysDictData().Add(ctx, req, operator.UserID)
 	return
 }
 
@@ -39,7 +44,11 @@ func (c *dictDataController) Get(ctx context.Context, req *system.DictDataGetReq
 
 // Edit 修改字典数据
 func (c *dictDataController) Edit(ctx context.Context, req *system.DictDataEditReq) (res *system.DictDataEditRes, err error) {
-	err = commonService.SysDictData().Edit(ctx, req, service.Context().GetUserId(ctx))
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = commonService.SysDictData().Edit(ctx, req, operator.UserID)
 	return
 }
 

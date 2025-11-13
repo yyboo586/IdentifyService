@@ -20,6 +20,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 func init() {
@@ -34,37 +35,21 @@ type sMiddleware struct{}
 
 // Ctx 自定义上下文对象
 func (s *sMiddleware) Ctx(r *ghttp.Request) {
-	ctx := r.GetCtx()
-	// 初始化登录用户信息
-	data, err := service.Token().Parse(r)
-	if err != nil {
-		// 执行下一步请求逻辑
-		r.Middleware.Next()
-		return
-	}
-	if data != nil {
-		context := new(model.Context)
-		err = gconv.Struct(data.Data, &context.User)
-		if err != nil {
-			g.Log().Error(ctx, err)
-			// 执行下一步请求逻辑
-			r.Middleware.Next()
-			return
-		}
-		service.Context().Init(r, context)
-	}
-	// 执行下一步请求逻辑
-	r.Middleware.Next()
+	MiddleWare.Auth(r)
 }
 
 // Auth 权限判断处理中间件
 func (s *sMiddleware) Auth(r *ghttp.Request) {
 	ctx := r.GetCtx()
 	//获取登陆用户id
-	adminId := service.Context().GetUserId(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		panic(err)
+	}
+	adminId := operator.UserID
 	url := gstr.TrimLeft(r.Request.URL.Path, "/")
 	//获取无需验证权限的用户id
-	tagSuperAdmin := service.SysUser().IsSupperAdmin(ctx, service.Context().GetUserId(ctx))
+	tagSuperAdmin := service.SysUser().IsSupperAdmin(ctx, operator.UserID)
 	if tagSuperAdmin {
 		r.Middleware.Next()
 		//不要再往后面执行

@@ -10,13 +10,13 @@ import (
 	"IdentifyService/internal/app/common/model"
 	commonService "IdentifyService/internal/app/common/service"
 	"IdentifyService/internal/app/system/consts"
-	"IdentifyService/internal/app/system/service"
 	"IdentifyService/library/libUtils"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 var UEditor = new(uEditorController)
@@ -208,10 +208,14 @@ func (c *uEditorController) uEditorUpload(ctx context.Context, upFile *ghttp.Upl
 		r    = g.RequestFromCtx(ctx)
 	)
 	v, _ := g.Cfg().Get(ctx, "upload.default")
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		panic(err)
+	}
 	if fType == "image" {
-		info, err = commonService.Upload().UploadFile(ctx, upFile, commonConsts.CheckFileTypeImg, v.Int(), service.Context().Get(ctx).User.Id, consts.UploadAppId)
+		info, err = commonService.Upload().UploadFile(ctx, upFile, commonConsts.CheckFileTypeImg, v.Int(), operator.UserID, consts.UploadAppId)
 	} else if fType == "file" {
-		info, err = commonService.Upload().UploadFile(ctx, upFile, commonConsts.CheckFileTypeFile, v.Int(), service.Context().Get(ctx).User.Id, consts.UploadAppId)
+		info, err = commonService.Upload().UploadFile(ctx, upFile, commonConsts.CheckFileTypeFile, v.Int(), operator.UserID, consts.UploadAppId)
 	}
 
 	if err != nil {

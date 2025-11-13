@@ -30,6 +30,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/yyboo586/common/MiddleWare"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
@@ -46,11 +47,6 @@ type sSysNotice struct{}
 
 func (s *sSysNotice) List(ctx context.Context, req *model.SysNoticeSearchReq) (listRes *model.SysNoticeSearchRes, err error) {
 	listRes = new(model.SysNoticeSearchRes)
-	currentUserId := service.Context().GetUserId(ctx)
-	if currentUserId == "" {
-		err = errors.New("用户信息查询失败")
-		return
-	}
 	err = g.Try(ctx, func(ctx context.Context) {
 		m := dao.SysNotice.Ctx(ctx).WithAll().As("n")
 		if req.Id != "" {
@@ -101,14 +97,13 @@ func (s *sSysNotice) List(ctx context.Context, req *model.SysNoticeSearchReq) (l
 }
 func (s *sSysNotice) ListShow(ctx context.Context, req *model.SysNoticeSearchReq) (listRes *model.SysNoticeSearchRes, err error) {
 	listRes = new(model.SysNoticeSearchRes)
-	currentUserId := service.Context().GetUserId(ctx)
-	if currentUserId == "" {
-		err = errors.New("用户信息查询失败")
-		return
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 	err = g.Try(ctx, func(ctx context.Context) {
 		m := dao.SysNotice.Ctx(ctx).WithAll().As("n")
-		m = m.LeftJoin("sys_notice_read as nr", fmt.Sprintf("nr.notice_id=n.id AND nr.user_id=%d", currentUserId))
+		m = m.LeftJoin("sys_notice_read as nr", fmt.Sprintf("nr.notice_id=n.id AND nr.user_id=%s", operator.UserID))
 		if req.Id != "" {
 			m = m.Where("n."+dao.SysNotice.Columns().Id+" = ?", req.Id)
 		}
@@ -119,11 +114,11 @@ func (s *sSysNotice) ListShow(ctx context.Context, req *model.SysNoticeSearchReq
 			m = m.Where("n."+dao.SysNotice.Columns().Type+" = ?", gconv.Int64(req.Type))
 			if gconv.Int(req.Type) == consts.SysLetterType {
 				if service.ToolsGenTable().IsMysql() {
-					m = m.Where("JSON_CONTAINS(n.receiver,?)", currentUserId)
+					m = m.Where("JSON_CONTAINS(n.receiver,?)", operator.UserID)
 				} else if service.ToolsGenTable().IsDM() {
-					m = m.Where("INSTR(n.receiver,?)>?", currentUserId, 0)
+					m = m.Where("INSTR(n.receiver,?)>?", operator.UserID, 0)
 				} else {
-					m = m.Where(fmt.Sprintf("receiver::jsonb @> '%d'::jsonb", currentUserId))
+					m = m.Where(fmt.Sprintf("receiver::jsonb @> '%s'::jsonb", operator.UserID))
 				}
 			}
 		}
@@ -365,7 +360,11 @@ func (s *sSysNotice) UnReadCount(ctx context.Context, currentUserId string) (sys
 }
 
 func (s *sSysNotice) ReadAll(ctx context.Context, nType string) (err error) {
-	currentUserId := service.Context().GetUserId(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return err
+	}
+	currentUserId := operator.UserID
 	if currentUserId == "" {
 		err = errors.New("获取当前用户信息失败")
 		return

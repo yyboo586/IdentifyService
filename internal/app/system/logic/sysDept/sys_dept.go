@@ -18,6 +18,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 func init() {
@@ -88,6 +89,11 @@ func (s *sSysDept) GetFromCache(ctx context.Context) (list []*entity.SysDept, er
 
 // Add 添加部门
 func (s *sSysDept) Add(ctx context.Context, req *system.DeptAddReq) (err error) {
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return err
+	}
+	userId := operator.UserID
 	err = g.Try(ctx, func(ctx context.Context) {
 		_, err = dao.SysDept.Ctx(ctx).Insert(do.SysDept{
 			ParentId:  req.ParentID,
@@ -97,7 +103,7 @@ func (s *sSysDept) Add(ctx context.Context, req *system.DeptAddReq) (err error) 
 			Phone:     req.Phone,
 			Email:     req.Email,
 			Status:    req.Status,
-			CreatedBy: service.Context().GetUserId(ctx),
+			CreatedBy: userId,
 		})
 		liberr.ErrIsNil(ctx, err, "添加部门失败")
 		// 删除缓存
@@ -108,6 +114,11 @@ func (s *sSysDept) Add(ctx context.Context, req *system.DeptAddReq) (err error) 
 
 // Edit 部门修改
 func (s *sSysDept) Edit(ctx context.Context, req *system.DeptEditReq) (err error) {
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return err
+	}
+	userId := operator.UserID
 	err = g.Try(ctx, func(ctx context.Context) {
 		if req.DeptId == req.ParentID {
 			liberr.ErrIsNil(ctx, errors.New("上级部门不能是自己"))
@@ -120,7 +131,7 @@ func (s *sSysDept) Edit(ctx context.Context, req *system.DeptEditReq) (err error
 			Phone:     req.Phone,
 			Email:     req.Email,
 			Status:    req.Status,
-			UpdatedBy: service.Context().GetUserId(ctx),
+			UpdatedBy: userId,
 		})
 		liberr.ErrIsNil(ctx, err, "修改部门失败")
 		// 删除缓存

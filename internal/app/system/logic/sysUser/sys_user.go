@@ -11,6 +11,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gurl"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/google/uuid"
+	"github.com/yyboo586/common/MiddleWare"
 
 	"IdentifyService/api/v1/system"
 	commonService "IdentifyService/internal/app/common/service"
@@ -55,21 +56,19 @@ func (s *sSysUser) GetCasBinUserPrefix() string {
 // IsSupperAdmin 判断用户是否超管
 func (s *sSysUser) IsSupperAdmin(ctx context.Context, userId string) bool {
 	superAdminIds := s.NotCheckAuthAdminIds(ctx)
-	if superAdminIds.Contains(userId) {
-		return true
-	}
-	return false
+	g.Log().Info(ctx, "superAdminIds", superAdminIds)
+	return superAdminIds.Contains(userId)
 }
 
 func (s *sSysUser) NotCheckAuthAdminIds(ctx context.Context) *gset.Set {
-	ids := g.Cfg().MustGet(ctx, "system.notCheckAuthAdminIds").Uint64s()
+	ids := g.Cfg().MustGet(ctx, "system.notCheckAuthAdminIds").Strings()
 	if !g.IsNil(ids) {
 		return gset.NewFrom(ids)
 	}
 	return gset.New()
 }
 
-func (s *sSysUser) GetAdminUserByUsernamePassword(ctx context.Context, req *system.UserLoginReq) (user *model.LoginUserRes, err error) {
+func (s *sSysUser) ValidateByUserNameAndPassword(ctx context.Context, req *system.UserLoginReq) (user *model.LoginUserRes, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		user, err = s.GetUserByUsername(ctx, req.UserName)
 		liberr.ErrIsNil(ctx, err)
@@ -78,12 +77,20 @@ func (s *sSysUser) GetAdminUserByUsernamePassword(ctx context.Context, req *syst
 		if libUtils.EncryptPassword(req.Password, user.UserSalt) != user.UserPassword {
 			liberr.ErrIsNil(ctx, gerror.New("账号密码错误"))
 		}
-		//账号状态
+		// 账号状态
 		if user.UserStatus == 0 {
 			liberr.ErrIsNil(ctx, gerror.New("账号已被冻结"))
 		}
 	})
 	return
+}
+
+func (s *sSysUser) ValidatePassword(ctx context.Context, userInfo *model.User, password string) (err error) {
+	//验证密码
+	if libUtils.EncryptPassword(password, userInfo.UserSalt) != userInfo.UserPassword {
+		return gerror.New("账号密码错误")
+	}
+	return nil
 }
 
 // GetUserByUsername 通过用户名获取用户信息
@@ -174,6 +181,7 @@ func (s *sSysUser) UpdateLoginInfo(ctx context.Context, id string, ip string, op
 // GetAdminRules 获取用户菜单数据
 func (s *sSysUser) GetAdminRules(ctx context.Context, userId string) (menuList []*model.UserMenus, permissions []string, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
+		g.Log().Info(ctx, "userId", userId)
 		//是否超管
 		isSuperAdmin := s.IsSupperAdmin(ctx, userId)
 		//获取用户菜单数据
@@ -187,6 +195,7 @@ func (s *sSysUser) GetAdminRules(ctx context.Context, userId string) (menuList [
 			name[k] = v.Name
 			roleIds[k] = v.Id
 		}
+		g.Log().Info(ctx, "isSuperAdmin", isSuperAdmin)
 		//获取菜单信息
 		if isSuperAdmin {
 			//超管获取所有菜单
@@ -278,8 +287,13 @@ func (s *sSysUser) GetAllMenus(ctx context.Context) (menus []*model.UserMenus, e
 func (s *sSysUser) GetAdminMenusIdsByRoleIds(ctx context.Context, roleIds []uint) (menuIds *garray.Array, err error) {
 	//获取角色对应的菜单id
 	menuIds = garray.New()
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	currentUserId := operator.UserID
 	err = g.Try(ctx, func(ctx context.Context) {
-		if s.IsSupperAdmin(ctx, service.Context().GetUserId(ctx)) {
+		if s.IsSupperAdmin(ctx, currentUserId) {
 			var menus []*model.SysAuthRuleInfoRes
 			menus, err = service.SysAuthRule().GetMenuList(ctx)
 			liberr.ErrIsNil(ctx, err)
@@ -437,7 +451,7 @@ func inSlice(field string, excludes []string) bool {
 }
 
 // 根据用户ID 获取用户
-func (s *sSysUser) GetByIdsUser(ctx context.Context, req *system.UserByIdsReq) (total interface{}, userList []*entity.SysUser, err error) {
+func (s *sSysUser) GetUsersByIDs(ctx context.Context, req *system.UserByIdsReq) (total interface{}, userList []*entity.SysUser, err error) {
 	err = g.Try(ctx, func(ctx context.Context) {
 		m := dao.SysUser.Ctx(ctx)
 		if req.Ids != nil {
@@ -657,16 +671,21 @@ func (s *sSysUser) filterRoleIds(ctx context.Context, roleIds []uint, userId str
 }
 
 func (s *sSysUser) Add(ctx context.Context, req *system.UserAddReq) (err error) {
-	err = s.UserNameOrMobileExists(ctx, req.UserName, req.Mobile)
+	err = s.CheckUserNameOrMobileExists(ctx, req.UserName, req.Mobile)
 	if err != nil {
 		return
 	}
 	req.UserSalt = grand.S(10)
 	req.Password = libUtils.EncryptPassword(req.Password, req.UserSalt)
 	userId := uuid.New().String()
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return err
+	}
+	currentUserId := operator.UserID
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		err = g.Try(ctx, func(ctx context.Context) {
-			_, e := dao.SysUser.Ctx(ctx).TX(tx).InsertAndGetId(do.SysUser{
+			_, e := dao.SysUser.Ctx(ctx).TX(tx).Insert(do.SysUser{
 				Id:           userId,
 				UserName:     req.UserName,
 				Mobile:       req.Mobile,
@@ -682,11 +701,11 @@ func (s *sSysUser) Add(ctx context.Context, req *system.UserAddReq) (err error) 
 			})
 			liberr.ErrIsNil(ctx, e, "添加用户失败")
 			//不是超管过滤提交角色数据
-			if !service.SysUser().IsSupperAdmin(ctx, service.Context().GetUserId(ctx)) {
-				req.RoleIds, err = s.filterRoleIds(ctx, req.RoleIds, service.Context().GetUserId(ctx))
+			if !service.SysUser().IsSupperAdmin(ctx, currentUserId) {
+				req.RoleIds, err = s.filterRoleIds(ctx, req.RoleIds, currentUserId)
 				liberr.ErrIsNil(ctx, err)
 			}
-			e = s.addUserRole(ctx, req.RoleIds, userId)
+			e = s.addUserRole(ctx, req.RoleIds, currentUserId)
 			liberr.ErrIsNil(ctx, e, "设置用户权限失败")
 			e = s.AddUserPost(ctx, tx, req.PostIds, userId)
 			liberr.ErrIsNil(ctx, e)
@@ -697,10 +716,15 @@ func (s *sSysUser) Add(ctx context.Context, req *system.UserAddReq) (err error) 
 }
 
 func (s *sSysUser) Edit(ctx context.Context, req *system.UserEditReq) (err error) {
-	err = s.UserNameOrMobileExists(ctx, "", req.Mobile, req.UserId)
+	err = s.CheckUserNameOrMobileExists(ctx, "", req.Mobile, req.UserId)
 	if err != nil {
 		return
 	}
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return err
+	}
+	currentUserId := operator.UserID
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		err = g.Try(ctx, func(ctx context.Context) {
 			_, err = dao.SysUser.Ctx(ctx).TX(tx).WherePri(req.UserId).Update(do.SysUser{
@@ -714,8 +738,8 @@ func (s *sSysUser) Edit(ctx context.Context, req *system.UserEditReq) (err error
 				IsAdmin:      req.IsAdmin,
 			})
 			liberr.ErrIsNil(ctx, err, "修改用户信息失败")
-			if !service.SysUser().IsSupperAdmin(ctx, service.Context().GetUserId(ctx)) {
-				req.RoleIds, err = s.filterRoleIds(ctx, req.RoleIds, service.Context().GetUserId(ctx))
+			if !service.SysUser().IsSupperAdmin(ctx, currentUserId) {
+				req.RoleIds, err = s.filterRoleIds(ctx, req.RoleIds, currentUserId)
 				liberr.ErrIsNil(ctx, err)
 			}
 			//设置用户所属角色信息
@@ -797,7 +821,7 @@ func (s *sSysUser) SetUserRole(ctx context.Context, roleId uint, userIds []strin
 		_, err = enforcer.RemoveFilteredGroupingPolicy(1, fmt.Sprintf("%d", roleId))
 		liberr.ErrIsNil(ctx, err)
 		for _, v := range userIds {
-			_, err = enforcer.AddGroupingPolicy(fmt.Sprintf("%s%d", s.casBinUserPrefix, v), gconv.String(roleId))
+			_, err = enforcer.AddGroupingPolicy(fmt.Sprintf("%s%s", s.casBinUserPrefix, v), gconv.String(roleId))
 			liberr.ErrIsNil(ctx, err)
 			//通知用户更新token
 			libWebsocket.SendToUser(v, &libWebsocket.WResponse{
@@ -809,7 +833,7 @@ func (s *sSysUser) SetUserRole(ctx context.Context, roleId uint, userIds []strin
 	return
 }
 
-func (s *sSysUser) UserNameOrMobileExists(ctx context.Context, userName, mobile string, id ...string) error {
+func (s *sSysUser) CheckUserNameOrMobileExists(ctx context.Context, userName, mobile string, id ...string) error {
 	user := (*entity.SysUser)(nil)
 	err := g.Try(ctx, func(ctx context.Context) {
 		m := dao.SysUser.Ctx(ctx)

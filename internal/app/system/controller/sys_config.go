@@ -5,7 +5,8 @@ import (
 
 	"IdentifyService/api/v1/system"
 	commonService "IdentifyService/internal/app/common/service"
-	"IdentifyService/internal/app/system/service"
+
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 var Config = configController{}
@@ -22,7 +23,11 @@ func (c *configController) List(ctx context.Context, req *system.ConfigSearchReq
 
 // Add 添加系统参数
 func (c *configController) Add(ctx context.Context, req *system.ConfigAddReq) (res *system.ConfigAddRes, err error) {
-	err = commonService.SysConfig().Add(ctx, req, service.Context().GetUserId(ctx))
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = commonService.SysConfig().Add(ctx, req, operator.UserID)
 	return
 }
 
@@ -34,7 +39,11 @@ func (c *configController) Get(ctx context.Context, req *system.ConfigGetReq) (r
 
 // Edit 修改系统参数
 func (c *configController) Edit(ctx context.Context, req *system.ConfigEditReq) (res *system.ConfigEditRes, err error) {
-	err = commonService.SysConfig().Edit(ctx, req, service.Context().GetUserId(ctx))
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = commonService.SysConfig().Edit(ctx, req, operator.UserID)
 	return
 }
 

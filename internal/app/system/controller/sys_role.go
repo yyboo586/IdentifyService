@@ -6,6 +6,8 @@ import (
 	"IdentifyService/api/v1/system"
 	"IdentifyService/internal/app/system/model"
 	"IdentifyService/internal/app/system/service"
+
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 var Role = roleController{}
@@ -27,7 +29,11 @@ func (c *roleController) GetParams(ctx context.Context, req *system.RoleGetParam
 	if err != nil {
 		return
 	}
-	roleIds, err := service.SysUser().GetAdminRoleIds(ctx, service.Context().GetUserId(ctx))
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	roleIds, err := service.SysUser().GetAdminRoleIds(ctx, operator.UserID)
 	if err != nil {
 		return
 	}

@@ -8,6 +8,8 @@ import (
 	"IdentifyService/internal/app/system/model"
 	"IdentifyService/internal/app/system/service"
 	"IdentifyService/library/libUtils"
+
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 var Personal = new(personalController)
@@ -43,7 +45,11 @@ func (c *personalController) RefreshToken(ctx context.Context, req *system.Refre
 		userAgent = libUtils.GetUserAgent(ctx)
 	)
 	res = new(system.RefreshTokenRes)
-	res.UserInfo, err = service.SysUser().GetUserById(ctx, service.Context().GetUserId(ctx))
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res.UserInfo, err = service.SysUser().GetUserById(ctx, operator.UserID)
 	if err != nil {
 		return
 	}
@@ -56,6 +62,10 @@ func (c *personalController) RefreshToken(ctx context.Context, req *system.Refre
 }
 
 func (c *personalController) genToken(ctx context.Context, userInfo *model.LoginUserRes, ip, userAgent string) (token string, err error) {
-	token, err = service.Token().Generate(ctx, userInfo)
+	tokenPair, err := service.Token().Generate(ctx, userInfo)
+	if err != nil {
+		return
+	}
+	token = tokenPair.AccessToken
 	return
 }

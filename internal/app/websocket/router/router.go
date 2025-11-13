@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	commonController "IdentifyService/internal/app/common/controller"
+	"IdentifyService/internal/app/system/model"
 	"IdentifyService/internal/app/system/service"
 	"IdentifyService/library/libUtils"
 	"IdentifyService/library/libWebsocket"
@@ -13,6 +14,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/guid"
 	"github.com/gorilla/websocket"
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 var R = new(Router)
@@ -42,6 +44,10 @@ func WsPage(r *ghttp.Request) {
 
 // NewClient 初始化
 func NewClient(r *ghttp.Request, socket *websocket.Conn, firstTime uint64) (client *libWebsocket.Client) {
+	operator, err := MiddleWare.GetContextUser(r.Context())
+	if err != nil {
+		panic(err)
+	}
 	client = &libWebsocket.Client{
 		Addr:          socket.RemoteAddr().String(),
 		ID:            guid.S(),
@@ -51,9 +57,14 @@ func NewClient(r *ghttp.Request, socket *websocket.Conn, firstTime uint64) (clie
 		CloseSignal:   make(chan struct{}, 1),
 		FirstTime:     firstTime,
 		HeartbeatTime: firstTime,
-		User:          service.Context().GetLoginUser(r.Context()),
-		IP:            libUtils.GetClientIp(r.Context()),
-		UserAgent:     r.UserAgent(),
+		User: &model.ContextUser{
+			LoginUserRes: &model.LoginUserRes{
+				Id:       operator.UserID,
+				UserName: operator.UserName,
+			},
+		},
+		IP:        libUtils.GetClientIp(r.Context()),
+		UserAgent: r.UserAgent(),
 	}
 	return
 }

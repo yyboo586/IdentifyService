@@ -6,6 +6,12 @@ package dao
 
 import (
 	"IdentifyService/internal/app/system/dao/internal"
+	"IdentifyService/internal/app/system/model/entity"
+	"context"
+	"database/sql"
+	"fmt"
+
+	"github.com/gogf/gf/v2/database/gdb"
 )
 
 // internalSysDeptDao is internal type for wrapping internal DAO implements.
@@ -25,3 +31,22 @@ var (
 )
 
 // Fill with you ideas below.
+func (d *sysDeptDao) Insert(ctx context.Context, tx gdb.TX, data map[string]interface{}) (deptID int64, err error) {
+	deptID, err = d.internalSysDeptDao.Ctx(ctx).TX(tx).Data(data).InsertAndGetId()
+	if err != nil {
+		return 0, err
+	}
+	return deptID, nil
+}
+
+func (d *sysDeptDao) Get(ctx context.Context, deptID uint64) (out *entity.SysDept, err error) {
+	out = &entity.SysDept{}
+	err = d.internalSysDeptDao.Ctx(ctx).Where(d.Columns().DeptId, deptID).Scan(out)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("部门不存在")
+		}
+		return nil, err
+	}
+	return out, nil
+}

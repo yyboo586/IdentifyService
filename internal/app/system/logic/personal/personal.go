@@ -15,6 +15,7 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/grand"
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 func init() {
@@ -30,7 +31,11 @@ func New() service.IPersonal {
 
 func (s *sPersonal) GetPersonalInfo(ctx context.Context, req *system.PersonalInfoReq) (res *system.PersonalInfoRes, err error) {
 	res = new(system.PersonalInfoRes)
-	userId := service.Context().GetUserId(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	userId := operator.UserID
 	res.User, err = service.SysUser().GetUserInfoById(ctx, userId)
 	var dept *entity.SysDept
 	dept, err = service.SysDept().GetByDeptId(ctx, res.User.DeptId)
@@ -51,8 +56,12 @@ func (s *sPersonal) GetPersonalInfo(ctx context.Context, req *system.PersonalInf
 }
 
 func (s *sPersonal) EditPersonal(ctx context.Context, req *system.PersonalEditReq) (user *model.LoginUserRes, err error) {
-	userId := service.Context().GetUserId(ctx)
-	err = service.SysUser().UserNameOrMobileExists(ctx, "", req.Mobile, userId)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	userId := operator.UserID
+	err = service.SysUser().CheckUserNameOrMobileExists(ctx, "", req.Mobile, userId)
 	if err != nil {
 		return
 	}
@@ -77,7 +86,11 @@ func (s *sPersonal) EditPersonal(ctx context.Context, req *system.PersonalEditRe
 }
 
 func (s *sPersonal) ResetPwdPersonal(ctx context.Context, req *system.PersonalResetPwdReq) (res *system.PersonalResetPwdRes, err error) {
-	userId := service.Context().GetUserId(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	userId := operator.UserID
 	salt := grand.S(10)
 	password := libUtils.EncryptPassword(req.Password, salt)
 	err = g.Try(ctx, func(ctx context.Context) {

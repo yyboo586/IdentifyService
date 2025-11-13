@@ -51,9 +51,15 @@ func (c *captchaController) V2Check(ctx context.Context, req *common.CheckCaptch
 
 func (c *captchaController) SendSmsCode(ctx context.Context, req *common.SendSmsCodeReq) (res *common.SendSmsCodeRes, err error) {
 	// 发送短信
-	err = service.Captcha().SendSmsCode(ctx, req.Phone, model.GetSMSBusinessType(req.BusinessType))
+	code, err := service.Captcha().SendSmsCode(ctx, req.Phone, model.GetSMSBusinessType(req.BusinessType))
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	return &common.SendSmsCodeRes{
+		Code: code,
+		Msg:  "验证码发送成功",
+	}, nil
 }
 
 func (c *captchaController) ValidateSMSCode(ctx context.Context, req *common.ValidateSMSCodeReq) (res *common.ValidateSMSCodeRes, err error) {

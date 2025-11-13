@@ -13,6 +13,7 @@ import (
 	"context"
 
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/yyboo586/common/MiddleWare"
 
 	"IdentifyService/internal/app/system/consts"
 	"IdentifyService/internal/app/system/dao"
@@ -84,7 +85,11 @@ func (s *sSysNoticeRead) Add(ctx context.Context, req *model.SysNoticeReadAddReq
 }
 
 func (s *sSysNoticeRead) ReadNotice(ctx context.Context, req *model.SysNoticeReadNoticeReq) (err error) {
-	currentUser := service.Context().Get(ctx).User.Id
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return err
+	}
+	currentUser := operator.UserID
 
 	err = g.Try(ctx, func(ctx context.Context) {
 		//判断是否有数据

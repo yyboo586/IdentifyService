@@ -16,6 +16,8 @@ import (
 	"IdentifyService/api/v1/system"
 	commonService "IdentifyService/internal/app/common/service"
 	"IdentifyService/internal/app/system/service"
+
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 type sysAttachmentController struct {
@@ -40,7 +42,11 @@ func (c *sysAttachmentController) Get(ctx context.Context, req *system.SysAttach
 
 // Add 添加附件管理
 func (c *sysAttachmentController) Add(ctx context.Context, req *system.SysAttachmentAddReq) (res *system.SysAttachmentAddRes, err error) {
-	req.CreatedBy = service.Context().GetUserId(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req.CreatedBy = operator.UserID
 	err = commonService.SysAttachment().Add(ctx, req.SysAttachmentAddReq)
 	return
 }
@@ -59,7 +65,11 @@ func (c *sysAttachmentController) Delete(ctx context.Context, req *system.SysAtt
 
 // 附件管理状态修改（状态）
 func (c *sysAttachmentController) ChangeStatus(ctx context.Context, req *system.SysAttachmentStatusSwitchReq) (res *system.SysAttachmentStatusSwitchRes, err error) {
-	if !service.SysUser().AccessRule(ctx, service.Context().GetUserId(ctx), "api/v1/system/sysAttachment/edit") {
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !service.SysUser().AccessRule(ctx, operator.UserID, "api/v1/system/sysAttachment/edit") {
 		err = errors.New("没有修改权限")
 		return
 	}

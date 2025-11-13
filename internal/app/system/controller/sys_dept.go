@@ -6,6 +6,8 @@ import (
 	"IdentifyService/api/v1/system"
 	"IdentifyService/internal/app/system/model/entity"
 	"IdentifyService/internal/app/system/service"
+
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 var Dept = sysDeptController{}
@@ -17,8 +19,12 @@ type sysDeptController struct {
 // List 部门列表
 func (c *sysDeptController) List(ctx context.Context, req *system.DeptSearchReq) (res *system.DeptSearchRes, err error) {
 	res = new(system.DeptSearchRes)
-	req.UserId = service.Context().GetUserId(ctx)
-	req.UserDeptId = service.Context().GetDeptId(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req.UserId = operator.UserID
+	req.UserDeptId = operator.DeptID
 	res.DeptList, err = service.SysDept().GetList(ctx, req)
 	return
 }
@@ -44,12 +50,15 @@ func (c *sysDeptController) Delete(ctx context.Context, req *system.DeptDeleteRe
 // TreeSelect 获取部门数据结构数据
 func (c *sysDeptController) TreeSelect(ctx context.Context, req *system.DeptTreeSelectReq) (res *system.DeptTreeSelectRes, err error) {
 	var deptList []*entity.SysDept
-	currentUser := service.Context().GetLoginUser(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	deptList, err = service.SysDept().GetList(ctx, &system.DeptSearchReq{
 		Status:     "1", //正常状态数据
 		ShowAll:    !req.ShowOwner,
-		UserId:     currentUser.Id,
-		UserDeptId: currentUser.DeptId,
+		UserId:     operator.UserID,
+		UserDeptId: operator.DeptID,
 	})
 	if err != nil {
 		return

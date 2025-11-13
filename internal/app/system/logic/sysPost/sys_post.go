@@ -13,6 +13,7 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 func init() {
@@ -58,6 +59,11 @@ func (s *sSysPost) List(ctx context.Context, req *system.PostSearchReq) (res *sy
 }
 
 func (s *sSysPost) Add(ctx context.Context, req *system.PostAddReq) (err error) {
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return err
+	}
+	userId := operator.UserID
 	err = g.Try(ctx, func(ctx context.Context) {
 		_, err = dao.SysPost.Ctx(ctx).Insert(do.SysPost{
 			PostCode:  req.PostCode,
@@ -65,7 +71,7 @@ func (s *sSysPost) Add(ctx context.Context, req *system.PostAddReq) (err error) 
 			PostSort:  req.PostSort,
 			Status:    req.Status,
 			Remark:    req.Remark,
-			CreatedBy: service.Context().GetUserId(ctx),
+			CreatedBy: userId,
 		})
 		liberr.ErrIsNil(ctx, err, "添加岗位失败")
 	})
@@ -73,6 +79,11 @@ func (s *sSysPost) Add(ctx context.Context, req *system.PostAddReq) (err error) 
 }
 
 func (s *sSysPost) Edit(ctx context.Context, req *system.PostEditReq) (err error) {
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return err
+	}
+	userId := operator.UserID
 	err = g.Try(ctx, func(ctx context.Context) {
 		_, err = dao.SysPost.Ctx(ctx).WherePri(req.PostId).Update(do.SysPost{
 			PostCode:  req.PostCode,
@@ -80,7 +91,7 @@ func (s *sSysPost) Edit(ctx context.Context, req *system.PostEditReq) (err error
 			PostSort:  req.PostSort,
 			Status:    req.Status,
 			Remark:    req.Remark,
-			UpdatedBy: service.Context().GetUserId(ctx),
+			UpdatedBy: userId,
 		})
 		liberr.ErrIsNil(ctx, err, "修改岗位失败")
 	})

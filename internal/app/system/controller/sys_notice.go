@@ -15,6 +15,8 @@ import (
 
 	"IdentifyService/api/v1/system"
 	"IdentifyService/internal/app/system/service"
+
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 type sysNoticeController struct {
@@ -46,14 +48,23 @@ func (c *sysNoticeController) Get(ctx context.Context, req *system.SysNoticeGetR
 
 // Add 添加通知公告
 func (c *sysNoticeController) Add(ctx context.Context, req *system.SysNoticeAddReq) (res *system.SysNoticeAddRes, err error) {
-	req.CreatedBy = service.Context().GetUserId(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req.CreatedBy = operator.UserID
 	err = service.SysNotice().Add(ctx, req.SysNoticeAddReq)
 	return
 }
 
 // Edit 修改通知公告
 func (c *sysNoticeController) Edit(ctx context.Context, req *system.SysNoticeEditReq) (res *system.SysNoticeEditRes, err error) {
-	req.UpdatedBy = service.Context().GetUserId(ctx)
+
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req.UpdatedBy = operator.UserID
 	err = service.SysNotice().Edit(ctx, req.SysNoticeEditReq)
 	return
 }
@@ -73,7 +84,11 @@ func (c *sysNoticeController) IndexData(ctx context.Context, req *system.SysNoti
 // UnReadCount
 func (c *sysNoticeController) UnReadCount(ctx context.Context, req *system.SysNoticeUnReadCountReq) (res *system.SysNoticeUnReadCountRes, err error) {
 	res = new(system.SysNoticeUnReadCountRes)
-	currentUser := service.Context().Get(ctx).User.Id
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	currentUser := operator.UserID
 	//noticeids, err := service.SysNotice().CurrentUseWithIds(ctx, currentUser)
 	res.SysNoticeUnreadCount, err = service.SysNotice().UnReadCount(ctx, currentUser)
 	fmt.Println(res)

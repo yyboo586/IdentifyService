@@ -5,7 +5,8 @@ import (
 
 	"IdentifyService/api/v1/system"
 	commonService "IdentifyService/internal/app/common/service"
-	"IdentifyService/internal/app/system/service"
+
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 var DictType = &SysDictTypeController{}
@@ -21,7 +22,11 @@ func (c *SysDictTypeController) List(ctx context.Context, req *system.DictTypeSe
 
 // Add 添加字典类型
 func (c *SysDictTypeController) Add(ctx context.Context, req *system.DictTypeAddReq) (res *system.DictTypeAddRes, err error) {
-	err = commonService.SysDictType().Add(ctx, req, service.Context().GetUserId(ctx))
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = commonService.SysDictType().Add(ctx, req, operator.UserID)
 	return
 }
 
@@ -34,7 +39,11 @@ func (c *SysDictTypeController) Get(ctx context.Context, req *system.DictTypeGet
 
 // Edit 修改字典数据
 func (c *SysDictTypeController) Edit(ctx context.Context, req *system.DictTypeEditReq) (res *system.DictTypeEditRes, err error) {
-	err = commonService.SysDictType().Edit(ctx, req, service.Context().GetUserId(ctx))
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = commonService.SysDictType().Edit(ctx, req, operator.UserID)
 	return
 }
 

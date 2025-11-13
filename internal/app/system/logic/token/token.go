@@ -28,6 +28,12 @@ func New() tokenUtils.IToken {
 	return &token{
 		Token: tokenUtils.NewToken(
 			tokenUtils.WithExcludePaths(opt.ExcludePaths),
+			tokenUtils.WithTokenStoreConfig(&tokenUtils.TokenStoreConfig{
+				DSN:         g.Cfg().MustGet(ctx, "database.default.link").String(),
+				Group:       "default",
+				TableName:   "t_token",
+				EnableDebug: true,
+			}),
 		),
 	}
 }

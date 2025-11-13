@@ -4,11 +4,14 @@ import (
 	"context"
 
 	"IdentifyService/api/v1/system"
+	commonService "IdentifyService/internal/app/common/service"
 	"IdentifyService/internal/app/system/model"
 	"IdentifyService/internal/app/system/model/entity"
 	"IdentifyService/internal/app/system/service"
 
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/yyboo586/common/LogModule"
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 var (
@@ -21,17 +24,23 @@ type userController struct {
 
 // GetUserMenus 获取用户菜单及按钮权限
 func (c *userController) GetUserMenus(ctx context.Context, req *system.UserMenusReq) (res *system.UserMenusRes, err error) {
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var (
 		permissions []string
 		menuList    []*model.UserMenus
-		loginUser   = service.Context().GetLoginUser(ctx)
 	)
-	userId := loginUser.Id
+	userId := operator.UserID
 	menuList, permissions, err = service.SysUser().GetAdminRules(ctx, userId)
 	res = &system.UserMenusRes{
 		MenuList:    menuList,
 		Permissions: permissions,
-		UserInfo:    loginUser.LoginUserRes,
+		UserInfo: &model.LoginUserRes{
+			Id:       operator.UserID,
+			UserName: operator.UserName,
+		},
 	}
 	return
 }
@@ -43,7 +52,16 @@ func (c *userController) List(ctx context.Context, req *system.UserSearchReq) (r
 		userList []*entity.SysUser
 	)
 	res = new(system.UserSearchRes)
-	req.UserInfo = service.Context().GetLoginUser(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req.UserInfo = &model.ContextUser{
+		LoginUserRes: &model.LoginUserRes{
+			Id:       operator.UserID,
+			UserName: operator.UserName,
+		},
+	}
 	total, userList, err = service.SysUser().List(ctx, req)
 	if err != nil || total == 0 {
 		return
@@ -71,7 +89,11 @@ func (c *userController) GetParams(ctx context.Context, req *system.UserGetParam
 	if err != nil {
 		return
 	}
-	userId := service.Context().GetUserId(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	userId := operator.UserID
 	//判断是否超管
 	if service.SysUser().IsSupperAdmin(ctx, userId) {
 		//自己创建的角色可以被授权
@@ -97,6 +119,23 @@ func (c *userController) GetParams(ctx context.Context, req *system.UserGetParam
 func (c *userController) Add(ctx context.Context, req *system.UserAddReq) (res *system.UserAddRes, err error) {
 	err = service.SysUser().Add(ctx, req)
 	return
+}
+
+func (c *loginController) UnRegister(ctx context.Context, req *system.UnRegisterReq) (res *system.UnRegisterRes, err error) {
+	err = service.SysUser().UnRegister(ctx, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	commonService.Log().WriteLog(ctx, []*LogModule.LogItem{
+		{
+			Module:  model.LogModuleUser,
+			Action:  model.LogActionUserUnRegister,
+			Message: "用户注销",
+			Detail:  req.UserID,
+		},
+	})
+	return &system.UnRegisterRes{}, nil
 }
 
 // GetEditUser 获取修改用户信息

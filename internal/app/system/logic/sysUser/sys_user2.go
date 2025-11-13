@@ -88,7 +88,7 @@ func (s *sSysUser) loginByPhonePassword(ctx context.Context, phone, password str
 // - 如果是未注册用户，自动注册。
 // - 如果是已注册用户，验证手机验证码是否正确。
 func (s *sSysUser) loginByPhoneSMSCode(ctx context.Context, phone, code string) (userInfo *model.User, err error) {
-	err = commonService.Captcha().ValidateSmsCode(ctx, phone, commonModel.SMSBusinessTypeLogin, code)
+	err = commonService.Captcha().ValidateSmsCode(ctx, phone, commonModel.SMSBusinessTypeAccountLogin, code)
 	if err != nil {
 		return nil, err
 	}

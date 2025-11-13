@@ -20,6 +20,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/yyboo586/common/MiddleWare"
 )
 
 func init() {
@@ -34,6 +35,10 @@ type sSysRole struct {
 }
 
 func (s *sSysRole) GetRoleListSearch(ctx context.Context, req *system.RoleListReq) (res *system.RoleListRes, err error) {
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	res = new(system.RoleListRes)
 	err = g.Try(ctx, func(ctx context.Context) {
 		model := dao.SysRole.Ctx(ctx)
@@ -43,7 +48,7 @@ func (s *sSysRole) GetRoleListSearch(ctx context.Context, req *system.RoleListRe
 		if req.Status != "" {
 			model = model.Where("a.status", gconv.Int(req.Status))
 		}
-		userId := service.Context().GetUserId(ctx)
+		userId := operator.UserID
 		//获取当前用户所属角色ids
 		if !service.SysUser().IsSupperAdmin(ctx, userId) {
 			var roleIds []uint
@@ -129,9 +134,14 @@ func (s *sSysRole) DelRoleRule(ctx context.Context, roleId int64) (err error) {
 }
 
 func (s *sSysRole) AddRole(ctx context.Context, req *system.RoleAddReq) (err error) {
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return err
+	}
+	userId := operator.UserID
 	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		err = g.Try(ctx, func(ctx context.Context) {
-			req.CreatedBy = service.Context().GetUserId(ctx)
+			req.CreatedBy = userId
 			roleId, e := dao.SysRole.Ctx(ctx).TX(tx).InsertAndGetId(do.SysRole{
 				Pid:           req.Pid,
 				Status:        req.Status,
@@ -199,7 +209,11 @@ func (s *sSysRole) GetFilteredNamedPolicy(ctx context.Context, id uint) (gpSlice
 }
 
 func (s *sSysRole) hasManageAccess(ctx context.Context, roleId uint, includeChildren ...bool) bool {
-	currentUserId := service.Context().GetUserId(ctx)
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return false
+	}
+	currentUserId := operator.UserID
 	if !service.SysUser().IsSupperAdmin(ctx, currentUserId) {
 		var (
 			roleIds   []uint
@@ -218,7 +232,7 @@ func (s *sSysRole) hasManageAccess(ctx context.Context, roleId uint, includeChil
 				return true
 			}
 		}
-		roleIds, err = service.SysUser().GetAdminRoleIds(ctx, service.Context().GetUserId(ctx), includeChildren...)
+		roleIds, err = service.SysUser().GetAdminRoleIds(ctx, currentUserId, includeChildren...)
 		if err != nil {
 			g.Log().Error(ctx, err)
 			return false
@@ -274,14 +288,19 @@ func (s *sSysRole) EditRole(ctx context.Context, req *system.RoleEditReq) (err e
 
 // 从给定的menuIds中过滤掉用户没有操作权限的菜单id
 func (s *sSysRole) filterAccessRuleIds(ctx context.Context, menuIds []uint) (newRuleIds []uint, err error) {
+	operator, err := MiddleWare.GetContextUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	currentUserId := operator.UserID
 	err = g.Try(ctx, func(ctx context.Context) {
 		//若不是超管，过滤ruleIds 把没有权限的过滤掉
-		if !service.SysUser().IsSupperAdmin(ctx, service.Context().GetUserId(ctx)) {
+		if !service.SysUser().IsSupperAdmin(ctx, currentUserId) {
 			var (
 				userRoleIds []uint
 				accessMenus *garray.Array
 			)
-			userRoleIds, err = service.SysUser().GetAdminRoleIds(ctx, service.Context().GetUserId(ctx))
+			userRoleIds, err = service.SysUser().GetAdminRoleIds(ctx, currentUserId)
 			liberr.ErrIsNil(ctx, err)
 			accessMenus, err = service.SysUser().GetAdminMenusIdsByRoleIds(ctx, userRoleIds)
 			for _, v := range menuIds {

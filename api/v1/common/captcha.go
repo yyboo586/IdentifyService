@@ -37,19 +37,21 @@ type CheckCaptchaV2Res struct {
 }
 
 type SendSmsCodeReq struct {
-	g.Meta       `path:"/send_sms_code" tags:"通用接口/验证码" method:"post" summary:"发送短信验证码"`
-	Phone        string `json:"phone" v:"required#手机号不能为空"`
-	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码登录)"`
+	g.Meta       `path:"/send_sms_code" tags:"认证模块" method:"post" summary:"发送短信验证码"`
+	Phone        string `json:"phone" v:"required#手机号不能为空" dc:"手机号"`
+	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码注册/登录、绑定/换绑手机号、修改密码)"`
 }
 
 type SendSmsCodeRes struct {
 	g.Meta `mime:"application/json"`
+	Code   string `json:"code" dc:"验证码(仅用于测试, 正式环境不返回)"`
+	Msg    string `json:"msg" dc:"提示信息"`
 }
 
 type ValidateSMSCodeReq struct {
-	g.Meta       `path:"/validate_sms_code" tags:"通用接口/验证码" method:"post" summary:"验证短信验证码"`
+	g.Meta       `path:"/validate_sms_code" tags:"认证模块" method:"post" summary:"验证短信验证码"`
 	Phone        string `json:"phone" v:"required#手机号不能为空" dc:"手机号"`
-	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码登录)"`
+	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码注册/登录、绑定/换绑手机号、修改密码、绑定身份证号)"`
 	Code         string `json:"code" v:"required#验证码不能为空" dc:"验证码"`
 }
 

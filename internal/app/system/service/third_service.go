@@ -43,7 +43,7 @@ type thirdService struct {
 func NewThirdService() IThirdService {
 	return &thirdService{
 		IUQTAddr:     "",
-		ExEngineAddr: g.Cfg().MustGet(context.Background(), "server.service.exEngine.addr").String(),
+		ExEngineAddr: g.Cfg().MustGet(context.Background(), "server.thirdService.exEngine.addr").String(),
 
 		client: httpUtils.NewHTTPClientWithDebug(true),
 	}
