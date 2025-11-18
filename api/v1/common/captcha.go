@@ -39,7 +39,7 @@ type CheckCaptchaV2Res struct {
 type SendSmsCodeReq struct {
 	g.Meta       `path:"/send_sms_code" tags:"认证模块" method:"post" summary:"发送短信验证码"`
 	Phone        string `json:"phone" v:"required#手机号不能为空" dc:"手机号"`
-	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码注册/登录、绑定/换绑手机号、修改密码)"`
+	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码注册/登录、绑定/换绑手机号、修改密码、注销账户)"`
 }
 
 type SendSmsCodeRes struct {
@@ -51,7 +51,7 @@ type SendSmsCodeRes struct {
 type ValidateSMSCodeReq struct {
 	g.Meta       `path:"/validate_sms_code" tags:"认证模块" method:"post" summary:"验证短信验证码"`
 	Phone        string `json:"phone" v:"required#手机号不能为空" dc:"手机号"`
-	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码注册/登录、绑定/换绑手机号、修改密码、绑定身份证号)"`
+	BusinessType string `json:"business_type" v:"required#业务类型不能为空" dc:"业务类型(验证码注册/登录、绑定/换绑手机号、修改密码、绑定身份证号、注销账户)"`
 	Code         string `json:"code" v:"required#验证码不能为空" dc:"验证码"`
 }
 

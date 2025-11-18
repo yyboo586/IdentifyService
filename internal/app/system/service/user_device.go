@@ -8,6 +8,7 @@ import (
 type (
 	IUserDevice interface {
 		RecordDevice(ctx context.Context, input *model.UserDeviceRecordInput) error
+		GetUserDevice(ctx context.Context, userID, deviceID string) (*model.UserDevice, error)
 		ListUserDevices(ctx context.Context, userID string, pageReq *model.PageReq) ([]*model.UserDevice, *model.PageRes, error)
 		DeleteUserDevice(ctx context.Context, userID, deviceID string) error
 	}

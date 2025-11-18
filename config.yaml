@@ -63,6 +63,7 @@ gfToken:
     - "/api/v1/system/logout"
     - "/api/v1/system/login2"
     - "/api/v1/system/user/updateUserType"
+    - "/api/v1/system/agreement/latest"
 
 
 system:

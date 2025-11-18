@@ -49,7 +49,7 @@ func (dao userDeviceDao) Ctx(ctx context.Context) *gdb.Model {
 	return g.DB(dao.group).Model(dao.table).Ctx(ctx)
 }
 
-func (dao userDeviceDao) GetByUserAndDevice(ctx context.Context, userID, deviceID string) (*entity.UserDevice, error) {
+func (dao userDeviceDao) GetByUserAndDevice(ctx context.Context, userID, deviceID string) (*entity.UserDevice, bool, error) {
 	var device entity.UserDevice
 	err := dao.Ctx(ctx).
 		Where(dao.columns.UserId, userID).
@@ -57,12 +57,12 @@ func (dao userDeviceDao) GetByUserAndDevice(ctx context.Context, userID, deviceI
 		Scan(&device)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, false, nil
 		}
-		return nil, err
+		return nil, false, err
 	}
 
-	return &device, nil
+	return &device, true, nil
 }
 
 func (dao userDeviceDao) Insert(ctx context.Context, data g.Map) error {

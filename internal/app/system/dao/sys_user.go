@@ -105,6 +105,9 @@ func (d *sysUserDao) GetUserPersonalInfo(ctx context.Context, userID string) (us
 		d.Columns().Avatar,
 		d.Columns().City,
 		d.Columns().Birthday,
+		d.Columns().CreatedAt,
+		d.Columns().IDCard,
+		d.Columns().RealName,
 	}
 
 	err = d.Ctx(ctx).Where(d.Columns().Id, userID).Fields(fields).Scan(userEntity)

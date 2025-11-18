@@ -18,6 +18,14 @@ import (
 	"github.com/google/uuid"
 )
 
+func (s *sSysUser) GetUserInfoByID(ctx context.Context, userID string) (user *model.User, err error) {
+	userEntity, err := dao.SysUser.Get(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return model.ConvertToUser(userEntity), nil
+}
+
 func (s *sSysUser) GetUserInfoByPhone(ctx context.Context, phone string) (out *model.User, exists bool, err error) {
 	userEntity, exists, err := dao.SysUser.GetUserByPhone(ctx, phone)
 	if err != nil {
@@ -51,7 +59,6 @@ func (s *sSysUser) SelfRegister(ctx context.Context, tx gdb.TX, userID string, d
 		dao.SysUser.Columns().Mobile:    phone,
 		dao.SysUser.Columns().UserEmail: "",
 		dao.SysUser.Columns().Sex:       0,
-		dao.SysUser.Columns().Birthday:  "",
 		dao.SysUser.Columns().City:      "",
 		dao.SysUser.Columns().Avatar:    "",
 		dao.SysUser.Columns().CardType:  "",
@@ -118,8 +125,8 @@ func (s *sSysUser) EditUserPersonalInfo(ctx context.Context, userID string, user
 	}
 
 	// 校验City长度是否超过10
-	if utf8.RuneCountInString(userInfo.City) > 10 {
-		return gerror.New("城市名称长度不能超过10个字符")
+	if utf8.RuneCountInString(userInfo.City) > 255 {
+		return gerror.New("城市名称长度不能超过255个字符")
 	}
 
 	updateData := map[string]interface{}{
@@ -156,12 +163,9 @@ func (s *sSysUser) UpdateUserPhone(ctx context.Context, userID string, phone str
 }
 
 func (s *sSysUser) EditUserPassword(ctx context.Context, userID string, phone string, password string) (err error) {
-	userInfo, exists, err := s.GetUserInfoByPhone(ctx, phone)
+	userInfo, err := s.GetUserInfoByID(ctx, userID)
 	if err != nil {
 		return err
-	}
-	if !exists {
-		return gerror.New("用户不存在")
 	}
 	if userInfo.Mobile == "" {
 		return gerror.New("手机号未绑定, 请先绑定手机号")
@@ -190,16 +194,13 @@ func (s *sSysUser) EditUserPassword(ctx context.Context, userID string, phone st
 	return nil
 }
 
-func (s *sSysUser) EditUserIDCard(ctx context.Context, userID string, phone string, idCard string, cardType string, realName string) (err error) {
+func (s *sSysUser) EditUserIDCard(ctx context.Context, userID string, idCard string, cardType string, realName string) (err error) {
 	userEntity, err := dao.SysUser.Get(ctx, userID)
 	if err != nil {
 		return err
 	}
 	if userEntity.Mobile == "" {
 		return gerror.New("手机号未绑定, 请先绑定手机号")
-	}
-	if userEntity.Mobile != phone {
-		return gerror.New("手机号不匹配, 请使用绑定的手机号进行修改身份证号")
 	}
 
 	if !model.IsValidCardType(cardType) {
@@ -285,6 +286,8 @@ func (s *sSysUser) Add3(ctx context.Context, deptID int64, phone, userNickname s
 		UserStatus:   model.UserStatusNormal,
 		DeptId:       deptID,
 		IsAdmin:      false,
+
+		Mobile: phone,
 	})
 	return
 }

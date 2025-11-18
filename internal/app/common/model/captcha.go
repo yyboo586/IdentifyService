@@ -14,6 +14,7 @@ const (
 	SMSBusinessTypeBindPhone                     // 绑定/换绑手机号
 	SMSBusinessTypeResetPassword                 // 修改密码
 	SMSBusinessTypeBindIDCard                    // 绑定身份证号
+	SMSBusinessTypeUnRegister                    // 注销账户
 )
 
 func GetSMSBusinessType(businessType string) SMSBusinessType {
@@ -26,6 +27,8 @@ func GetSMSBusinessType(businessType string) SMSBusinessType {
 		return SMSBusinessTypeResetPassword
 	case "绑定身份证号":
 		return SMSBusinessTypeBindIDCard
+	case "注销账户":
+		return SMSBusinessTypeUnRegister
 	default:
 		return BusinessTypeUnknown
 	}

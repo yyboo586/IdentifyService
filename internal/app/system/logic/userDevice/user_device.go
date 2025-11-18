@@ -42,16 +42,31 @@ func (s *sUserDevice) RecordDevice(ctx context.Context, input *model.UserDeviceR
 		dao.UserDevice.Columns().UpdatedAt:  now,
 	}
 
-	device, err := dao.UserDevice.GetByUserAndDevice(ctx, input.UserID, input.DeviceID)
+	device, exists, err := dao.UserDevice.GetByUserAndDevice(ctx, input.UserID, input.DeviceID)
 	if err != nil {
 		return err
 	}
-	if device == nil {
+	if !exists { // 设备不存在，则插入
 		data[dao.UserDevice.Columns().CreatedAt] = now
 		return dao.UserDevice.Insert(ctx, data)
 	}
 
+	// 设备存在，则更新
 	return dao.UserDevice.Update(ctx, device.Id, data)
+}
+
+func (s *sUserDevice) GetUserDevice(ctx context.Context, userID, deviceID string) (*model.UserDevice, error) {
+	if strings.TrimSpace(userID) == "" || strings.TrimSpace(deviceID) == "" {
+		return nil, gerror.New("用户ID或设备ID不能为空")
+	}
+	device, exists, err := dao.UserDevice.GetByUserAndDevice(ctx, userID, deviceID)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, gerror.New("设备不存在")
+	}
+	return convertUserDeviceEntity(device), nil
 }
 
 func (s *sUserDevice) ListUserDevices(ctx context.Context, userID string, pageReq *model.PageReq) ([]*model.UserDevice, *model.PageRes, error) {

@@ -26,7 +26,7 @@ func (router *Router) BindController(ctx context.Context, group *ghttp.RouterGro
 		if err := libRouter.RouterAutoBindBefore(ctx, router, group); err != nil {
 			panic(err)
 		}
-		group.Middleware(service.Middleware().Auth)
+		// group.Middleware(service.Middleware().Auth)
 		//后台操作日志记录
 		group.Hook("/*", ghttp.HookAfterOutput, service.OperateLog().OperationLog)
 		group.Bind(

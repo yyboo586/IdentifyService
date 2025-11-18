@@ -8,7 +8,7 @@ import (
 )
 
 type UnRegisterReq struct {
-	g.Meta `path:"/users/{user_id}/unregister" tags:"账户管理" method:"post" summary:"注销账户"`
+	g.Meta `path:"/users/{user_id}/unregister" tags:"个人中心" method:"post" summary:"注销账户"`
 	commonApi.Author
 	UserID string `p:"user_id" v:"required#用户ID不能为空"`
 }
@@ -19,7 +19,7 @@ type UnRegisterRes struct {
 }
 
 type GetUserPersonalInfoReq struct {
-	g.Meta `path:"/users/{user_id}/personal-info" tags:"账户管理" method:"get" summary:"获取用户个人信息"`
+	g.Meta `path:"/users/{user_id}/personal-info" tags:"个人中心" method:"get" summary:"获取用户个人信息"`
 	model.Author
 	UserID string `p:"user_id" v:"required#用户ID不能为空"`
 }
@@ -30,7 +30,7 @@ type GetUserPersonalInfoRes struct {
 }
 
 type EditUserPersonalInfoReq struct {
-	g.Meta `path:"/users/{user_id}/personal-info" tags:"账户管理" method:"put" summary:"编辑用户个人信息(全量更新)"`
+	g.Meta `path:"/users/{user_id}/personal-info" tags:"个人中心" method:"put" summary:"编辑用户个人信息(全量更新)"`
 	model.Author
 	UserID   string `p:"user_id" v:"required#用户ID不能为空"`
 	Nickname string `json:"nickname" dc:"用户昵称"`
@@ -45,16 +45,19 @@ type EditUserPersonalInfoRes struct {
 }
 
 type UserPersonalInfo struct {
-	Nickname string `json:"nickname" dc:"用户昵称"`
-	Avatar   string `json:"avatar" dc:"头像"`
-	Mobile   string `json:"mobile" dc:"手机号"`
-	Sex      int    `json:"sex" dc:"性别(0:保密,1:男,2:女)"`
-	Birthday string `json:"birthday" dc:"生日(yyyy-mm-dd)"`
-	City     string `json:"city" dc:"城市"`
+	Nickname          string `json:"nickname" dc:"用户昵称"`
+	Avatar            string `json:"avatar" dc:"头像"`
+	Mobile            string `json:"mobile" dc:"手机号"`
+	Sex               int    `json:"sex" dc:"性别(0:保密,1:男,2:女)"`
+	Birthday          string `json:"birthday" dc:"生日(yyyy-mm-dd)"`
+	City              string `json:"city" dc:"城市"`
+	CreateTime        string `json:"create_time" dc:"创建时间"`
+	IsAlreadyRealname bool   `json:"is_already_realname" dc:"是否已经实名认证"`
+	UserRealName      string `json:"user_real_name" dc:"用户真实姓名"`
 }
 
 type BindPhoneReq struct {
-	g.Meta `path:"/users/{user_id}/bind-phone" tags:"账户管理" method:"put" summary:"绑定手机号"`
+	g.Meta `path:"/users/{user_id}/bind-phone" tags:"个人中心" method:"put" summary:"绑定手机号"`
 	commonApi.Author
 	UserID string `p:"user_id" v:"required#用户ID不能为空"`
 	Phone  string `p:"phone" v:"required#手机号不能为空"`
@@ -66,11 +69,10 @@ type BindPhoneRes struct {
 }
 
 type EditUserPasswordReq struct {
-	g.Meta `path:"/users/{user_id}/password" tags:"账户管理" method:"put" summary:"修改密码"`
+	g.Meta `path:"/users/{user_id}/password" tags:"个人中心" method:"put" summary:"修改密码"`
 	commonApi.Author
 	UserID      string `p:"user_id" v:"required#用户ID不能为空"`
 	Phone       string `p:"phone" v:"required#手机号不能为空"`
-	Code        string `p:"code" v:"required#验证码不能为空"`
 	NewPassword string `p:"new_password" v:"required#新密码不能为空"`
 }
 
@@ -79,11 +81,9 @@ type EditUserPasswordRes struct {
 }
 
 type EditUserIDCardReq struct {
-	g.Meta `path:"/users/{user_id}/id-card" tags:"账户管理" method:"put" summary:"绑定身份证号"`
+	g.Meta `path:"/users/{user_id}/id-card" tags:"个人中心" method:"put" summary:"绑定身份证号"`
 	commonApi.Author
 	UserID string `p:"user_id" v:"required#用户ID不能为空"`
-	Phone  string `p:"phone" v:"required#手机号不能为空"`
-	Code   string `p:"code" v:"required#验证码不能为空"`
 	// 证件类型(1:居民身份证,2:港澳居民来往内地通行证,3:台湾居民来往大陆通行证)
 	CardType string `p:"card_type" v:"required|in:居民身份证,港澳居民往来内地通行证,台湾居民往来大陆通行证#证件类型不正确"`
 	IDCard   string `p:"id_card" v:"required#证件号不能为空"`
@@ -95,7 +95,7 @@ type EditUserIDCardRes struct {
 }
 
 type GetUserIDCardReq struct {
-	g.Meta `path:"/users/{user_id}/id-card" tags:"账户管理" method:"get" summary:"获取身份证号"`
+	g.Meta `path:"/users/{user_id}/id-card" tags:"个人中心" method:"get" summary:"获取身份证号"`
 	commonApi.Author
 	UserID string `p:"user_id" v:"required#用户ID不能为空"`
 }
@@ -131,7 +131,7 @@ type Delete3Res struct {
 }
 
 type ListUserDeviceReq struct {
-	g.Meta `path:"/users/{user_id}/device" tags:"账户管理/设备管理" method:"get" summary:"获取用户设备列表"`
+	g.Meta `path:"/users/{user_id}/device" tags:"个人中心/设备管理" method:"get" summary:"获取用户设备列表"`
 	model.Author
 	UserID string `p:"user_id" v:"required#用户ID不能为空"`
 	model.PageReq
@@ -144,7 +144,7 @@ type ListUserDeviceRes struct {
 }
 
 type DeleteUserDeviceReq struct {
-	g.Meta `path:"/users/{user_id}/device/{device_id}" tags:"账户管理/设备管理" method:"delete" summary:"删除用户设备"`
+	g.Meta `path:"/users/{user_id}/device/{device_id}" tags:"个人中心/设备管理" method:"delete" summary:"删除用户设备"`
 	model.Author
 	UserID   string `p:"user_id" v:"required#用户ID不能为空"`
 	DeviceID string `p:"device_id" v:"required#设备ID不能为空"`

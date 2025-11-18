@@ -2,13 +2,16 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"IdentifyService/api/v1/system"
 	commonModel "IdentifyService/internal/app/common/model"
 	commonService "IdentifyService/internal/app/common/service"
 	"IdentifyService/internal/app/system/model"
 	"IdentifyService/internal/app/system/service"
+	"IdentifyService/library/libSecurity"
 
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/yyboo586/common/MiddleWare"
 )
 
@@ -25,12 +28,15 @@ func (c *userController) GetUserPersonalInfo(ctx context.Context, req *system.Ge
 
 	res = &system.GetUserPersonalInfoRes{
 		UserPersonalInfo: &system.UserPersonalInfo{
-			Nickname: userInfo.UserNickname,
-			Avatar:   userInfo.Avatar,
-			Mobile:   userInfo.Mobile,
-			Sex:      userInfo.Sex,
-			Birthday: userInfo.Birthday,
-			City:     userInfo.City,
+			Nickname:          userInfo.UserNickname,
+			Avatar:            userInfo.Avatar,
+			Mobile:            userInfo.Mobile,
+			Sex:               userInfo.Sex,
+			Birthday:          userInfo.Birthday,
+			City:              userInfo.City,
+			CreateTime:        userInfo.CreatedAt.Time.Format(time.DateTime),
+			IsAlreadyRealname: userInfo.IDCard != "",
+			UserRealName:      libSecurity.MaskRealName(userInfo.RealName),
 		},
 	}
 	return res, nil
@@ -67,11 +73,6 @@ func (c *userController) BindPhone(ctx context.Context, req *system.BindPhoneReq
 }
 
 func (c *userController) EditUserPassword(ctx context.Context, req *system.EditUserPasswordReq) (res *system.EditUserPasswordRes, err error) {
-	err = commonService.Captcha().ValidateSmsCode(ctx, req.Phone, commonModel.SMSBusinessTypeResetPassword, req.Code)
-	if err != nil {
-		return nil, err
-	}
-
 	err = service.SysUser().EditUserPassword(ctx, req.UserID, req.Phone, req.NewPassword)
 	if err != nil {
 		return nil, err
@@ -81,12 +82,7 @@ func (c *userController) EditUserPassword(ctx context.Context, req *system.EditU
 }
 
 func (c *userController) EditUserIDCard(ctx context.Context, req *system.EditUserIDCardReq) (res *system.EditUserIDCardRes, err error) {
-	err = commonService.Captcha().ValidateSmsCode(ctx, req.Phone, commonModel.SMSBusinessTypeBindIDCard, req.Code)
-	if err != nil {
-		return nil, err
-	}
-
-	err = service.SysUser().EditUserIDCard(ctx, req.UserID, req.Phone, req.IDCard, req.CardType, req.RealName)
+	err = service.SysUser().EditUserIDCard(ctx, req.UserID, req.IDCard, req.CardType, req.RealName)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +108,7 @@ func (c *userController) Add3(ctx context.Context, req *system.Add3Req) (res *sy
 	if err != nil {
 		return nil, err
 	}
+	g.Log().Info(ctx, operator.DeptID)
 	userID, err := service.SysUser().Add3(ctx, int64(operator.DeptID), req.Phone, req.UserNickname)
 	if err != nil {
 		return nil, err
