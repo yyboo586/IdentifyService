@@ -73,21 +73,20 @@ INSERT INTO `sys_user` VALUES
 '::1', '2023-10-31 11:22:06', '2021-06-22 17:58:00', '2023-04-22 14:39:18', NULL, '', '', 0);
 
 
--- 协议主表
 CREATE TABLE IF NOT EXISTS `t_agreement` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL COMMENT '协议名称',
-  `major_version` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '主版本号(如1.0.0)',
-  `minor_version` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '次版本号(如1.1.0)',
-  `patch_version` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '补丁版本号(如1.1.1)',
-  `content` MEDIUMTEXT NOT NULL COMMENT 'HTML格式协议内容',
-  `version` INT(11) NOT NULL DEFAULT 0 COMMENT '并发版本控制',
+  `major_version` INT NOT NULL DEFAULT 1 COMMENT '主版本号',
+  `minor_version` INT NOT NULL DEFAULT 0 COMMENT '次版本号',
+  `patch_version` INT NOT NULL DEFAULT 0 COMMENT '补丁版本号',
+  `version_code` INT NOT NULL DEFAULT 0 COMMENT '版本编码(major*10000+minor*100+patch)',
+  `status` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '状态(0:草稿 1:已发布 2:已归档)',
+  `content` LONGTEXT NOT NULL COMMENT 'HTML格式协议内容',
+  `published_at` BIGINT(20) NULL DEFAULT NULL COMMENT '发布时间',
   `created_at` BIGINT(20) NOT NULL COMMENT '创建时间',
   `updated_at` BIGINT(20) NOT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `idx_name_major_version`(`name`, `major_version`),
-  UNIQUE INDEX `idx_name_minor_version`(`name`, `minor_version`),
-  UNIQUE INDEX `idx_name_patch_version`(`name`, `patch_version`)
+  UNIQUE INDEX `idx_name_version`(`name`, `major_version`, `minor_version`, `patch_version`)
 ) ENGINE=InnoDB  COMMENT = '协议主表';
 
 -- 用户同意记录表
@@ -96,6 +95,7 @@ CREATE TABLE IF NOT EXISTS `t_user_agreement` (
   `user_id` VARCHAR(40) NOT NULL COMMENT '用户ID',
   `agreement_id` BIGINT(20) NOT NULL COMMENT '协议ID',
   `agreement_name` VARCHAR(255) NOT NULL COMMENT '协议名称',
+  `version_code` INT NOT NULL DEFAULT 0 COMMENT '同意时协议版本编码',
   `agreed` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否同意(0:不同意 1:同意)',
   `created_at` BIGINT(20) NOT NULL COMMENT '同意时间',
   PRIMARY KEY (`id`),

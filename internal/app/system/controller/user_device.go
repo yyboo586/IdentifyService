@@ -2,7 +2,6 @@ package controller
 
 import (
 	"IdentifyService/api/v1/system"
-	"IdentifyService/internal/app/system/dao"
 	"IdentifyService/internal/app/system/service"
 	"context"
 	"time"
@@ -51,17 +50,18 @@ func (c *userDeviceController) DeleteUserDevice(ctx context.Context, req *system
 	}
 	g.Log().Info(ctx, operator.UserID, operator.UserName)
 
+	device, err := service.UserDevice().GetUserDevice(ctx, req.UserID, req.DeviceID)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: 事务
 	err = service.Token().RevokeDeviceToken(ctx, req.DeviceID)
 	if err != nil {
 		return nil, err
 	}
 
 	err = service.UserDevice().DeleteUserDevice(ctx, req.UserID, req.DeviceID)
-	if err != nil {
-		return nil, err
-	}
-
-	device, err := dao.UserDevice.GetByUserAndDevice(ctx, req.UserID, req.DeviceID)
 	if err != nil {
 		return nil, err
 	}

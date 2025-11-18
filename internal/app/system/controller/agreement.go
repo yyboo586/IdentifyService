@@ -13,10 +13,17 @@ var Agreement = new(agreementController)
 type agreementController struct{}
 
 func (c *agreementController) Create(ctx context.Context, req *system.AgreementCreateReq) (res *system.AgreementCreateRes, err error) {
+	major, minor, patch, err := model.ParseVersion(req.Version)
+	if err != nil {
+		return nil, err
+	}
 	input := &model.AgreementCreateInput{
-		Name:         req.Name,
-		MajorVersion: req.MajorVersion,
-		Content:      req.Content,
+		Name:       req.Name,
+		Major:      major,
+		Minor:      minor,
+		Patch:      patch,
+		Content:    req.Content,
+		PublishNow: req.PublishNow,
 	}
 	id, err := service.Agreement().CreateAgreement(ctx, input)
 	if err != nil {
@@ -28,9 +35,9 @@ func (c *agreementController) Create(ctx context.Context, req *system.AgreementC
 func (c *agreementController) Update(ctx context.Context, req *system.AgreementUpdateReq) (res *system.AgreementUpdateRes, err error) {
 	input := &model.AgreementUpdateInput{
 		ID:         req.ID,
-		Name:       req.Name,
-		UpdateType: req.UpdateType,
 		Content:    req.Content,
+		PublishNow: req.PublishNow,
+		Status:     req.Status,
 	}
 	id, err := service.Agreement().UpdateAgreement(ctx, input)
 	if err != nil {
@@ -58,7 +65,8 @@ func (c *agreementController) Get(ctx context.Context, req *system.AgreementGetR
 
 func (c *agreementController) List(ctx context.Context, req *system.AgreementListReq) (res *system.AgreementListRes, err error) {
 	input := &model.AgreementListInput{
-		Name: req.Name,
+		Name:   req.Name,
+		Status: req.Status,
 		PageReq: model.PageReq{
 			Page: req.Page,
 			Size: req.Size,
@@ -117,14 +125,28 @@ func convertAgreementToAPI(item *model.Agreement) *system.AgreementItem {
 	if item == nil {
 		return nil
 	}
+	var createdAt, updatedAt, publishedAt int64
+	if item.CreatedAt != nil {
+		createdAt = item.CreatedAt.Unix()
+	}
+	if item.UpdatedAt != nil {
+		updatedAt = item.UpdatedAt.Unix()
+	}
+	if item.PublishedAt != nil {
+		publishedAt = item.PublishedAt.Unix()
+	}
 	return &system.AgreementItem{
 		ID:           item.ID,
 		Name:         item.Name,
 		MajorVersion: item.MajorVersion,
 		MinorVersion: item.MinorVersion,
 		PatchVersion: item.PatchVersion,
+		VersionCode:  item.VersionCode,
+		Status:       item.Status,
 		Content:      item.Content,
-		CreatedAt:    item.CreatedAt.Unix(),
-		UpdatedAt:    item.UpdatedAt.Unix(),
+		Version:      item.VersionString(),
+		PublishedAt:  publishedAt,
+		CreatedAt:    createdAt,
+		UpdatedAt:    updatedAt,
 	}
 }

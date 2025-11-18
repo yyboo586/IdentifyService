@@ -4,6 +4,7 @@ import (
 	"IdentifyService/internal/app/system/model"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
 )
 
 type PreUploadFileReq struct {
@@ -30,4 +31,16 @@ type ReportUploadResultReq struct {
 
 type ReportUploadResultRes struct {
 	g.Meta `mime:"application/json"`
+}
+
+type UploadFileReq struct {
+	g.Meta `path:"/file/upload" mine:"multipart/form-data" tags:"文件管理" method:"post" summary:"上传文件"`
+	model.Author
+	File *ghttp.UploadFile `p:"file" type:"file" dc:"选择上传文件" v:"required#上传文件必须"`
+}
+
+type UploadFileRes struct {
+	g.Meta   `mime:"application/json"`
+	FileID   string `json:"file_id" dc:"文件ID"`
+	FileLink string `json:"file_link" dc:"文件链接"`
 }

@@ -83,7 +83,7 @@ type (
 		EditUserPersonalInfo(ctx context.Context, userID string, userInfo *model.UserPersonalInfo) (err error)
 		UpdateUserPhone(ctx context.Context, userID string, phone string) (err error)
 		EditUserPassword(ctx context.Context, userID string, phone string, password string) (err error)
-		EditUserIDCard(ctx context.Context, userID string, phone string, idCard string, cardType string, realName string) (err error)
+		EditUserIDCard(ctx context.Context, userID string, idCard string, cardType string, realName string) (err error)
 		GetUserIDCard(ctx context.Context, userID string) (info *model.UserIDCardInfo, err error)
 		Add3(ctx context.Context, deptID int64, phone, userNickname string) (userID string, err error)
 		Delete3(ctx context.Context, userID string) (err error)

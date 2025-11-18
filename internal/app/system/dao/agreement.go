@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"IdentifyService/internal/app/system/model"
 	"IdentifyService/internal/app/system/model/entity"
 	"context"
 	"database/sql"
@@ -23,8 +24,10 @@ type agreementColumns struct {
 	MajorVersion string
 	MinorVersion string
 	PatchVersion string
-	Version      string
+	VersionCode  string
+	Status       string
 	Content      string
+	PublishedAt  string
 	CreatedAt    string
 	UpdatedAt    string
 }
@@ -38,8 +41,10 @@ var Agreement = agreementDao{
 		MajorVersion: "major_version",
 		MinorVersion: "minor_version",
 		PatchVersion: "patch_version",
-		Version:      "version",
+		VersionCode:  "version_code",
+		Status:       "status",
 		Content:      "content",
+		PublishedAt:  "published_at",
 		CreatedAt:    "created_at",
 		UpdatedAt:    "updated_at",
 	},
@@ -87,10 +92,13 @@ func (dao agreementDao) GetByID(ctx context.Context, id int64) (*entity.Agreemen
 	return &agreement, nil
 }
 
-func (dao agreementDao) List(ctx context.Context, name string, page, size int) ([]*entity.Agreement, int, error) {
+func (dao agreementDao) List(ctx context.Context, name string, status *int, page, size int) ([]*entity.Agreement, int, error) {
 	model := dao.Ctx(ctx)
 	if name != "" {
 		model = model.WhereLike(dao.columns.Name, name)
+	}
+	if status != nil {
+		model = model.Where(dao.columns.Status, *status)
 	}
 	count, err := model.Clone().Count()
 	if err != nil {
@@ -99,9 +107,7 @@ func (dao agreementDao) List(ctx context.Context, name string, page, size int) (
 
 	var list []*entity.Agreement
 	err = model.
-		OrderDesc(dao.columns.MajorVersion).
-		OrderDesc(dao.columns.MinorVersion).
-		OrderDesc(dao.columns.PatchVersion).
+		OrderDesc(dao.columns.VersionCode).
 		Page(page, size).
 		Scan(&list)
 	if err != nil {
@@ -110,116 +116,37 @@ func (dao agreementDao) List(ctx context.Context, name string, page, size int) (
 	return list, count, nil
 }
 
-// GetMaxMajorVersion 获取指定协议名称的最大主版本号
-func (dao agreementDao) GetMaxMajorVersion(ctx context.Context, name string) (string, error) {
-	var list []*entity.Agreement
-	err := dao.Ctx(ctx).
-		Where(dao.columns.Name, name).
-		OrderDesc(dao.columns.MajorVersion).
-		OrderDesc(dao.columns.MinorVersion).
-		OrderDesc(dao.columns.PatchVersion).
-		Limit(1).
-		Scan(&list)
-	if err != nil {
-		return "0", err
-	}
-	if len(list) == 0 {
-		return "0", nil
-	}
-	return list[0].MajorVersion, nil
-}
-
-// GetMaxMinorVersion 获取指定协议名称和主版本号的最大次版本号
-func (dao agreementDao) GetMaxMinorVersion(ctx context.Context, name, majorVersion string) (string, error) {
-	var list []*entity.Agreement
-	err := dao.Ctx(ctx).
-		Where(dao.columns.Name, name).
-		Where(dao.columns.MajorVersion, majorVersion).
-		OrderDesc(dao.columns.MinorVersion).
-		OrderDesc(dao.columns.PatchVersion).
-		Limit(1).
-		Scan(&list)
-	if err != nil {
-		return "0", err
-	}
-	if len(list) == 0 {
-		return "0", nil
-	}
-	return list[0].MinorVersion, nil
-}
-
-// GetMaxPatchVersion 获取指定协议名称、主版本号和次版本号的最大补丁版本号
-func (dao agreementDao) GetMaxPatchVersion(ctx context.Context, name, majorVersion, minorVersion string) (string, error) {
-	var list []*entity.Agreement
-	err := dao.Ctx(ctx).
-		Where(dao.columns.Name, name).
-		Where(dao.columns.MajorVersion, majorVersion).
-		Where(dao.columns.MinorVersion, minorVersion).
-		OrderDesc(dao.columns.PatchVersion).
-		Limit(1).
-		Scan(&list)
-	if err != nil {
-		return "0", err
-	}
-	if len(list) == 0 {
-		return "0", nil
-	}
-	return list[0].PatchVersion, nil
-}
-
 // GetLatestAgreement 获取指定协议名称的最新版本
 func (dao agreementDao) GetLatestAgreement(ctx context.Context, name string) (*entity.Agreement, error) {
-	// 1. 获取最大主版本号
-	maxMajor, err := dao.GetMaxMajorVersion(ctx, name)
+	var agreement entity.Agreement
+	err := dao.Ctx(ctx).
+		Where(dao.columns.Name, name).
+		Where(dao.columns.Status, model.AgreementStatusPublished).
+		OrderDesc(dao.columns.VersionCode).
+		Limit(1).
+		Scan(&agreement)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, gerror.New("协议不存在")
+		}
 		return nil, err
 	}
-	if maxMajor == "0" {
+	if agreement.Id == 0 {
 		return nil, gerror.New("协议不存在")
 	}
 
-	// 2. 获取该主版本下的最大次版本号
-	maxMinor, err := dao.GetMaxMinorVersion(ctx, name, maxMajor)
-	if err != nil {
-		return nil, err
-	}
-
-	// 3. 获取该主版本+次版本下的最大补丁版本号
-	maxPatch, err := dao.GetMaxPatchVersion(ctx, name, maxMajor, maxMinor)
-	if err != nil {
-		return nil, err
-	}
-
-	// 4. 查询该版本记录
-	var agreement entity.Agreement
-	err = dao.Ctx(ctx).
-		Where(dao.columns.Name, name).
-		Where(dao.columns.MajorVersion, maxMajor).
-		Where(dao.columns.MinorVersion, maxMinor).
-		Where(dao.columns.PatchVersion, maxPatch).
-		Scan(&agreement)
-	if err != nil {
-		return nil, err
-	}
-
 	return &agreement, nil
 }
 
-// GetByMajorVersion 根据协议名称和主版本号获取协议
-func (dao agreementDao) GetByMajorVersion(ctx context.Context, name, majorVersion string) (*entity.Agreement, error) {
-	var agreement entity.Agreement
-	err := dao.Ctx(ctx).
+func (dao agreementDao) ExistsVersion(ctx context.Context, name string, major, minor, patch int) (bool, error) {
+	count, err := dao.Ctx(ctx).
 		Where(dao.columns.Name, name).
-		Where(dao.columns.MajorVersion, majorVersion).
-		Where(dao.columns.MinorVersion, "0").
-		Where(dao.columns.PatchVersion, "0").
-		Scan(&agreement)
+		Where(dao.columns.MajorVersion, major).
+		Where(dao.columns.MinorVersion, minor).
+		Where(dao.columns.PatchVersion, patch).
+		Count()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
-	return &agreement, nil
-}
-
-func gerrorfNotFound(resource string, value interface{}) error {
-	return gerror.Newf("%s not found: %v", resource, value)
+	return count > 0, nil
 }

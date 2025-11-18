@@ -14,6 +14,7 @@ func (s *sSysDept) CreateDept(ctx context.Context, tx gdb.TX, deptName string, m
 		dao.SysDept.Columns().Ancestors: "",
 		dao.SysDept.Columns().DeptName:  deptName,
 		dao.SysDept.Columns().ManagerID: managerID,
+		dao.SysDept.Columns().Status:    1,
 		dao.SysDept.Columns().CreatedAt: gtime.Now(),
 		dao.SysDept.Columns().UpdatedAt: gtime.Now(),
 	}

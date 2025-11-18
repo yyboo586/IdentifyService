@@ -6,8 +6,6 @@ import (
 	"IdentifyService/internal/app/system/model/entity"
 	"IdentifyService/internal/app/system/service"
 	"context"
-	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -32,35 +30,33 @@ func (s *sAgreement) CreateAgreement(ctx context.Context, input *model.Agreement
 	if !model.IsValidAgreementName(input.Name) {
 		return 0, gerror.New("协议名称不正确")
 	}
-	if input.MajorVersion == "" {
-		return 0, gerror.New("主版本号不能为空")
+	if input.Major < 0 || input.Minor < 0 || input.Patch < 0 {
+		return 0, gerror.New("版本号不能为负数")
 	}
 
-	// 检查主版本号不能小于之前最大的主版本号
-	maxMajor, err := dao.Agreement.GetMaxMajorVersion(ctx, input.Name)
+	exists, err := dao.Agreement.ExistsVersion(ctx, input.Name, input.Major, input.Minor, input.Patch)
 	if err != nil {
-		return 0, gerror.Wrap(err, "获取最大主版本号失败")
+		return 0, gerror.Wrap(err, "校验协议版本失败")
 	}
-	if maxMajor != "0" {
-		compare := model.CompareVersion(input.MajorVersion, maxMajor)
-		if compare < 0 {
-			return 0, gerror.Newf("新主版本号(%s)不能小于当前最大主版本号(%s)", input.MajorVersion, maxMajor)
-		}
-		if compare == 0 {
-			return 0, gerror.Newf("主版本号(%s)已存在", input.MajorVersion)
-		}
+	if exists {
+		return 0, gerror.New("协议版本已存在")
 	}
 
 	now := gtime.Now().Unix()
 	data := g.Map{
 		dao.Agreement.Columns().Name:         input.Name,
-		dao.Agreement.Columns().MajorVersion: input.MajorVersion,
-		dao.Agreement.Columns().MinorVersion: "",
-		dao.Agreement.Columns().PatchVersion: "",
-		dao.Agreement.Columns().Version:      0,
+		dao.Agreement.Columns().MajorVersion: input.Major,
+		dao.Agreement.Columns().MinorVersion: input.Minor,
+		dao.Agreement.Columns().PatchVersion: input.Patch,
+		dao.Agreement.Columns().VersionCode:  model.BuildVersionCode(input.Major, input.Minor, input.Patch),
+		dao.Agreement.Columns().Status:       model.AgreementStatusDraft,
 		dao.Agreement.Columns().Content:      input.Content,
 		dao.Agreement.Columns().CreatedAt:    now,
 		dao.Agreement.Columns().UpdatedAt:    now,
+	}
+	if input.PublishNow {
+		data[dao.Agreement.Columns().Status] = model.AgreementStatusPublished
+		data[dao.Agreement.Columns().PublishedAt] = now
 	}
 
 	id, err := dao.Agreement.Insert(ctx, data)
@@ -77,63 +73,35 @@ func (s *sAgreement) UpdateAgreement(ctx context.Context, input *model.Agreement
 	if input.ID == 0 {
 		return 0, gerror.New("协议ID不能为空")
 	}
-	if !model.IsValidAgreementName(input.Name) {
-		return 0, gerror.New("协议名称不正确")
-	}
-	if input.UpdateType != "minor" && input.UpdateType != "patch" {
-		return 0, gerror.New("更新类型必须是 minor 或 patch")
-	}
 
 	oldAgreement, err := dao.Agreement.GetByID(ctx, input.ID)
 	if err != nil {
 		return 0, gerror.Wrap(err, "获取协议信息失败")
 	}
 
-	var newMajor, newMinor, newPatch string
-
-	if input.UpdateType == "minor" {
-		// 修改次版本：找到该主版本下的最大次版本，然后+1，补丁版本设为0
-		maxMinor, err := dao.Agreement.GetMaxMinorVersion(ctx, input.Name, oldAgreement.MajorVersion)
-		if err != nil {
-			return 0, gerror.Wrap(err, "获取最大次版本号失败")
-		}
-		maxMinorInt, _ := strconv.Atoi(maxMinor)
-		newMinorInt := maxMinorInt + 1
-		newMajor = oldAgreement.MajorVersion
-		newMinor = fmt.Sprintf("%d", newMinorInt)
-		newPatch = "0"
-	} else if input.UpdateType == "patch" {
-		// 修改补丁版本：找到该主版本+次版本下的最大补丁版本，然后+1
-		maxPatch, err := dao.Agreement.GetMaxPatchVersion(ctx, input.Name, oldAgreement.MajorVersion, oldAgreement.MinorVersion)
-		if err != nil {
-			return 0, gerror.Wrap(err, "获取最大补丁版本号失败")
-		}
-		maxPatchInt, _ := strconv.Atoi(maxPatch)
-		newPatchInt := maxPatchInt + 1
-		newMajor = oldAgreement.MajorVersion
-		newMinor = oldAgreement.MinorVersion
-		newPatch = fmt.Sprintf("%d", newPatchInt)
-	} else {
-		return 0, gerror.New("更新类型必须是 minor 或 patch")
-	}
-
 	now := gtime.Now().Unix()
 	data := g.Map{
-		dao.Agreement.Columns().Name:         input.Name,
-		dao.Agreement.Columns().MajorVersion: newMajor,
-		dao.Agreement.Columns().MinorVersion: newMinor,
-		dao.Agreement.Columns().PatchVersion: newPatch,
-		dao.Agreement.Columns().Version:      0,
-		dao.Agreement.Columns().Content:      input.Content,
-		dao.Agreement.Columns().CreatedAt:    now,
-		dao.Agreement.Columns().UpdatedAt:    now,
+		dao.Agreement.Columns().Content:   input.Content,
+		dao.Agreement.Columns().UpdatedAt: now,
 	}
 
-	id, err := dao.Agreement.Insert(ctx, data)
-	if err != nil {
-		return 0, gerror.Wrap(err, "新增协议版本失败")
+	if input.PublishNow && oldAgreement.Status != model.AgreementStatusPublished {
+		data[dao.Agreement.Columns().Status] = model.AgreementStatusPublished
+		data[dao.Agreement.Columns().PublishedAt] = now
 	}
-	return id, nil
+	if input.Status != nil {
+		data[dao.Agreement.Columns().Status] = *input.Status
+		if *input.Status == model.AgreementStatusPublished {
+			data[dao.Agreement.Columns().PublishedAt] = now
+		} else {
+			data[dao.Agreement.Columns().PublishedAt] = 0
+		}
+	}
+
+	if err := dao.Agreement.Update(ctx, input.ID, data); err != nil {
+		return 0, gerror.Wrap(err, "更新协议失败")
+	}
+	return input.ID, nil
 }
 
 func (s *sAgreement) DeleteAgreement(ctx context.Context, id int64) error {
@@ -169,7 +137,7 @@ func (s *sAgreement) ListAgreements(ctx context.Context, input *model.AgreementL
 		input.Size = 10
 	}
 
-	entities, total, err := dao.Agreement.List(ctx, input.Name, input.Page, input.Size)
+	entities, total, err := dao.Agreement.List(ctx, input.Name, input.Status, input.Page, input.Size)
 	if err != nil {
 		return nil, nil, gerror.Wrap(err, "获取协议列表失败")
 	}
@@ -198,10 +166,18 @@ func (s *sAgreement) GetLatestAgreement(ctx context.Context, name string) (*mode
 }
 
 func (s *sAgreement) RecordUserAgreements(ctx context.Context, info *model.UserAgreement) error {
+	if info == nil {
+		return gerror.New("用户协议信息不能为空")
+	}
+	agreement, err := dao.Agreement.GetByID(ctx, info.AgreementID)
+	if err != nil {
+		return gerror.Wrap(err, "获取协议版本失败")
+	}
 	data := g.Map{
 		dao.UserAgreement.Columns().UserId:        info.UserID,
 		dao.UserAgreement.Columns().AgreementID:   info.AgreementID,
 		dao.UserAgreement.Columns().AgreementName: info.AgreementName,
+		dao.UserAgreement.Columns().VersionCode:   agreement.VersionCode,
 		dao.UserAgreement.Columns().CreatedAt:     time.Now().Unix(),
 	}
 	if info.Agreed {
@@ -232,6 +208,7 @@ func (s *sAgreement) GetUserAgreements(ctx context.Context, userID string) ([]*m
 			UserID:        entity.UserID,
 			AgreementID:   entity.AgreementID,
 			AgreementName: entity.AgreementName,
+			VersionCode:   entity.VersionCode,
 			Agreed:        entity.Agreed == 1,
 			CreatedAt:     gtime.New(time.Unix(entity.CreatedAt, 0)),
 		})
@@ -249,7 +226,10 @@ func convertAgreementEntity(item *entity.Agreement) *model.Agreement {
 		MajorVersion: item.MajorVersion,
 		MinorVersion: item.MinorVersion,
 		PatchVersion: item.PatchVersion,
+		VersionCode:  item.VersionCode,
+		Status:       item.Status,
 		Content:      item.Content,
+		PublishedAt:  gtime.New(item.PublishedAt),
 		CreatedAt:    gtime.New(item.CreatedAt),
 		UpdatedAt:    gtime.New(item.UpdatedAt),
 	}

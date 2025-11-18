@@ -10,9 +10,10 @@ type AgreementCreateReq struct {
 	g.Meta `path:"/agreement" tags:"协议管理" method:"post" summary:"创建协议"`
 	model.Author
 
-	Name         string `json:"name" v:"required#协议名称不能为空" dc:"协议名称(用户服务协议/隐私保护协议)"`
-	MajorVersion string `json:"major_version" v:"required#主版本号不能为空" dc:"主版本号(如1)"`
-	Content      string `json:"content" v:"required#协议内容不能为空"`
+	Name       string `json:"name" v:"required#协议名称不能为空" dc:"协议名称(用户服务协议/隐私保护协议)"`
+	Version    string `json:"version" v:"required#版本号不能为空" dc:"版本号(格式: 1.0.0)"`
+	Content    string `json:"content" v:"required#协议内容不能为空"`
+	PublishNow bool   `json:"publish_now" dc:"是否立即发布"`
 }
 
 type AgreementCreateRes struct {
@@ -25,9 +26,9 @@ type AgreementUpdateReq struct {
 	model.Author
 
 	ID         int64  `p:"id" v:"required#协议ID不能为空"`
-	Name       string `json:"name" v:"required#协议名称不能为空"`
-	UpdateType string `json:"update_type" v:"required|in:minor,patch#更新类型必须是minor或patch" dc:"更新类型(minor:次版本, patch:补丁版本)"`
 	Content    string `json:"content" v:"required#协议内容不能为空"`
+	PublishNow bool   `json:"publish_now" dc:"是否立即发布"`
+	Status     *int   `json:"status" dc:"0:草稿 1:已发布 2:已归档"`
 }
 
 type AgreementUpdateRes struct {
@@ -63,7 +64,8 @@ type AgreementListReq struct {
 	model.Author
 	model.PageReq
 
-	Name string `p:"name"`
+	Name   string `p:"name"`
+	Status *int   `p:"status"`
 }
 
 type AgreementListRes struct {
@@ -76,10 +78,14 @@ type AgreementListRes struct {
 type AgreementItem struct {
 	ID           int64  `json:"id"`
 	Name         string `json:"name"`
-	MajorVersion string `json:"major_version"`
-	MinorVersion string `json:"minor_version"`
-	PatchVersion string `json:"patch_version"`
+	MajorVersion int    `json:"major_version"`
+	MinorVersion int    `json:"minor_version"`
+	PatchVersion int    `json:"patch_version"`
+	VersionCode  int    `json:"version_code"`
+	Status       int    `json:"status"`
 	Content      string `json:"content"`
+	Version      string `json:"version"`
+	PublishedAt  int64  `json:"published_at"`
 	CreatedAt    int64  `json:"created_at"`
 	UpdatedAt    int64  `json:"updated_at"`
 }
@@ -113,6 +119,7 @@ type UserAgreementItem struct {
 	UserID        string `json:"user_id"`
 	AgreementID   int64  `json:"agreement_id"`
 	AgreementName string `json:"agreement_name"`
+	VersionCode   int    `json:"version_code"`
 	Agreed        bool   `json:"agreed"`
 	CreatedAt     int64  `json:"created_at"`
 }

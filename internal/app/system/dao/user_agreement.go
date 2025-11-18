@@ -19,6 +19,7 @@ type userAgreementColumns struct {
 	UserId        string
 	AgreementID   string
 	AgreementName string
+	VersionCode   string
 	Agreed        string
 	CreatedAt     string
 }
@@ -31,6 +32,7 @@ var UserAgreement = userAgreementDao{
 		UserId:        "user_id",
 		AgreementID:   "agreement_id",
 		AgreementName: "agreement_name",
+		VersionCode:   "version_code",
 		Agreed:        "agreed",
 		CreatedAt:     "created_at",
 	},

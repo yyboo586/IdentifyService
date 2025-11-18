@@ -9,14 +9,14 @@ import (
 )
 
 type IMQ interface {
-	Publish(ctx context.Context, topic string, userIDs []string, content interface{}) error
+	Publish(ctx context.Context, topic string, userIDs []string, content map[string]interface{}) error
 }
 
 var localMQ IMQ
 
 func MQ() IMQ {
 	if localMQ == nil {
-		panic("implement not found for interface IMQ, forgot register?")
+		localMQ = NewMQ()
 	}
 	return localMQ
 }

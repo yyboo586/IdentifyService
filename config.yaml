@@ -2,7 +2,7 @@ server:
   address:     ":9700"
   serverRoot: "resource/public"
   sessionPath: "resource/session"  
-  dumpRouterMap: true
+  dumpRouterMap: false
   routeOverWrite: true
   openapiPath: "/api.json"
   swaggerPath: "/swagger"
@@ -63,6 +63,7 @@ gfToken:
     - "/api/v1/system/logout"
     - "/api/v1/system/login2"
     - "/api/v1/system/user/updateUserType"
+    - "/api/v1/system/agreement/latest"
 
 
 system:

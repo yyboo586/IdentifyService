@@ -94,6 +94,7 @@ type UserInfo2 struct {
 	UserName string `json:"user_name"`
 	Mobile   string `json:"mobile"`
 	UserType string `json:"user_type"`
+	DeptID   uint64 `json:"dept_id"`
 }
 
 type TokenIntrospectReq struct {

@@ -25,7 +25,8 @@ require (
 	github.com/tiger1103/gfast-cache v1.0.9
 	github.com/wenlng/go-captcha v1.2.5
 	github.com/xuri/excelize/v2 v2.7.1
-	github.com/yyboo586/common v0.0.0-20251117055150-dbb0e958173f
+	github.com/yyboo586/MQSDK v0.0.0-20251030090756-f4b0aaab57a8
+	github.com/yyboo586/common v0.0.0-20251119073925-644c95039210
 	golang.org/x/net v0.43.0
 	golang.org/x/tools v0.35.0
 )
@@ -106,7 +107,6 @@ require (
 	github.com/xuri/efp v0.0.0-20230802181842-ad255f2331ca // indirect
 	github.com/xuri/nfp v0.0.0-20230802015359-2d5eeba905e9 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	github.com/yyboo586/MQSDK v0.0.0-20251030090756-f4b0aaab57a8 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/otel v1.38.0 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect

@@ -4,11 +4,13 @@ package entity
 type Agreement struct {
 	Id           int64  `orm:"id"`
 	Name         string `orm:"name"`
-	MajorVersion string `orm:"major_version"`
-	MinorVersion string `orm:"minor_version"`
-	PatchVersion string `orm:"patch_version"`
-	Version      int    `orm:"version"`
+	MajorVersion int    `orm:"major_version"`
+	MinorVersion int    `orm:"minor_version"`
+	PatchVersion int    `orm:"patch_version"`
+	VersionCode  int    `orm:"version_code"`
+	Status       int    `orm:"status"`
 	Content      string `orm:"content"`
+	PublishedAt  int64  `orm:"published_at"`
 	CreatedAt    int64  `orm:"created_at"`
 	UpdatedAt    int64  `orm:"updated_at"`
 }
@@ -19,6 +21,7 @@ type UserAgreement struct {
 	UserID        string `orm:"user_id"`
 	AgreementID   int64  `orm:"agreement_id"`
 	AgreementName string `orm:"agreement_name"`
+	VersionCode   int    `orm:"version_code"`
 	Agreed        int    `orm:"agreed"`
 	CreatedAt     int64  `orm:"created_at"`
 }

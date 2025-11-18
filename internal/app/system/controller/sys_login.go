@@ -171,13 +171,22 @@ func (c *loginController) TokenInspect(ctx context.Context, req *system.TokenInt
 		return nil, nil
 	}
 
+	g.Log().Info(ctx, customClaims)
+	userID, _ := customClaims.Data.(map[string]interface{})["user_id"].(string)
+	iuqtID, _ := customClaims.Data.(map[string]interface{})["iuqt_id"].(string)
+	userName, _ := customClaims.Data.(map[string]interface{})["user_name"].(string)
+	mobile, _ := customClaims.Data.(map[string]interface{})["mobile"].(string)
+	deptID, _ := customClaims.Data.(map[string]interface{})["dept_id"].(float64)
+	userType, _ := customClaims.Data.(map[string]interface{})["user_type"].(float64)
+
 	res = &system.TokenIntrospectRes{}
 	res.UserInfo2 = system.UserInfo2{
-		UserID:   customClaims.Data.(map[string]interface{})["user_id"].(string),
-		IUQTID:   customClaims.Data.(map[string]interface{})["iuqt_id"].(string),
-		UserName: customClaims.Data.(map[string]interface{})["user_name"].(string),
-		Mobile:   customClaims.Data.(map[string]interface{})["mobile"].(string),
-		UserType: model.GetUserTypeText(model.UserType(int(customClaims.Data.(map[string]interface{})["user_type"].(float64)))),
+		UserID:   userID,
+		IUQTID:   iuqtID,
+		UserName: userName,
+		Mobile:   mobile,
+		DeptID:   uint64(deptID),
+		UserType: model.GetUserTypeText(model.UserType(int(userType))),
 	}
 	return res, nil
 }
@@ -279,6 +288,7 @@ func (c *loginController) LoginOrRegister(ctx context.Context, req *system.UserL
 		"mobile":        userInfo.Mobile,
 		"device_id":     req.DeviceInfo.DeviceID,
 		"user_type":     userInfo.UserType,
+		"dept_id":       userInfo.DeptId,
 	}
 	tokenPair, err = service.Token().Generate(ctx, tokenData)
 	if err != nil {
